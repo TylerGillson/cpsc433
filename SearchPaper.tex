@@ -1,4 +1,4 @@
-\documentclass[10pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
 \usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
     \geometry{
      a4paper,
@@ -8,6 +8,7 @@
 \usepackage{amsmath}
 \usepackage{underscore}
 \usepackage{caption}
+\usepackage{algorithmic}
 \usepackage{enumitem}		
 \hypersetup{
     colorlinks=true,
@@ -21,7 +22,7 @@
 								% TeX will automatically convert eps --> pdf in pdflatex		
 \usepackage{amssymb}
 
-%SetFonts
+\newenvironment{cmr}{\fontfamily{cmr}\selectfont}{\par}
 
 \setlength{\parskip}{1em}
 \setlength{\parindent}{4em}
@@ -40,112 +41,221 @@
 \maketitle
 \break
 
-\centerline{{\Large Problem Description}}
-\par The problem of assigning courses (resp. course sections) and labs to weekly time slots, in its basic version, can be rather easily described. We have a set,\\\\
-\centerline{Courses = \{c\textsubscript{1}, $\ldots$, c\textsubscript{m}\}}
-\par\noindent of course sections that a department teaches in a particular semester; and a set,\\\\
-\centerline{Labs = \{l\textsubscript{11}, $\ldots$, l\textsubscript{1k\textsubscript{1}}, $\ldots$, l\textsubscript{m\textsubscript{1}}, $\ldots$, l\textsubscript{mk\textsubscript{m}}\}}
-\par\noindent of labs (or tutorials) such that l\textsubscript{i1}, $\ldots$, l\textsubscript{ik\textsubscript{i}} are the labs for course (section) c\textsubscript{i} (which means that k\textsubscript{i} can be 0, if the course does not have any labs). And then we have a set,\\\\
-\centerline{Slots = \{s\textsubscript{1}, $\ldots$, s\textsubscript{n}\}}
-\par\noindent of time slots in which courses and labs have to be fitted.
-\par For each slot s\textsubscript{j}, we have a limit coursemax(s\textsubscript{j}) (a natural number) of courses that can be put into the slot and also a limit labmax(s\textsubscript{j}) (again, a natural number) of labs that can be put into the slot (courses and labs are independent from each other in this regard, i.e. a slot can take coursemax(s\textsubscript{j}) courses and labmax(s\textsubscript{j}) labs). Naturally, the labs to a particular course can never be in the slot in which the course is. There are also other limitations (so-called \textit{hard constraints}) and wishes that the department has (but they might not be fulfillable, therefore these wishes are called \textit{soft constraints}).
+\centerline{{\Large Search Paradigm I --- Set-Based Search}}
 
-\par The task that the system described in this paper must fulfill is to find an assignment \textit{assign} of courses and labs to slots that fulfills the hard constraints and optimizes the soft constraints. More formally, \textit{assign} is a function, \textit{assign}: Courses + Labs $\Rightarrow$ Slots that fulfills two conditions, namely:
-\begin{itemize}[topsep=0pt]
-\item[1.] \textbf{Constr}(\textit{assign}) = true, with \textbf{Constr} testing the fulfillment of all hard constraints (and being true if and only if every single hard constraint is fulfilled). And,
-\item[2.] \textbf{Eval}(\textit{assign}) is minimal in the set of all possible assignments fulfilling \textbf{Constr}. \\ \textbf{Eval} is an evaluation function that measures how well an assignment fulfills the soft constraints.
-\end{itemize}
+\noindent {\\ \large \textbf{Solution Overview}}\\\\
+\begin{cmr}
+\indent Our approach to solving the problem within the context of set-based search will rely mainly on the use of a genetic algorithm.
+We will obtain an initial, randomly generated population for our GA via an Or-tree-based Search that will provide candidate solutions to the problem's
+hard constraints. In this first stage of our solution, we remove the problem's soft constraints, thereby re-formulating it as a constraint satisfaction problem (CSP).
 
-\noindent A listing of the hard and soft constraints will follow.
+\indent Once we have obtained an initial population of some size, pop_init, we will consider its individuals to be facts in a Set-based Search.
+We will also define a constant, pop_max, as an upper bound on the size of any later generation.
+The set-based search will use our genetic algorithm's cross-over function, and a reduce function as its extension rules.
+The reduce function will remove individuals with large f\textsubscript{Wert} values from the population until the population has been halved, should it ever reach a size of pop_max.
+We will use the provided \textbf{Eval} function to compute f\textsubscript{Wert}. Furthermore, there will be no need for an f\textsubscript{Select} function in our set based search, as
+transitions to each successive generation will be determined by our GA's selection function.
+The start state will be our initial set of randomly generated facts and our goal state will be: ``Whichever occurs first: 50 generations have been modelled, or an hour has elapsed".
 
-\noindent \textbf{Hard Constraints:}
-\begin{itemize}[topsep=0pt, itemsep=0pt]
-\item General Hard Constraints:
-    \begin{itemize}[topsep=0pt, itemsep=0pt]
-    \item Not more than coursemax(s) courses can be assigned to slot s.
-    \item Not more than labmax(s) labs can be assigned to slot s.
-    \item \textit{assign}(c\textsubscript{i}) has to be unequal to \textit{assign}(l\textsubscript{ik}) for all k and i.
-    \item The input for your system will contain a list of \textit{not-compatible}(a, b) statements, with a, b in Courses + Labs. For each of those, \textit{assign}(a) has to be unequal to \textit{assign}(b).
-    \item The input for your system can contain a partial assignment \textit{partassign}: Courses + Labs $\Rightarrow$ Slots + \{\$\}. The assignment \textit{assign} your system produces has to fulfill the condition: 
-    \textit{assign}(a) = \textit{partassign}(a) for all a in Courses + Labs with \textit{partassign}(a) not equal to \$.
-    \item The input for your system can contain a list of \textit{unwanted}(a, s) statements, with a in Courses + Labs and s in Slots. For each of those, \textit{assign}(a) has to be unequal to s.
-    \end{itemize}
-\item Department Hard Constraints:
-    \begin{itemize}[topsep=0pt, itemsep=0pt]
-    \item If a course (course section) is put into a slot on Mondays, it has to be put into the corresponding time slots on Wednesdays and Fridays. So, these three time slots are treated as one abstract slot, which allows us to see our Department problem as an instantiation of the general problem!
-    \item If a course (course section) is put into a slot on Tuesdays, it has to be put into the corresponding time slots on Thursdays.
-    \item If a lab/tutorial is put into a slot on Mondays, it has to be put into the corresponding time slots on Wednesdays.
-    \item If a lab/tutorial is put into a slot on Tuesdays, it has to be put into the corresponding time slots on Thursdays.
-    \item All course sections with a section number starting LEC 9 are evening classes and have to be scheduled into evening slots.
-    \item All courses (course sections) on the 500-level have to be scheduled into different time slots.
-    \item No courses can be scheduled on Tuesdays from 11:00 - 12:30.
-    \item There are two special ``courses" CPSC 813 and CPSC 913 that have to be scheduled Tuesdays/Thursdays 18:00-19:00 and CPSC 813 is not allowed to overlap with any labs/tutorials of CPSC 313 or with any course section of CPSC 313 (and transitively with any other courses that are not allowed to overlap with CPSC 313) and CPSC 913 is not allowed to overlap with any labs/tutorials of CPSC 413 or with any course section of CPSC 413 (and transitively with any other courses that are not allowed to overlap with CPSC 413). These two ``courses" are my "tricky" way to deal with the fact of quizzes for CPSC 313 and CPSC 413.
-    \end{itemize}
-\end{itemize}
+\indent In our GA, we will use f\textsubscript{Wert} = \textbf{Eval} as a fitness function, \textbf{Cons} and \textbf{Cons\textsuperscript{*}} for constraint-checking, and roulette-wheel selection as a selection method.
+\textbf{Cons\textsuperscript{*}} is a variant of \textbf{Cons} used to evaluate the constraint-compliance of partial solutions, which we assume can be derived from the provided \textbf{Cons} function.
+\end{cmr}
 
-\noindent \textbf{Soft Constraints:}
-\begin{itemize}[topsep=0pt, itemsep=0pt]
-\item General Soft Constraints:
-    \begin{itemize}[topsep=0pt, itemsep=0pt]
-    \item Since there are usually time slots that are less liked than others, there is a certain pressure to also put courses and labs into the more unwanted slots. To facilitate this pressure, we have for each slot s minimal numbers coursemin(s) and labmin(s) that indicate how many courses, resp. labs, should at least be scheduled into the slot s. Your system should be able to accept as input penalty values pen_coursemin and pen_labsmin (as system parameters) and for each course below coursemin we will get pen_coursemin and for each lab pen_labsmin added to the \textbf{Eval}-value of an assignment.
-    \item Certain professors that often teach certain courses have certain preferences regarding in which time slots their courses and labs should be scheduled. Naturally, we see this as something that should be treated as soft constraint. Depending on a to-be-determined ranking scheme, each professor will be awarded a certain set of ranking points and he/she can distribute these points over pairs of (course/lab, time slots). Formally, we assume a function preference: (Courses + Labs) x Slots $\Rightarrow$ Natural numbers that reports those preferences. For each assignment in \textit{assign}, we add up the preference-values for a course/lab that refer to a different slot as the penalty that is added to the \textbf{Eval}-value of \textit{assign}.
-    \item For certain courses and/or labs, a department might know that there are never any students that take these courses/labs in the same semester. And therefore the department might find it convenient to have such courses/labs scheduled at the same time (this can also be used to keep students from taking certain courses prematurely). To facilitate this, there will be a list of \textit{pair}(a, b) statements in the input for your system, with a, b in Courses + Labs, and a parameter pen_notpaired for your system. For every \textit{pair}(a, b) statement, for which \textit{assign}(a) is not equal to \textit{assign}(b), you have to add pen_notpaired to the \textbf{Eval}-value of \textit{assign}.
-    \end{itemize}
-\item Department Soft Constraints:
-    \begin{itemize}[topsep=0pt, itemsep=0pt]
-    \item Different sections of a course should be scheduled at different times. For each pair of sections that is scheduled into the same slot, we add a penalty pen\_section to the \textbf{Eval}-value of an assignment \textit{assign}.
-    \end{itemize}
-\end{itemize}
-\break
+\noindent {\large \textbf{Or-tree-based Search Model}}
 
-\noindent \textbf{Additional Information:}
-\par At the University of Calgary, courses are identified by a department/program indicator, a course number and a section number. For example: CPSC 433 LEC 02. Labs/tutorials add to the course identification the lab/tutorial number. If a lab is intended to be associated with a specific section of the course, for example CPSC 433 LEC 02 TUT 01 (or LAB instead of TUT, \textbf{we will treat TUT and LAB as synonymous for this assignment}). If a lab is open to students from all sections of a course, the section number is dropped. For example: CPSC 433 TUT 01.
-\par The available time slots depend on the day of the week and whether we look at lectures or labs/tutorials:
-\begin{itemize}[topsep=0pt, itemsep=0pt]
-\item On Mondays, Wednesdays, and Fridays, the slots available for lectures are: 8:00-9:00, 9:00-10:00, 10:00-11:00, 11:00-12:00, 12:00-13:00, 13:00-14:00, 14:00-15:00, 15:00-16:00, 16:00-17:00, 17:00-18:00, 18:00-19:00, 19:00-20:00, and 20:00-21:00.
-\item On Mondays, Tuesdays, Wednesdays, and Thursdays, the slots available for labs/tutorials are: 8:00-9:00, 9:00-10:00, 10:00-11:00, 11:00-12:00, 12:00-13:00, 13:00-14:00, 14:00-15:00, 15:00-16:00, 16:00-17:00, 17:00-18:00, 18:00-19:00, 19:00-20:00, and 20:00-21:00.
-\item On Fridays, the slots available for labs/tutorials are: 8:00-10:00, 10:00-12:00, 12:00-14:00, 14:00-16:00, 16:00-18:00, and 18:00-20:00.
-\item On Tuesdays and Thursdays, the slots available for lectures are: 8:00-9:30, 9:30-11:00, 11:00-12:30, 12:30-14:00, 14:00-15:30, 15:30-17:00, 17:00-18:30, and 18:30-20:00.
-\item All slots beginning at 18:00 or later are so-called evening slots.
-\end{itemize}
+\noindent We define Prob as a vector of length $\vert$Courses + Labs$\vert$, whose elements consist of the indices of slots from Slots, or the unassigned symbol, \$. The vector's ordering will preserve the original ordering of Courses + Labs. Therefore, a Prob vector can be read sequentially as: Course/Lab at position $i$, having value $j$, has been assigned time slot $s_j$, where $s_j$ is the member $s$ of the set Slots at the $j$\textsuperscript{th} index of that set. As such, our definition of Prob is equivalent with the notion of a partial assignment, \textit{partassign}.
+
+\noindent Before formally defining Prob, we define $D_i$, the domain of any element in a problem instance, pr, to be the set: \{0, $\dots$, $j$\} where $j+1$ = $\vert$Slots$\vert$.
+
+\noindent \centerline{Prob =  $\langle C_1 \text{slot}, \dots, C_n \text{slot}, \dots, L_{11} \text{slot}, \dots, L_{1{k_1}} \text{slot}, \dots, L_{n1} \text{slot}, \dots, L_{n{k_n}} \text{slot}\rangle$}\\
+\centerline{such that $C_i \text{slot}$, $L_{i{k_i}} \text{slot} \in D_i \cup \{\$\}$}
+
+\noindent Which can be abstracted into the form:
+
+\noindent \centerline{Prob = $\langle X_1, \dots, X_n\rangle$ such that $X_i \in D_i \cup \{\$\}$}
+
+\noindent We define our alternatives relation, Altern, as follows:
+
+\noindent \centerline{Altern = $\{((X_1, \dots, X_i, \dots, X_n), (X_1, \dots, d_{i1}, \dots, X_{in}), \dots, (X_1, \dots, d_{i\ell}, \dots, X_n))$ $\vert$ $X_i$ = $\perp$,}\\
+\centerline{$1 \le i \le n$, $\vert D_i \vert = \ell$, $D_i = \{d_i, \dots, d_{i\ell}\}\}$}
+
+\noindent We define the notion, ``pr is solved" as follows:
+
+\noindent \centerline{pr = $(X_1, \dots, X_n)$ and $\forall i$ such that $1 \le i \le n$, $X_i$ $\neq$ $\perp$, and pr is not unsolvable.}
+
+\noindent We define the notion, ``pr is unsolvable" as follows:
+
+\noindent \centerline{pr = $(X_1, \dots, X_n)$ and there is a constraint $C_i = R_i(X_1, \dots, X_k)$}\\
+\centerline{such that $\exists X_{ij}$ $\in$ pr with a value unequal to $\perp$ and $(X_1, \dots, X_k)$ do not satisfy $R_i$.}
+
+\noindent Since we have access to \textbf{Constr\textsuperscript{*}}, derived from the provided function, \textbf{Constr}, we can allow \textbf{Constr\textsuperscript{*}} to perform the work of assessing whether any particular problem instance, pr, is compliant with the problem's hard constraints.
+
+\noindent {\large \textbf{Or-tree-based Search Process}}
+
+\begin{cmr}
+\noindent Search Control:
+
+\noindent Our O\textsubscript{Tree} will obviously begin with a single node, (pr, ?). Its expansion will be governed by the recursive relation, Erw\textsubscript{$\lor$}.
+After each application of Altern, the search control will perform a constraint analysis on each new successor node of O\textsubscript{Tree} using \textbf{Constr\textsuperscript{*}}.
+Nodes where \textbf{Constr\textsuperscript{*}} evaluates to false will be pruned out of O\textsubscript{Tree} prior to leaf selection.
+
+\noindent The search control will pick a random leaf from among the minimal f\textsubscript{leaf} values.
+
+\noindent In order to define f\textsubscript{leaf}, we must first define a function, sum\$: pr $\Rightarrow$ $\mathbb{Z}$. Which, given some pr, returns the number of \$ entries within it. 
+\end{cmr}
+
+\noindent f\textsubscript{leaf}: \{pr\textsubscript{1}, $\dots$, pr\textsubscript{$n$}\} $\Rightarrow$ pr\textsubscript{$i$}\\
+    \[
+        \text{f\textsubscript{leaf}} = \left\{\begin{array}{ll}
+            -1, & \text{if (pr\textsubscript{$i$}, yes)}\\
+            0, & \text{if (pr\textsubscript{$i$}, no)}\\
+            \text{sum$\$$(pr\textsubscript{$i$})}, & \text{if (pr\textsubscript{$i$}, ?)}
+            \end{array}\right\}
+      \]
+
+\begin{cmr}
+\noindent After f\textsubscript{leaf} values have been calculated for each node, if there is a solved node then the search is finished and the solved problem instance is returned as output.
+
+\noindent Otherwise, all unsolvable nodes will be pruned, and a random integer, $r$, will be generated such that $1 \le r \le n$, where n is equal to the number of remaining new successor nodes generated by Altern.
+Control will then select the $r$\textsuperscript{th} node and resume the expansion of O\textsubscript{Tree}.
+\end{cmr}
+
+\noindent {\large \textbf{Or-tree-based Search Instance:}}
+
+\noindent We define our initial search state, $s_0$, as follows:
+
+\noindent \centerline{$s_0$ = pr = $\langle X_1, \dots, X_n\rangle$ such that, $\forall X_i$ $\in$ pr, $X_i$ = \$}
+
+\noindent However, $s_0$ will occasionally be equal to a partial assignment, \textit{partassign}. This will be stipulated more formally in the search control for our Set-based Search.
+
+\noindent Our goal state, $G_{\lor}$, is equivalent with the definition of the notion, ``pr is solved", as seen above.\\
 \newpage
 
-\centerline{{\Large Search Paradigm I --- Set-Based Search}}
-\noindent \textbf{\\Set-Based Search Model}\\\\
-A\textsubscript{Set} = (S\textsubscript{Set}, T\textsubscript{Set}):\\
-\indent F = set of facts\\
-\indent Ext $\subseteq$ \{A $\rightarrow$ B $\vert$ A, B $\subseteq$ F\}: set of extension rules\\
-\indent S\textsubscript{Set} $\subseteq$ 2$\textsuperscript{F}$ (power set of F)\\
-\indent T\textsubscript{Set} = \{(s, s') $\vert$ $\exists$(A $\rightarrow$ B) $\in$ Ext such that A $\subseteq$ s and s' = (s - A) $\cup$ B\}:  transition relation between states\\\\
-\noindent The Search Model defines the main data structure(s) and the search space. It tells us what the Search Control can work with and limits its choices.\\
+\noindent \textbf{Set-Based Search Model}
 
-\noindent \textbf{Set-Based Search Process}\\\\
-P\textsubscript{Set} = (A\textsubscript{Set}, K\textsubscript{Set}):\\
-\indent A\textsubscript{Set} is the Search Model.\\
-\indent K\textsubscript{Set}(s) = s' $\Rightarrow$ (s, s') $\in$ T\textsubscript{Set}. (Search Control)\\\\
-Where,\\\\
-A $\rightarrow$ B $\in$ Ext\\ 
-A $\subseteq$ s\\
-For all A' $\rightarrow$ B' $\in$ Ext with A' $\subseteq$ s, then: f\textsubscript{Wert}(A, B) $\leq$ f\textsubscript{Wert}(A', B')\\
-A $\rightarrow$ B = f\textsubscript{Select}(\{A' $\rightarrow$ B' $\vert$ f\textsubscript{Wert}(A', B') $\leq$ f\textsubscript{Wert}(A'', B'') $\forall$(A'' $\rightarrow$ B'') $\in$ Ext, A'' $\subseteq$ s\})\\\\
-The Search Process defines how to deal with indeterminism of Search Model. It must deal with all states and all searches. Env is ignored for the purposes of the assignment --- therefore it does not appear in any of the above formulae.\\
+\begin{cmr}
+\noindent We define a set of facts, $F$, to be a set of candidate solutions produced by an Or-tree-based Search as described above.
+As mentioned in the problem overview, we will assume that our initial set $F$ will be of size pop_init.
+\end{cmr}
 
-\noindent f\textsubscript{Wert}(A, B) = ???: evaluates the transition from A to B and returns an integer value.\\
+\noindent Before formally defining $F$, we define $D_i$, the domain of any element in an individual, $F_i$, to be the set: \{0, $\dots$, $j$\} where $j+1$ = $\vert$Slots$\vert$.
 
-\noindent f\textsubscript{Select}(?, ?) = ???: acts as a tie-breaker between all minimal values returned by f\textsubscript{Wert}\\
+\noindent \centerline{$F$ = \{$\langle X_1, \dots, X_n\rangle$\textsubscript{$1$}, $\dots$, $\langle X_1, \dots, X_n\rangle$\textsubscript{$k$} $\vert$ $X_i \in D_i$, $1 \le i \le n$, $k = \text{pop_init}$\}}
 
-\noindent \textbf{Set-Based Search Instance}\\\\
-Ins\textsubscript{Set} = (s\textsubscript{0}, G\textsubscript{Set}):\\
-\indent s\textsubscript{0}, s\textsubscript{Goal} $\in$ S\textsubscript{Set} = Start state for the instance\\
-\indent G\textsubscript{Set}(s) = yes, if and only if s\textsubscript{Goal} $\subseteq$ s or there is no extension rule applicable in s.
+\noindent Before defining Ext, we will first define an alternative Search Control for the Or-tree-based Search used for generating candidate solutions.
 
-\noindent \textbf{\\We need to define:}
-\begin{itemize}[topsep=0pt]
-\item F
-\item Ext
-\item f\textsubscript{Wert}
-\item f\textsubscript{Select}
-\end{itemize}
+\noindent Search Control\textsubscript{Alt}:
+
+\noindent Our O\textsubscript{Tree}, once again, will obviously begin with a single node, (pr, ?); and its expansion will be governed by the recursive relation, Erw\textsubscript{$\lor$}.
+
+\noindent If both of the selected parents, $A$ and $B$, have the same first element, then pr will be initialized with that element's value as its first element, followed by \$'s. Otherwise pr will be initialized with all \$'s, as before.
+
+\noindent For each subsequent element of pr, if $A$ and $B$ agree upon its value, control will select that value. Otherwise, if they disagree, Altern will be applied.
+
+\noindent After each application of Altern, the search control will perform a constraint analysis on each new successor node of O\textsubscript{Tree} using \textbf{Constr\textsuperscript{*}}.
+Nodes where \textbf{Constr\textsuperscript{*}} evaluates to false will be pruned out of O\textsubscript{Tree} prior to leaf selection.
+
+\noindent Leaf selection will occur as in the original search control, using the same f\textsubscript{leaf} function and randomized selection from among the set of leafs of equal proximity to a solution.
+
+\begin{cmr}
+\noindent Once again, after f\textsubscript{leaf} values have been calculated for each node, if there is a solved node then the search is finished and the solved problem instance is returned as output.
+
+\noindent Otherwise, all unsolvable nodes will be pruned and the control will then select a random leaf as mentioned above and resume the expansion of O\textsubscript{Tree}.
+\end{cmr}
+
+\noindent Now we will define the set of extension rules, Ext:
+\begin{enumerate} [topsep=0pt, itemsep=0pt, leftmargin=*]
+\item Cross-Over/Mutation:
+	\begin{enumerate}[leftmargin=*]
+	\item $A$ = select($F$), $B$ = select($F - A$). (We will define select($F$) in our Search Process).
+	\item Now that we have selected two parent facts, we will execute our Or-tree-based Search using Search Control\textsubscript{Alt}.
+	\item The resulting solution produced by this search will then be added to the population.
+	\end{enumerate} 
+\item Reduce:
+	\begin{enumerate}
+	\item If the size of the current generation equals pop_max, execute reduce($F$). (We will define reduce($F$) in our Search Process).
+	\end{enumerate}
+\end{enumerate}
+\newpage
+
+\noindent \textbf{Set-Based Search Process}
+
+\noindent Here we define the function, select($F$), which will be used in Ext to pick individuals out of the population in order to perform the cross-over/mutation operation on them.
+
+\noindent select: $F$ $\Rightarrow$ ($F_i$) is an implementation of the roulette-wheel selection algorithm.\\\\
+select($F$) \{
+\begin{algorithmic}[\textfloatsep = 0pt]
+    \STATE sum = 0
+    \FOR {$A_i$ in $F$}
+    	\STATE $A_i$.\textbf{Eval} = \textbf{Eval}($A_i$)
+	\STATE sum ++ $A_i$.\textbf{Eval}
+    \ENDFOR
+    \FOR {$A_i$ in $F$}
+    	\STATE $A_i$.\textbf{Eval}_norm = $A_i$.\textbf{Eval} / sum
+    \ENDFOR
+    \STATE sort($F$, $A_i$.\textbf{Eval}_norm)
+    \FOR {$A_i$ in $F$}
+    	\FOR {$A_j$ in $F$ and $A_j$.index $<$ $A_i$.index}
+    		\STATE $A_i$.ACNF += $A_j$.\textbf{Eval}_norm
+    	\ENDFOR
+    \ENDFOR
+    \STATE rand r = randFloatBetween(0, 1)
+    \STATE selected = NULL
+    \STATE index = 0
+    \WHILE {true}
+    	\STATE selected = $F_{\text{index}}$
+    	\IF {$F_{\text{(index + 1)}}$.ACNF $\geq$ r}
+    		\STATE return selected
+    	\ENDIF
+	\STATE index ++ 1
+    \ENDWHILE \\ \}
+\end{algorithmic}
+
+\noindent Here we define the function, reduce($F$), which will be used in Ext to reduce the size a generation that has become too large. The removal of individuals from the population will be performed quasi-randomly via the select($F$) function, in order to avoid implementing an elitist GA.\\\\
+reduce($F$) \{
+\begin{algorithmic}[\textfloatsep = 0pt]
+    \IF {$\vert F \vert$ \% 2 == 0}
+    	\STATE target_size = $\dfrac{\vert F \vert}{2}$
+    \ELSE
+    	\STATE target_size = $\dfrac{\vert F \vert + 1}{2}$
+    \ENDIF
+    \STATE $i$ = 0
+    \WHILE {$i <$ target_size}
+    	\STATE individual = select($F$)
+	\STATE $F$ = $F$ - individual
+	\STATE $i$ ++ 1
+    \ENDWHILE \\ \}
+\end{algorithmic}
+
+\noindent Search Control:
+
+\noindent The search control for our Set-based Search will be responsible for producing the initial set, $F$, tracking the amount of time elapsed, and counting the number of generations that our GA has modelled. The first thing our control will do is start a timer.
+
+\noindent Next, in order to produce $F$, the control will execute the following algorithm:
+
+\noindent produce($F$) \{
+\begin{algorithmic}[\textfloatsep = 0pt]
+    \STATE $i$ = 0
+    \WHILE {$i <$ pop_init}
+    	\IF {\textit{partassign} $\in$ input}
+		\STATE individual = Or-tree-based Search execution with $s_0$ = \textit{partassign}
+	\ELSE
+		\STATE individual = Or-tree-based Search execution with $s_0$ as originally defined in our Or-tree-based Search Instance
+	\ENDIF
+	\STATE $F$ = $F$ + individual
+	\STATE $i$ ++ 1
+    \ENDWHILE \\ \}
+\end{algorithmic}
+
+\noindent Once $F$ has been produced, a generation counter will be instantiated with the value ``1". Following that, the search control will simply allow our GA to begin evolving its initial population. If at any point the timer reaches one hour or the generation counter reaches 50, the search control will halt the GA. At that point, the most fit individual in the current population will be returned as the final, optimized solution to the assignment problem.
+
+\noindent \textbf{Set-Based Search Instance}
+
+\noindent s\textsubscript{0} = Start state for the search instance --- composed of pop_init candidate solutions.\\
+G\textsubscript{Set}(s) = Yes, if and only if 50 generations have been modelled, or one hour has elapsed.\\\\
+
+\noindent That concludes our description of a Set-based Search solution to the assignment problem.
+
 \newpage
 
 \centerline{{\Large Search Paradigm II --- And-Tree-Based Search}}
