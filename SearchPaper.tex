@@ -76,17 +76,17 @@ The start state will be our initial set of randomly generated facts and our goal
 
 \noindent We define our alternatives relation, Altern, as follows:
 
-\noindent \centerline{Altern = $\{((X_1, \dots, X_i, \dots, X_n), (X_1, \dots, d_{i1}, \dots, X_{in}), \dots, (X_1, \dots, d_{i\ell}, \dots, X_n))$ $\vert$ $X_i$ = $\perp$,}\\
+\noindent \centerline{Altern = $\{((X_1, \dots, X_i, \dots, X_n), (X_1, \dots, d_{i1}, \dots, X_{in}), \dots, (X_1, \dots, d_{i\ell}, \dots, X_n))$ $\vert$ $X_i$ = $\$$,}\\
 \centerline{$1 \le i \le n$, $\vert D_i \vert = \ell$, $D_i = \{d_i, \dots, d_{i\ell}\}\}$}
 
 \noindent We define the notion, ``pr is solved" as follows:
 
-\noindent \centerline{pr = $(X_1, \dots, X_n)$ and $\forall i$ such that $1 \le i \le n$, $X_i$ $\neq$ $\perp$, and pr is not unsolvable.}
+\noindent \centerline{pr = $(X_1, \dots, X_n)$ and $\forall i$ such that $1 \le i \le n$, $X_i$ $\neq$ $\$$, and pr is not unsolvable.}
 
 \noindent We define the notion, ``pr is unsolvable" as follows:
 
 \noindent \centerline{pr = $(X_1, \dots, X_n)$ and there is a constraint $C_i = R_i(X_1, \dots, X_k)$}\\
-\centerline{such that $\exists X_{ij}$ $\in$ pr with a value unequal to $\perp$ and $(X_1, \dots, X_k)$ do not satisfy $R_i$.}
+\centerline{such that $\exists X_{ij}$ $\in$ pr with a value unequal to $\$$ and $(X_1, \dots, X_k)$ do not satisfy $R_i$.}
 
 \noindent Since we have access to \textbf{Constr\textsuperscript{*}}, derived from the provided function, \textbf{Constr}, we can allow \textbf{Constr\textsuperscript{*}} to perform the work of assessing whether any particular problem instance, pr, is compliant with the problem's hard constraints.
 
@@ -150,7 +150,7 @@ As mentioned in the problem overview, we will assume that our initial set $F$ wi
 
 \noindent If both of the selected parents, $A$ and $B$, have the same first element, then pr will be initialized with that element's value as its first element, followed by \$'s. Otherwise pr will be initialized with all \$'s, as before.
 
-\noindent For each subsequent element of pr, if $A$ and $B$ agree upon its value, control will select that value. Otherwise, if they disagree, Altern will be applied.
+\noindent For each subsequent element of pr, if $A$ and $B$ agree upon its value, control will select that value --- generating a single new successor node with a pr vector that reflects the addition of that shared value. Otherwise, if they disagree, Altern will be applied.
 
 \noindent After each application of Altern, the search control will perform a constraint analysis on each new successor node of O\textsubscript{Tree} using \textbf{Constr\textsuperscript{*}}.
 Nodes where \textbf{Constr\textsuperscript{*}} evaluates to false will be pruned out of O\textsubscript{Tree} prior to leaf selection.
@@ -176,7 +176,6 @@ Nodes where \textbf{Constr\textsuperscript{*}} evaluates to false will be pruned
 	\item If the size of the current generation equals pop_max, execute reduce($F$). (We will define reduce($F$) in our Search Process).
 	\end{enumerate}
 \end{enumerate}
-\newpage
 
 \noindent \textbf{Set-Based Search Process}
 
@@ -247,7 +246,7 @@ reduce($F$) \{
     \ENDWHILE \\ \}
 \end{algorithmic}
 
-\noindent Once $F$ has been produced, a generation counter will be instantiated with the value ``1". Following that, the search control will simply allow our GA to begin evolving its initial population. If at any point the timer reaches one hour or the generation counter reaches 50, the search control will halt the GA. At that point, the most fit individual in the current population will be returned as the final, optimized solution to the assignment problem.
+\noindent Once $F$ has been produced, a generation counter will be instantiated with the value ``1". Following that, the search control will simply allow our GA to begin evolving its initial population. If at any point the timer reaches one hour or the generation counter reaches 50, the search control will halt the GA. At that point, the most fit individual (according to the \textbf{Eval} function) in the current population will be returned as the final, optimized solution to the assignment problem.
 
 \noindent \textbf{Set-Based Search Instance}
 
