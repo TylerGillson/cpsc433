@@ -9,7 +9,8 @@
 \usepackage{underscore}
 \usepackage{caption}
 \usepackage{algorithmic}
-\usepackage{enumitem}		
+\usepackage{enumitem}	
+\usepackage{verbatim}	
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
@@ -47,18 +48,19 @@
 \begin{cmr}
 \indent Our approach to solving the problem within the context of set-based search will rely mainly on the use of a genetic algorithm.
 We will obtain an initial, randomly generated population for our GA via an Or-tree-based Search that will provide candidate solutions to the problem's
-hard constraints. In this first stage of our solution, we remove the problem's soft constraints, thereby re-formulating it as a constraint satisfaction problem (CSP).
+hard constraints. In this first stage of our solution, we ignore the problem's soft constraints, thereby re-formulating it as a constraint satisfaction problem (CSP).
 
 \indent Once we have obtained an initial population of some size, pop_init, we will consider its individuals to be facts in a Set-based Search.
 We will also define a constant, pop_max, as an upper bound on the size of any later generation.
-The set-based search will use our genetic algorithm's cross-over function, and a reduce function as its extension rules.
-The reduce function will remove individuals with large f\textsubscript{Wert} values from the population until the population has been halved, should it ever reach a size of pop_max.
-We will use the provided \textbf{Eval} function to compute f\textsubscript{Wert}. Furthermore, there will be no need for an f\textsubscript{Select} function in our set based search, as
-transitions to each successive generation will be determined by our GA's selection function.
-The start state will be our initial set of randomly generated facts and our goal state will be: ``Whichever occurs first: 50 generations have been modelled, or an hour has elapsed".
+The set-based search will use our genetic algorithm's crossover function, and a reduce function as its extension rules.
+f\textsubscript{Wert} will be used to decide whether the reduction or crossover extension rule applies.
+When the population has exceeded pop_max, f\textsubscript{Wert} will indicate that a reduction is to take place. 
+Then  f\textsubscript{Select} will be used as a tiebreaker to determine which fact will undergo reduction, using \textbf{Eval}.
+f\textsubscript{Select} will also tell us which two parents will be used in the crossover extension rule.
+The start state will be our initial set of randomly generated facts and our end condition will be a predetermined number of generations or a predetermined time limit, whichover comes first.
 
-\indent In our GA, we will use f\textsubscript{Wert} = \textbf{Eval} as a fitness function, \textbf{Cons} and \textbf{Cons\textsuperscript{*}} for constraint-checking, and roulette-wheel selection as a selection method.
-\textbf{Cons\textsuperscript{*}} is a variant of \textbf{Cons} used to evaluate the constraint-compliance of partial solutions, which we assume can be derived from the provided \textbf{Cons} function.
+\indent In our GA, we will use \textbf{Eval} to measure how the well each of the final set of facts meets soft constraints, \textbf{Constr} and \textbf{Constr\textsuperscript{*}}to check hard constraints, and roulette-wheel selection as a selection method for crossover.
+\textbf{Constr\textsuperscript{*}} is a variant of \textbf{Constr} used to evaluate the constraint-compliance of partial solutions, which we assume can be derived from the provided \textbf{Constr} function.
 \end{cmr}
 
 \noindent {\large \textbf{Or-tree-based Search Model}}
@@ -93,33 +95,79 @@ The start state will be our initial set of randomly generated facts and our goal
 \noindent {\large \textbf{Or-tree-based Search Process}}
 
 \begin{cmr}
-\noindent Search Control:
-
+\noindent Initial Search Control:
+\begin{comment}
 \noindent Our O\textsubscript{Tree} will obviously begin with a single node, (pr, ?). Its expansion will be governed by the recursive relation, Erw\textsubscript{$\lor$}.
 After each application of Altern, the search control will perform a constraint analysis on each new successor node of O\textsubscript{Tree} using \textbf{Constr\textsuperscript{*}}.
-Nodes where \textbf{Constr\textsuperscript{*}} evaluates to false will be pruned out of O\textsubscript{Tree} prior to leaf selection.
+\end{comment}
 
+\noindent This is the search control for the generation of the initial population for the set-based search.
+
+\noindent In order to decide which leaf to operate on, the search control first looks for leaf nodes where the problem is solved. If there are multiple of these leaf nodes, then one is chosen at random. The sol-entry of the selected node is then changed to yes.
+If no such leaf nodes exist, then the search control considers any leaf nodes where the problem is unsolvable. Once again if there are multiple of these nodes, then one is selected at random. The sol-entry is then changed to no. If neither of these types of leaf nodes exist, then the search control selects the leaf which has the fewest unassigned courses/labs (\$'s), therefore the deepest leaf node in the tree. 
+If there are multiple of these nodes, one will be chosen randomly and Altern will be applied to this node.
+
+\end{cmr}
+\begin{comment}
 \noindent The search control will pick a random leaf from among the minimal f\textsubscript{leaf} values.
+\end{comment}
 
 \noindent In order to define f\textsubscript{leaf}, we must first define a function, sum\$: pr $\Rightarrow$ $\mathbb{Z}$. Which, given some pr, returns the number of \$ entries within it. 
-\end{cmr}
 
-\noindent f\textsubscript{leaf}: \{pr\textsubscript{1}, $\dots$, pr\textsubscript{$n$}\} $\Rightarrow$ pr\textsubscript{$i$}\\
+\noindent We also want to define a function rand: pr $\Rightarrow$ $\mathbb{R}$. 
+
+\noindent Here we have a set of problems P =  \{pr\textsubscript{1}, $\dots$, pr\textsubscript{$k$}\} $\vert$ sum$\$$(pr\textsubscript{$i$}) = sum$\$$(pr\textsubscript{$j$}), 1 $\geq$ i,j $\geq$ k
+
+\noindent z is a random integer such that 1 $\geq$ z $\geq$ $\vert$ P $\vert$
+
     \[
-        \text{f\textsubscript{leaf}} = \left\{\begin{array}{ll}
-            -1, & \text{if (pr\textsubscript{$i$}, yes)}\\
-            0, & \text{if (pr\textsubscript{$i$}, no)}\\
-            \text{sum$\$$(pr\textsubscript{$i$})}, & \text{if (pr\textsubscript{$i$}, ?)}
+        \text{rand} = \left\{\begin{array}{ll}
+            0, & \text{: pr\textsubscript{$z$}}\\
+            0.01, & \text{: pr\textsubscript{$i$} $\vert$ i $\neq$ z, 1 $\geq$ i $\geq$ $\vert$ P $\vert$}\\
             \end{array}\right\}
       \]
 
+\noindent f\textsubscript{leaf}: pr\textsubscript{$i$} $\Rightarrow$ $\mathbb{R}$\\
+
+\noindent Here  pr\textsubscript{$i$} = \{x\textsubscript{1}, $\dots$, x\textsubscript{$n$}\} and input is a \textit {partassign} = \{y\textsubscript{1}, $\dots$, y\textsubscript{$n$}\}, which is either the \textit partassign given to the search as the input or y\textsubscript{i} such that $\forall y\textsubscript{i}$ $\in$ input, y\textsubscript{i} = \$
+
+    \[
+        \text{f\textsubscript{leaf}} = \left\{\begin{array}{ll}
+            -1, & \text{: (pr\textsubscript{$i$} is solved)}\\
+            0, & \text{: (pr\textsubscript{$i$} is unsolvable)}\\
+            \text{sum$\$$(pr\textsubscript{$i$})+ rand(pr\textsubscript{$i$})}, & \text{: $\forall x\textsubscript{i}$ = y\textsubscript{i} or x\textsubscript{i} = \$}\\
+	\infty & \text{: else}
+            \end{array}\right\}
+      \]
+
+\begin{comment}
 \begin{cmr}
 \noindent After f\textsubscript{leaf} values have been calculated for each node, if there is a solved node then the search is finished and the solved problem instance is returned as output.
 
 \noindent Otherwise, all unsolvable nodes will be pruned, and a random integer, $r$, will be generated such that $1 \le r \le n$, where n is equal to the number of remaining new successor nodes generated by Altern.
 Control will then select the $r$\textsuperscript{th} node and resume the expansion of O\textsubscript{Tree}.
 \end{cmr}
+\end{comment}
+\begin{cmr}
+\noindent Crossover Search Control:
 
+\noindent This is the search control for the generation of the initial population for the set-based search.
+
+\noindent This search control is similar to the initial search control. The only difference comes in when there are no solved or unsolvable leaf nodes. The leaf nodes with problems containing the fewest \$'s are considered however the tiebreaker is dependant one the parents used for the crossover. Leaf nodes with a problem, where each entry in the vector is either equal to the entry in the same position of either parent's vector or \$ are then chosen. These are chosen between randomly if multiple leaf nodes fitting this description exist. If none of these exist, then select randomly from the other leaf nodes with the fewest \$'s.
+
+Here the two parents are relevant and will be denoted by Par\textsubscript{1} = \{par\textsubscript{1\textsubscript{1}}, $\dots$, par\textsubscript{1\textsubscript{$n$}}\} and Par\textsubscript{2} = \{par\textsubscript{1\textsubscript{2}}, $\dots$, par\textsubscript{2\textsubscript{$n$}}\}
+
+    \[
+        \text{f\textsubscript{leaf}} = \left\{\begin{array}{ll}
+            -1, & \text{: (pr\textsubscript{$i$} is solved)}\\
+            0, & \text{: (pr\textsubscript{$i$} is unsolvable)}\\
+            \text{sum$\$$(pr\textsubscript{$i$})+ rand(pr\textsubscript{$i$})}, & \text{: $\forall x\textsubscript{i}$ = y\textsubscript{i} and (x\textsubscript{i} = par\textsubscript{1\textsubscript{i}} or par\textsubscript{2\textsubscript{i}}) or x\textsubscript{i} = \$}\\
+            \text{sum$\$$(pr\textsubscript{$i$})+ rand(pr\textsubscript{$i$})} + 0.1, & \text{: $\forall x\textsubscript{i}$ = y\textsubscript{i} and (x\textsubscript{i} $\neq$ par\textsubscript{1\textsubscript{i}} or par\textsubscript{2\textsubscript{i}}) or x\textsubscript{i} = \$}\\
+	\infty & \text{: else}
+            \end{array}\right\}
+      \]
+
+\end{cmr}
 \noindent {\large \textbf{Or-tree-based Search Instance:}}
 
 \noindent We define our initial search state, $s_0$, as follows:
@@ -142,6 +190,7 @@ As mentioned in the problem overview, we will assume that our initial set $F$ wi
 
 \noindent \centerline{$F$ = \{$\langle X_1, \dots, X_n\rangle$\textsubscript{$1$}, $\dots$, $\langle X_1, \dots, X_n\rangle$\textsubscript{$k$} $\vert$ $X_i \in D_i$, $1 \le i \le n$, $k = \text{pop_init}$\}}
 
+\begin{comment}
 \noindent Before defining Ext, we will first define an alternative Search Control for the Or-tree-based Search used for generating candidate solutions.
 
 \noindent Search Control\textsubscript{Alt}:
@@ -162,24 +211,31 @@ Nodes where \textbf{Constr\textsuperscript{*}} evaluates to false will be pruned
 
 \noindent Otherwise, all unsolvable nodes will be pruned and the control will then select a random leaf as mentioned above and resume the expansion of O\textsubscript{Tree}.
 \end{cmr}
+\end{comment}
 
 \noindent Now we will define the set of extension rules, Ext:
 \begin{enumerate} [topsep=0pt, itemsep=0pt, leftmargin=*]
-\item Cross-Over/Mutation:
+\item Crossover:
 	\begin{enumerate}[leftmargin=*]
 	\item $A$ = select($F$), $B$ = select($F - A$). (We will define select($F$) in our Search Process).
-	\item Now that we have selected two parent facts, we will execute our Or-tree-based Search using Search Control\textsubscript{Alt}.
+	\item Now that we have selected two parent facts, we will execute our Or-tree-based Search using the Crossover Search Control.
 	\item The resulting solution produced by this search will then be added to the population.
 	\end{enumerate} 
 \item Reduce:
 	\begin{enumerate}
-	\item If the size of the current generation equals pop_max, execute reduce($F$). (We will define reduce($F$) in our Search Process).
+	\item A fact is removed from the set of facts.
+	\item A $\rightarrow$ B $\vert$ B = $\emptyset$
+	\end{enumerate}
+\item Populate:
+	\begin{enumerate}
+	\item A new fact is generated by running an Or-tree-based Search using the initial search control. Where the starting state of the tree is either as defined in our Or-tree-based Search 		instance or \textit{partassign} if \textit{partassign} was given as input.
+	\item  A $\rightarrow$ B $\vert$ A = $\emptyset$
 	\end{enumerate}
 \end{enumerate}
 
 \noindent \textbf{Set-Based Search Process}
 
-\noindent Here we define the function, select($F$), which will be used in Ext to pick individuals out of the population in order to perform the cross-over/mutation operation on them.
+\noindent Here we define the function, select($F$), which will be used in Ext to pick individuals out of the population in order to perform the crossover operation on them.
 
 \noindent select: $F$ $\Rightarrow$ ($F_i$) is an implementation of the roulette-wheel selection algorithm.\\\\
 select($F$) \{
@@ -210,6 +266,17 @@ select($F$) \{
     \ENDWHILE \\ \}
 \end{algorithmic}
 
+\noindent We also define a function pop(F) which evaluates the size of the current population, where F is the current set of facts.
+
+    \[
+        \text{pop(F)} = \left\{\begin{array}{ll}
+            -1 & \text{: $\vert$F$\vert$ $<$ pop_init}\\
+            1 & \text{: $\vert$F$\vert$ $>$ pop_max}\\
+            0 & \text{: else}
+            \end{array}\right\}
+      \]
+
+\begin{comment}
 \noindent Here we define the function, reduce($F$), which will be used in Ext to reduce the size a generation that has become too large. The removal of individuals from the population will be performed quasi-randomly via the select($F$) function, in order to avoid implementing an elitist GA.\\\\
 reduce($F$) \{
 \begin{algorithmic}[\textfloatsep = 0pt]
@@ -225,11 +292,23 @@ reduce($F$) \{
 	\STATE $i$ ++ 1
     \ENDWHILE \\ \}
 \end{algorithmic}
+\end{comment}
 
 \noindent Search Control:
 
 \noindent The search control for our Set-based Search will be responsible for producing the initial set, $F$, tracking the amount of time elapsed, and counting the number of generations that our GA has modelled. The first thing our control will do is start a timer.
 
+\noindent In order to decide which transition to apply to our set of facts we pick the transition that minimizes f\textsubscript{Wert}.
+
+    \[
+        \text{f\textsubscript{Wert}(A, B, e)} = \left\{\begin{array}{ll}
+            \text{-2(pop(F))} & \text{: A = $\emptyset$}\\
+            \text{2(pop(F))} & \text{: B = $\emptyset$}\\
+            -1 & \text{: else}
+            \end{array}\right\}
+      \]
+
+\begin{comment}
 \noindent Next, in order to produce $F$, the control will execute the following algorithm:
 
 \noindent produce($F$) \{
@@ -245,13 +324,20 @@ reduce($F$) \{
 	\STATE $i$ ++ 1
     \ENDWHILE \\ \}
 \end{algorithmic}
+\end{comment}
 
-\noindent Once $F$ has been produced, a generation counter will be instantiated with the value ``1". Following that, the search control will simply allow our GA to begin evolving its initial population. If at any point the timer reaches one hour or the generation counter reaches 50, the search control will halt the GA. At that point, the most fit individual (according to the \textbf{Eval} function) in the current population will be returned as the final, optimized solution to the assignment problem.
+\noindent We have already defined a method to select the two parents for the crossover extension and we don't need to pick a fact for the populate extension to operate on, however we do need to control which fact the reduce extension rule is applied to. We do this by using \textbf{Eval} to evaluate how well each fact follows the soft constraint. The fact with the maximum \textbf{Eval} score is used for the reduction.
+
+\noindent f\textsubscript{select} (\{A\textsubscript{1} $\rightarrow$ B\textsubscript{1}, $\dots$, A\textsubscript{m} $\rightarrow$ B\textsubscript{m}\}, e) = A\textsubscript{i} $\rightarrow$ B\textsubscript{i}
+
+\noindent where A\textsubscript{i} $\neq$ $\emptyset$ and \textbf{Eval}(A\textsubscript{i}) $<$ \textbf{Eval}(A\textsubscript{j}), i $\neq$ j, 1 $\geq$ i, j $\geq$ m or i $<$ j
+
+\noindent Every time after the crossover rule is applied, the generation counter will increase by 1. If after any application of an extension, the time limit is up or the generation counter reaches the predetermined maximum threshold, the search control will halt the GA. At that point, the most fit individual (according to the \textbf{Eval} function) in the current population will be returned as the final, optimized solution to the assignment problem.
 
 \noindent \textbf{Set-Based Search Instance}
 
 \noindent s\textsubscript{0} = Start state for the search instance --- composed of pop_init candidate solutions.\\
-G\textsubscript{Set}(s) = Yes, if and only if 50 generations have been modelled, or one hour has elapsed.\\\\
+G\textsubscript{Set}(s) = Yes, if and only if enough generations have been reached or enough time has elapsed.\\\\
 
 \noindent That concludes our description of a Set-based Search solution to the assignment problem.
 
