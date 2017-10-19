@@ -90,6 +90,8 @@ if $\beta _{pr_i}$ $\leq \beta _{best}$ then $\beta_ {best} = \beta _{pr_i } $
 if $\beta _{pr_i}$  $> \beta _{best}$ then  $pr_i = null$, pruning the leaf from the tree.
 
 
+
+
 \bigskip
 \bigskip
 
@@ -114,11 +116,19 @@ It is the state where each course and lab has a slot assigned to it. The state w
 The search control operation operates in the following order:
 
 \bigskip
-1. Apply $F_{leaf}$ to the tree.
 
-2. Apply $Div$ to the tree, prioritizing the branch with the lowest $F_{leaf}$ value. In case of a tie, the left most branch is used. $Div$ is applied to all unsolved branches $(pr, ?)$. It is at this point that all lower leaves are checked for $(pr, solved)$.
+
+1. Apply $Div$ to the tree, prioritizing the branch with the lowest $F_{leaf}$ value. In case of a tie, the left most branch is used. $Div$ is applied to all unsolved branches $(pr, ?)$. 
+
+2. Apply $F_{leaf}$ to the tree. 
 
 3. Apply $F_{bound}$ to the tree, pruning the leaves that are out of bounds if needed.
+
+4. We check states to see if they are solved: If $pr$ is some $partassign$, and $F_{leaf} \geq \beta_{best} $ the mark the state as $pr, solved$.
+
+If a $\forall X_i \in pr, X_i \neq \$ $ then we mark the state as $(pr, solved$. 
+
+5. We choose the smallest $F_{leaf}$ value of the leaves that are marked $pr, ?$  and apply $Div$ again, starting the process over again.
 
 \bigskip
 \bigskip
@@ -137,6 +147,9 @@ $s_0 = pr = <X_1, ..., X_n> $ such that $\forall X_i \in pr, X_i = \$ $
 
 The goal state is $G_{and}$ is reached when all branches are marked with $(pr, solved)$.
 
+\bigskip
+
+The best solution is of the states marked $(pr, solved)$, the complete solution with the lowest $\beta$ value is optimal.
 \huge
 
 
