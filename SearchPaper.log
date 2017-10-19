@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  18 OCT 2017 22:15
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  19 OCT 2017 14:27
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -436,78 +436,68 @@ File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 72.
  [2]
-Underfull \hbox (badness 10000) in paragraph at lines 132--133
+Underfull \hbox (badness 10000) in paragraph at lines 123--124
 
  []
 
 [3]
-Overfull \hbox (2.68634pt too wide) detected at line 170
-[] \OT1/cmr/m/n/10.95 = []
+Underfull \hbox (badness 10000) in paragraph at lines 132--133
+
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 181--182
+Underfull \hbox (badness 10000) in paragraph at lines 153--154
 
  []
 
 [4]
-Underfull \hbox (badness 10000) in paragraph at lines 242--244
+Underfull \hbox (badness 10000) in paragraph at lines 199--201
 
  []
 
-[5] [6]
-Underfull \hbox (badness 10000) in paragraph at lines 341--343
+[5]
+Underfull \hbox (badness 10000) in paragraph at lines 228--230
 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 341--343
-
- []
-
-[7] [8] [9]
-
-LaTeX Warning: Command \o invalid in math mode on input line 476.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 509--514
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 282--284
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 509--514
+Underfull \hbox (badness 10000) in paragraph at lines 282--284
 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 509--514
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 515--519
+[7]
+Underfull \hbox (badness 10000) in paragraph at lines 306--307
 
  []
 
-[10]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 525.
- [11]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 525.
+[8]
+
+LaTeX Warning: Command \o invalid in math mode on input line 378.
+
+[9]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 395.
+ [10]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 395.
  (./SearchPaper.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 525.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 525.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 395.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 395.
 Package rerunfilecheck Info: File `SearchPaper.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 525.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 395.
  ) 
 Here is how much of TeX's memory you used:
- 8026 strings out of 493014
- 120289 string characters out of 6133351
- 212742 words of memory out of 5000000
+ 8040 strings out of 493014
+ 120485 string characters out of 6133351
+ 213742 words of memory out of 5000000
  11433 multiletter control sequences out of 15000+600000
- 13353 words of font info for 50 fonts, out of 8000000 for 9000
+ 13046 words of font info for 49 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 36i,16n,38p,673b,704s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 36i,15n,38p,630b,517s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></
@@ -524,10 +514,10 @@ ve/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
 016/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/201
 6/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2016
 /texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on SearchPaper.pdf (11 pages, 198496 bytes).
+Output written on SearchPaper.pdf (10 pages, 193530 bytes).
 PDF statistics:
- 165 PDF objects out of 1000 (max. 8388607)
- 134 compressed objects within 2 object streams
- 47 named destinations out of 1000 (max. 500000)
+ 179 PDF objects out of 1000 (max. 8388607)
+ 149 compressed objects within 2 object streams
+ 61 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
