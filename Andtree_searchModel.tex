@@ -1,0 +1,53 @@
+\documentclass[letterpaper, 11pt]{article}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{automata}
+
+\usepackage[scaled]{helvet}
+\renewcommand*\familydefault{\sfdefault} 
+\usepackage[T1]{fontenc}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\begin{document}
+\section*{And-tree Search Model}
+
+For the model, Prob is defined as a vector of length |Courses + Labs|, whose elements consist of the indices of slots from Slots, or the unassigned symbol, \$. The ordering of vector will be the same as the original ordering of Courses + Labs. Therefore, a Prob vector can be read sequentially as: Course/Lab at position $i$, having value $j$, has been assigned time slot $s_{j}$, where $s_{j}$ is the member $s$ of the set Slots at the $j^{th}$ index of Slots. As such, the definition of Prob is equivalent with the notion of a partial assignment, $\textit{partassgin}$.
+
+$D_{i}$, defined as the domain of any element in a problem instance, pr, to be the set: {0,...,$j$} where $j$ + 1 = |Slots|. With that, Prob is defined as follows:
+
+\begin{center}
+{Prob = <$C_{1}$slot,...,$C_{n}$slot,...,$L_{11}$slot,...,$L_{1k_{1}}$slot,...,$L_{n1}$slot,..,$L_{nk_{n}}$slot> \\ such that $C_{i}$slot, $L_{ik_{i}}$slot $\in D_{i} \cup \big\{\$\big\}$}
+\end{center}
+
+Which can be abstracted into the form:
+
+\begin{center}
+{Prob = <$X_{1}$,...,$X_{n}$> such that $X_{i} \in D_{i} \cup \big\{\$\big\}$ }
+\end{center}
+The divide relation, Div, defined as:
+
+\begin{center}
+{Div = $\big\{((X_{1},...,X_{i},...,X_{n}),(X_{1},...,d_{i1},...,X_{in}),...,(X_{1},...d_{il},...,X_{n}))$  | $ X_{i} = \$, 1 \le i \le n, |D_{i}| = l, D_{i} = \big\{d_{i},...,d_{il}$\big\}\big\}}
+\end{center}
+
+"pr is solved" is defined as follows:
+
+\begin{center}
+{pr = ($X_{1},...,X_{n}$) and $\forall$$i$ such that $1 \le i \le n$, $X_{i} \neq \$$, and pr is not unsolvable.}
+\end{center}
+
+"pr is unsolvable" is defined as follows:
+
+\begin{center}
+{pr = ($X_{1},...,X_{n}$) and there is a constraint $C_{i} = R_{i}(X_{1},...,X_{k}$) such that $\exists$$X_{ij} \in $pr with a value unequal to \$ and ($X_{1},...,X_{k}$) do not satisfy $R_{i}$.}
+\end{center}
+
+Since we have access to  \textbf{Constr$^{\ast}$}, derived from the provided function, \textbf{Constr}, we can allow  \textbf{Constr$^{\ast}$} to perform the work of assessing whether any particular problem instance, pr, is compliant with the problem;s hard constraints.
+
+\end{document}
