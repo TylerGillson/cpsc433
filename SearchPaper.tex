@@ -12,7 +12,7 @@
 \usepackage{enumitem}	
 \usepackage{verbatim}
 \usepackage{tikz}				% package for drawing node diagrams for search derivations
-\usetikzlibrary{trees}
+\usetikzlibrary{trees, shapes, decorations}
 
 \def\infinity{\rotatebox{90}{8}}
 
@@ -285,7 +285,7 @@ f\textsubscript{select}($F$) \{
 \noindent In order to decide which transition to apply to our set of facts we pick the transition that minimizes f\textsubscript{Wert}.
  
      \[
-         \text{f\textsubscript{Wert}(A, B, e)} = \left\{\begin{array}{ll}
+         \text{f\textsubscript{Wert}(A, B)} = \left\{\begin{array}{ll}
              \text{pop(F)} & \text{: B = $F - F_0$}\\
              0 & \text{: B = else }
              \end{array}\right\}
@@ -415,6 +415,119 @@ We define our division relation, Div, as follows:\\
 
 \noindent Since we have access to \textbf{Constr$^{\ast}$}, derived from the provided function, \textbf{Constr}, we can allow  \textbf{Constr$^{\ast}$} to perform the work of assessing whether any particular problem instance, pr, is compliant with the problem's hard constraints.
 
-%INSERT DAVIDS STUFF%
+\noindent{\\ \large\textbf{And-tree-based Search Process}}
+
+\noindent Having defined the search model, we are now ready to define the Search Process and Search Instance.
+
+\noindent A\textsubscript{tree} will begin with a single node, $s_0 = (pr, ?)$, and its expansion will be defined by the recursive relation $Erw_{\land}$. Each iteration will use $Div$ to expand the tree and create new nodes. After each $Div$, $F_{bound}$ evaluates all solved leaves via a branch and bound operation, using a $beta$ value. The search control uses this $\beta$ value to prune once a solution has been found. After this, $F_{leaf}$  evaluates all the leaves, and calculates a number, assessing each leaf. The search control will prioritize applying $Div$ to the lowest value leaves first. The search control will choose the left most leaf in the case that $F_{leaf}$ provides a tie between multiple leaves.
+
+\noindent $F_{leaf}$ evaluates a penalty score of an assignment, based on the soft and hard constraints. For partial assignments, $F_{leaf}$$^*$ is used, which uses $Eval^*$ and $Constr^*$ instead. 
+
+\noindent $F_{leaf}$ : $pr_i$ $ \to \mathbb{R} $
+ \[
+          \text{F\textsubscript{leaf}} = \left\{\begin{array}{ll}
+            \infinity & \text{: if $Constr(pr_i)=$ false}\\
+            Eval(pr_i) & \text{: else}
+            \end{array}\right\}
+      \]
+
+\noindent $F_{bound}$ is used by the search control to keep the tree size within reason. It sets the $\beta$ values of all complete solutions, when the state is (pr, Yes). 
+We can define $F_{bound}$ as follows:
+
+\noindent $F_{bound}$ : $\{pr_1$, ..., $pr_i$, ..., $pr_n$ \} where 1 $\leq i\leq n$
+ \[
+          \text{F\textsubscript{bound}} = \left\{\begin{array}{ll}
+          \beta = \beta & \text{: if $(pr_i, ?)$}\\
+          \beta = min(Eval(pr_i), \dots, Eval(pr_n)) & \text{: else, for all $pr_i$ having the sol-entry ``Yes''}\\  
+          \end{array}\right\}
+      \]
+      
+\noindent As there is is only one $Div$ relation, $F_{trans}$ is not used. Additionally, there is no backtracking in this search control.
+
+\noindent The search control operation operates in the following order:
+\begin{enumerate}
+\item Apply $Div$ to the tree, prioritizing the leaf node with the lowest $F_{leaf}$ value. In case of a tie, the deepest, leftmost leaf node is used. 
+\item Apply $F_{bound}$.  
+\item Apply $F_{leaf}$. If $F_{leaf} \geq \beta $, then prune the leaf.
+\item We check leaf nodes to see if they are solved: We mark a leaf node, $pr_i$ as ($pr_i$, Yes) if $\forall$$X_j$ $\in$ $pr_i$, $X_j$ $\neq$ \$ and $F_{leaf}(pr_i) \neq \infinity$
+\item We choose the smallest $F_{leaf}$ value of the leaves that are marked $(pr, ?)$  and apply $Div$ again, starting the process over again.
+\end{enumerate}
+
+\noindent{\large\textbf{And-tree-based Search Instance}}
+
+\noindent As before the initial search state is $s_0$:\\
+
+\centerline{$s_0 = pr = \langle X_1, ..., X_n \rangle $ such that $\forall X_i \in pr, X_i = \$ $ or}
+\centerline{$s_0$ is some partial assignment given as an input to the search.}
+
+\noindent We set $\beta = \infinity$ at the beginning of the search.
+
+\noindent The goal state is $G_{and}$ is reached when all leaf nodes are marked (pr, Yes).
+
+\noindent The optimal solution is the leaf node with the lowest $F_{leaf}$ value.
+\newpage
+
+\noindent {\large \textbf{A simple example:}}
+
+\noindent Slots = \{$s_1, s_2, s_3$\}, Courses = \{$c_1, c_2$\}, Labs = \{$l_{11}, l_{21}$\}
+
+\noindent Hard Constraints:
+\begin{enumerate}[topsep=0pt, itemsep=0pt]
+\item \textbf{Constr} and \textbf{Constr\textsuperscript{*}} both equal false if $c_1$ is assigned $s_1$
+\item \textbf{Constr} and \textbf{Constr\textsuperscript{*}} both equal false if $l_{21}$ is assigned $s_3$
+\end{enumerate}
+
+\noindent Soft Constraints:
+\begin{enumerate}[topsep=0pt, itemsep=0pt]
+\item \textbf{Eval} and \textbf{Eval\textsuperscript{*}} both equal 5 if $c_1$ is assigned $s_2$
+\item \textbf{Eval} and \textbf{Eval\textsuperscript{*}} both equal 5 if $l_{21}$ is assigned $s_1$
+\end{enumerate}
+
+\noindent \textbf{And-tree search derivation:}
+
+\noindent The values underneath each node are f\textsubscript{leaf} values. Also, $\beta$ = $\infty$.
+
+\begin{tikzpicture}[level distance=3cm,
+  level 1/.style={sibling distance=3cm},
+  level 2/.style={sibling distance=3cm}]
+  \node {($\langle \$, \$, \$, \$  \rangle$, ?)}
+    child {node[label=below: $\infty$] {($\langle 0, \$, \$, \$  \rangle$, ?)} }
+    child {node[label=below: 5] {($\langle 1, \$, \$, \$  \rangle$, ?)}}
+    child {node[label=below: 0] {($\langle 2, \$, \$, \$  \rangle$, ?)}
+    	child {node[label=below: 0] {($\langle 2, 0, \$, \$  \rangle$, ?)}
+		child {node[label=below: 0] {($\langle 2, 0, 0, \$  \rangle$, ?)}
+			child {node[label=below: 5] {($\langle 2, 0, 0, 0  \rangle$, ?)}}
+		      	child {node[label=below: \text{0, so $\beta$ = 0}] {($\langle 2, 0, 0, 1  \rangle$, Yes)}}
+			child {node[label=below: $\infty$] {($\langle 2, 0, 0, 2  \rangle$, ?)}} }
+	      	child {node[label=below: 0] {($\langle 2, 0, 1, \$  \rangle$, ?)}}
+		child {node[label=below: 0] {($\langle 2, 0, 2, \$  \rangle$, ?)}} }
+      	child {node[label=below: 0] {($\langle 2, 1, \$, \$  \rangle$, ?)}}
+	child {node[label=below: 0] {($\langle 2, 2, \$, \$  \rangle$, ?)}}
+    };
+\end{tikzpicture}
+\newpage
+
+\noindent Since a solution has been found and $\beta$ updated, the search control prunes all leaf nodes where f\textsubscript{leaf} $\geq$ $\beta$.
+
+\begin{tikzpicture}[level distance=3cm,
+  level 1/.style={sibling distance=3cm},
+  level 2/.style={sibling distance=3cm}]
+  \node {($\langle \$, \$, \$, \$  \rangle$, ?)}
+    child {node[label=below: $\infty$, cross out, draw] {($\langle 0, \$, \$, \$  \rangle$, ?)} }
+    child {node[label=below: 5, cross out, draw] {($\langle 1, \$, \$, \$  \rangle$, ?)}}
+    child {node[label=below: 0] {($\langle 2, \$, \$, \$  \rangle$, ?)}
+    	child {node[label=below: 0] {($\langle 2, 0, \$, \$  \rangle$, ?)}
+		child {node[label=below: 0] {($\langle 2, 0, 0, \$  \rangle$, ?)}
+			child {node[label=below: 5, cross out, draw] {($\langle 2, 0, 0, 0  \rangle$, ?)}}
+		      	child {node[label=below: \text{0, so $\beta$ = 0}] {($\langle 2, 0, 0, 1  \rangle$, Yes)}}
+			child {node[label=below: $\infty$, cross out, draw] {($\langle 2, 0, 0, 2  \rangle$, ?)}} }
+	      	child {node[label=below: 0, cross out, draw] {($\langle 2, 0, 1, \$  \rangle$, ?)}}
+		child {node[label=below: 0, cross out, draw] {($\langle 2, 0, 2, \$  \rangle$, ?)}} }
+      	child {node[label=below: 0, cross out, draw] {($\langle 2, 1, \$, \$  \rangle$, ?)}}
+	child {node[label=below: 0, cross out, draw] {($\langle 2, 2, \$, \$  \rangle$, ?)}}
+    };
+\end{tikzpicture}
+
+\noindent In this example, all nodes are pruned after the first solution is found, therefore the final, optimized solution is $\langle$ 2, 0, 0, 1 $\rangle$.
 
 \end{document}
