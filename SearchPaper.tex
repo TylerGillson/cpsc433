@@ -11,7 +11,9 @@
 \usepackage{algorithmic}
 \usepackage{enumitem}	
 \usepackage{verbatim}
-%\usepackage{tikzpicture}				% package for drawing node diagrams for search derivations
+\usepackage{tikz}				% package for drawing node diagrams for search derivations
+\usetikzlibrary{trees}
+
 \def\infinity{\rotatebox{90}{8}}
 
 \hypersetup{
@@ -101,10 +103,9 @@ The start state will be our initial set of randomly generated facts and our end 
 \noindent This is the search control for the generation of the initial population for the set-based search.
 
 \noindent Our O\textsubscript{Tree} will begin with a single node, (pr, ?). Its expansion will be governed by the recursive relation, Erw\textsubscript{$\lor$}.
-Typically, the first step our control will take is to apply Altern to the root node, with $i$ = 1, then increment $i$.
-However, if s\textsubscript{0} is a partial assignment, then $i$ will be the index value of the first \$, rather than 1.
-After each subsequent application of Altern, the search control will increment $i$, then perform a constraint analysis on each new successor node of O\textsubscript{Tree} using \textbf{Constr\textsuperscript{*}}.
-As such, the search control works one element ($X_i$) at a time, from left to right across each problem instance, until a solution is found.
+If a partial assignment is provided, pr, is of the form \textit{partassign} and expansion will begin at the first \$ in pr. For all subsequent assignments, the search control will replicate the form of \textit{partassign} wherever it had made an assignment.
+
+\noindent In general, the search control will construct pr in a left to right fashion, assigning slots to elements of pr from the lowest to the highest index.
 
 \noindent In order to decide which leaf to operate on, the search control applies f\textsubscript{leaf}. It first looks for leaf nodes where the problem is solvable. If there are multiple of these leaf nodes, then one is chosen at random. The sol-entry of the selected node is then changed to ``Yes'' and the search is finished.
 
@@ -116,25 +117,30 @@ There will always be multiple of these nodes, since the search control works one
 \noindent In order to define f\textsubscript{leaf}, we must first define a function, sum\$: pr $\Rightarrow$ $\mathbb{Z}$. Which, given some pr, returns the number of \$ entries within it. 
 
 \noindent Given,\\
-\centerline{P =  \{pr\textsubscript{1}, $\dots$, pr\textsubscript{$k$}\} $\vert$ sum$\$$(pr\textsubscript{$i$}) = sum$\$$(pr\textsubscript{$j$}), 1 $\leq$ $i$, $j$ $\leq$ $k$, $i \neq j$ \}}
+\centerline{P =  \{\{pr\textsubscript{1}, $\dots$, pr\textsubscript{$k$}\} $\vert$ sum$\$$(pr\textsubscript{$i$}) = sum$\$$(pr\textsubscript{$j$}), 1 $\leq$ $i$, $j$ $\leq$ $k$, $i \neq j$ \}}
 
 \noindent We define a function rand: pr $\Rightarrow$ $\mathbb{R}$ to deal with multiple deepest leaf nodes.
 
-\noindent Let $z$ be a random integer such that 1 $\leq$ $z$ $\leq$ $k$. Then,\\
-    \[
-        \text{rand} = \left\{\begin{array}{ll}
-            0 & \text{: pr\textsubscript{$z$}}\\
-            0.5 & \text{: pr\textsubscript{$i$} $\vert$ $i$ $\neq$ z, 1 $\leq$ $i$ $\leq$ $k$}
-            \end{array}\right\}
-      \]
+\noindent Let $z$ be a random integer such that 1 $\leq$ $z$ $\leq$ $\vert$P$\vert$. Then,\\
+ 
+     \[
+         \text{rand} = \left\{\begin{array}{ll}
+             0 & \text{: pr\textsubscript{$z$}}\\
+             0.01 & \text{: pr\textsubscript{$i$} $\vert$ $i$ $\neq$ $z$, 1 $\leq$ $i$ $\leq$ $\vert$P$\vert$}\\
+             \end{array}\right\}
+       \]
+
 
 \end{cmr}
+
+\noindent Here  pr\textsubscript{$i$} = \{X\textsubscript{1}, $\dots$, X\textsubscript{$n$}\} and input is a \textit {partassign} = \{y\textsubscript{1}, $\dots$, y\textsubscript{$n$}\}, which is either the \textit{partassign} given to the search as the input or s\textsubscript{0}, as defined the the search instance.
+
 \noindent Now we define f\textsubscript{leaf}: pr\textsubscript{$i$} $\Rightarrow$ $\mathbb{R}$\\
     \[
         \text{f\textsubscript{leaf}} = \left\{\begin{array}{ll}
             -1 & \text{: pr\textsubscript{$i$} is solvable}\\
             0 & \text{: pr\textsubscript{$i$} is unsolvable}\\
-            \text{sum$\$$(pr\textsubscript{$i$}) + rand(pr\textsubscript{$i$})} & \text{: else}
+            \text{sum$\$$(pr\textsubscript{$i$}) + rand(pr\textsubscript{$i$})} & \text{: $\forall X\textsubscript{i}$ = y\textsubscript{i} or y\textsubscript{i} = \$}
             \end{array}\right\}
       \]
 
@@ -164,7 +170,7 @@ As mentioned in the problem overview, we will assume that our initial set $F$ wi
 
 \noindent \centerline{$F$ = \{$\langle X_1, \dots, X_n\rangle$\textsubscript{$1$}, $\dots$, $\langle X_1, \dots, X_n\rangle$\textsubscript{$k$} $\vert$ $X_i \in D_i$, $1 \le i \le n$, $k = \text{pop_init}$\}}
 
-\noindent Before defining Ext, we will first define an alternative Search Control for the Or-tree-based Search used for generating candidate solutions.
+\noindent Before defining Ext, we will first define an alternative Search Control for the Or-tree-based Search which will be applied when using the cross-over/mutation extension rule.
 
 \noindent Search Control\textsubscript{Alt}:
 
@@ -172,11 +178,29 @@ As mentioned in the problem overview, we will assume that our initial set $F$ wi
 
 \noindent If both of the selected parents, $A$ and $B$, have the same first element, then pr will be initialized with that element's value as its first element, followed by \$'s. Otherwise pr will be initialized with all \$'s, as before.
 
-\noindent For each subsequent element of pr, pr\textsubscript{$i$}, \textbf{Constr\textsuperscript{*}}(pr\textsubscript{$i$}) will be calculated for both $A$ and $B$. If both parent elements constitute valid additions to pr, one will be chosen randomly --- generating a single new successor node with a pr vector that reflects the addition of that element.
+\noindent The only difference between Search Control\textsubscript{Alt} and the initial search control is that the two parents must be considered in f\textsubscript{leaf}.
 
-\noindent Otherwise, if neither parent element constitutes a valid addition to pr, Altern will be applied. 
-Leaf selection will occur as in the original search control, using the same f\textsubscript{leaf} function and randomized selection from among the set of leaves of equal proximity to a solution.
-Next, $i$ will be incremented and the process repeated.
+\noindent As such, we redefine the set P used by the rand function as follows:\\\\
+\centerline{P =  \{\{pr\textsubscript{1}, $\dots$, pr\textsubscript{$k$}\} $\vert$ sum$\$$(pr\textsubscript{$i$}) = sum$\$$(pr\textsubscript{$j$}),}\\
+\centerline{(X\textsubscript{$i$\textsubscript{$\ell$}} = par\textsubscript{1\textsubscript{$\ell$}} or X\textsubscript{$i$\textsubscript{$\ell$}} = par\textsubscript{2\textsubscript{$\ell$}} and X\textsubscript{$j$\textsubscript{$\ell$}} = par\textsubscript{1\textsubscript{$\ell$}} or X\textsubscript{$j$\textsubscript{$\ell$}} = par\textsubscript{2\textsubscript{$\ell$}}, or }
+\centerline{X\textsubscript{$i$\textsubscript{$\ell$}} $\neq$ par\textsubscript{1\textsubscript{$\ell$}} and X\textsubscript{$i$\textsubscript{$\ell$}} $\neq$ par\textsubscript{2\textsubscript{$\ell$}} and X\textsubscript{$j$\textsubscript{$\ell$}} $\neq$ par\textsubscript{1\textsubscript{$\ell$}} and X\textsubscript{$j$\textsubscript{$\ell$}} $\neq$ par\textsubscript{2\textsubscript{$\ell$}}), and}\\
+\centerline{1 $\leq$ $i$, $j$ $\leq$ $k$, $i \neq j$ \}}
+
+\noindent Where $\ell$ is the index of the pr's under consideration at the current tree depth. By our definition, P will either contain all the leaf nodes where the value of the $\ell$'th element matches one of the two parents, or P will contain all the leaf nodes where no match is found.
+
+\noindent We denote the parents as follows:\\\\
+\centerline{Par\textsubscript{1} = \{par\textsubscript{1\textsubscript{1}}, $\dots$, par\textsubscript{1\textsubscript{$n$}}\} and Par\textsubscript{2} = \{par\textsubscript{2\textsubscript{1}}, $\dots$, par\textsubscript{2\textsubscript{$n$}}\}}
+
+\noindent If both parent elements at the position under consideration constitute valid additions to pr, one will be chosen randomly, according to f\textsubscript{leaf}. Otherwise, if neither parent element would be a valid addition to pr, a valid option generated by Altern will be chosen randomly.
+     \[
+         \text{f\textsubscript{leaf}} = \left\{\begin{array}{ll}
+             -1 & \text{: (pr\textsubscript{$i$} is solved)}\\
+             0 & \text{: (pr\textsubscript{$i$} is unsolvable)}\\
+             \text{sum$\$$(pr\textsubscript{$i$})+ rand(pr\textsubscript{$i$})} & \text{: X\textsubscript{$i$} = par\textsubscript{1\textsubscript{$i$}} or X\textsubscript{$i$} = par\textsubscript{2\textsubscript{$i$}}}\\
+             \text{sum$\$$(pr\textsubscript{$i$})+ rand(pr\textsubscript{$i$})} + 0.1 & \text{: X\textsubscript{$i$} $\neq$ par\textsubscript{1\textsubscript{$i$}} and X\textsubscript{$i$} $\neq$ par\textsubscript{2\textsubscript{$i$}}}\\
+ 	\infty & \text{: else}
+             \end{array}\right\}
+       \]
 
 \noindent Now we will define the set of extension rules, Ext:
 \begin{enumerate} [topsep=0pt, itemsep=0pt, leftmargin=*]
@@ -188,7 +212,9 @@ Next, $i$ will be incremented and the process repeated.
 	\end{enumerate} 
 \item Reduce:
 	\begin{enumerate}
-	\item $k$ facts are removed from $F$, such that $k$ = $\vert F \vert$ - pop_max.
+	\item The set $F$ is sorting according to \textbf{Eval}: sort($F$, \textbf{Eval})
+	\item The first individual in $F$ is then removed: $F$ = $F$ - $F_0$
+	\item This brings the size of $F$ back down to pop_max, since we only ever add a single individual at a time.
 	\end{enumerate}
 \end{enumerate}
 
@@ -224,27 +250,7 @@ f\textsubscript{select}($F$) \{
 	\STATE index ++ 1
     \ENDWHILE \\ \}
 \end{algorithmic}
-
-\noindent Next we define the function, reduce($F$), which will be used in Ext to reduce the size a generation that has become too large.\\\\
-reduce($F$) \{
-\begin{algorithmic}[\textfloatsep = 0pt]
-    \STATE $k$ = $\vert F \vert$ - pop_max
-    \STATE sort($F$, \textbf{Eval})
-    \STATE $i$ = 0
-    \WHILE {$i <$ $k$}
-    	\STATE $F$ = $F$ - $F_i$
-	\STATE $i$ ++ 1
-    \ENDWHILE \\ \}
-\end{algorithmic}
-
-\noindent We also define a function pop($F$) which evaluates the size of the current population, where $F$ is the current set of facts.
-    \[
-        \text{pop($F$)} = \left\{\begin{array}{ll}
-            -1 & \text{: $\vert F \vert$ $\leq$ pop_max}\\
-            0 & \text{: else}
-            \end{array}\right\}
-      \]
-
+      
 \noindent Search Control:
 
 \noindent The search control for our Set-based Search will be responsible for producing the initial set, $F$, tracking the amount of time elapsed, and counting the number of generations that our GA has modelled. The first thing our control will do is start a timer.
@@ -267,22 +273,109 @@ reduce($F$) \{
 
 \noindent Once $F$ has been produced, our GA will begin its work.
 
-\noindent In order to decide which transition to apply to our set of facts we apply f\textsubscript{Wert}.
-    \[
-        \text{f\textsubscript{Wert}(A, B)} = \left\{\begin{array}{ll}
-            \text{Cross-Over/Mutate} & \text{: pop($F$) == -1}\\
-            \text{Reduce} & \text{: pop($F$) == 0}
-            \end{array}\right\}
-      \]
+\noindent We also define a function pop($F$) which evaluates the size of the current population, where $F$ is the current set of facts.
+ 
+     \[
+         \text{pop(F)} = \left\{\begin{array}{ll}
+             -1 & \text{: $\vert$F$\vert$ $>$ pop_max}\\
+             1 & \text{: else}
+             \end{array}\right\}
+       \]
+
+\noindent In order to decide which transition to apply to our set of facts we pick the transition that minimizes f\textsubscript{Wert}.
+ 
+     \[
+         \text{f\textsubscript{Wert}(A, B, e)} = \left\{\begin{array}{ll}
+             \text{pop(F)} & \text{: B = $F - F_0$}\\
+             0 & \text{: B = else }
+             \end{array}\right\}
+       \]
+
+\noindent f\textsubscript{Wert} evaluates to -1 if the transition under consideration is reduce and the size of the current generation is larger than pop_max.
+It evaluates to 1 when considering reduce and the current generation is not too large.
+Lastly, f\textsubscript{Wert} evaulates to 0 whenever the cross-over/mutate rule is being considered.
 
 \noindent Each time the cross-over/mutate rule is applied, the generation counter will increase by 1. If after any application of an extension rule, the time limit is up or the generation counter reaches the predetermined maximum threshold, the search control will halt the GA. At that point, the most fit individual (according to the \textbf{Eval} function) in the current population will be returned as the final, optimized solution to the assignment problem.
 
 \noindent {\large \textbf{Set-based Search Instance}}
 
 \noindent s\textsubscript{0} = Start state for the search instance --- composed of pop_init candidate solutions.\\
-G\textsubscript{Set}(s) = Yes, if and only if enough generations have been reached or enough time has elapsed.\\\\
+G\textsubscript{Set}(s) = Yes, if and only if enough generations have been reached or enough time has elapsed.\\
 
 \noindent That concludes our description of a Set-based Search solution to the assignment problem.
+\newpage
+
+\noindent {\large \textbf{A simple example:}}
+
+\noindent Slots = \{$s_1, s_2, s_3$\}, Courses = \{$c_1, c_2$\}, Labs = \{$l_{11}, l_{21}$\}
+
+\noindent Hard Constraints:
+\begin{enumerate}[topsep=0pt, itemsep=0pt]
+\item \textbf{Constr} and \textbf{Constr\textsuperscript{*}} both equal false if $c_1$ is assigned $s_1$
+\item \textbf{Constr} and \textbf{Constr\textsuperscript{*}} both equal false if $l_{21}$ is assigned $s_3$
+\end{enumerate}
+
+\noindent Soft Constraints:
+\begin{enumerate}[topsep=0pt, itemsep=0pt]
+\item \textbf{Eval} and \textbf{Eval\textsuperscript{*}} both equal 5 if $c_1$ is assigned $s_2$
+\item \textbf{Eval} and \textbf{Eval\textsuperscript{*}} both equal 5 if $l_{21}$ is assigned $s_1$
+\end{enumerate}
+
+\noindent \textbf{Or-tree candidate \#1 search derivation with the initial search control:}
+
+\noindent The values underneath each node are f\textsubscript{leaf} values.
+
+\begin{tikzpicture}[level distance=3cm,
+  level 1/.style={sibling distance=3cm},
+  level 2/.style={sibling distance=3cm}]
+  \node {($\langle \$, \$, \$, \$  \rangle$, ?)}
+    child {node[label=below: 0] {($\langle 0, \$, \$, \$  \rangle$, No)} }
+    child {node[label=below: 3] {($\langle 1, \$, \$, \$  \rangle$, ?)}
+    	child {node[label=below: 2.01] {($\langle 1, 0, \$, \$  \rangle$, ?)}}
+      	child {node[label=below: 2] {($\langle 1, 1, \$, \$  \rangle$, ?)}
+		child {node[label=below: 1] {($\langle 1, 1, 0, \$  \rangle$, ?)}
+			child {node[label=below: -1] {($\langle 1, 1, 0, 0  \rangle$, Yes)}}
+		      	child {node {($\langle 1, 1, 0, 1  \rangle$, ?)}}
+			child {node {($\langle 1, 1, 0, 2  \rangle$, ?)}} }
+	      	child {node[label=below: 1.01] {($\langle 1, 1, 1, \$  \rangle$, ?)}}
+		child {node[label=below: 1.01] {($\langle 1, 1, 2, \$  \rangle$, ?)}} }
+	child {node[label=below: 2.01] {($\langle 1, 2, \$, \$  \rangle$, ?)}}
+    }
+    child {node[label=below: 3.01] {($\langle 2, \$, \$, \$  \rangle$, ?)}};
+\end{tikzpicture}
+
+\noindent For the sake of brevity, we now assume that we have derived another candidate solution: $\langle 2, 2, 0, 1  \rangle$.
+\newpage
+
+\noindent \textbf{Or-tree cross-over/mutation search derivation with Search Control\textsubscript{Alt}:}\\\\
+Par\textsubscript{1} = $\langle 1, 1, 0, 0  \rangle$, Par\textsubscript{2} = $\langle 2, 2, 0, 1  \rangle$\\\\
+\begin{tikzpicture}[level distance=3cm,
+  level 1/.style={sibling distance=3cm},
+  level 2/.style={sibling distance=3cm}]
+  \node {($\langle \$, \$, \$, \$  \rangle$, ?)}
+    child {node[label=below: 3.1] {($\langle 0, \$, \$, \$  \rangle$, ?)} }
+    child {node[label=below: 3] {($\langle 1, \$, \$, \$  \rangle$, ?)}
+    	child {node[label=below: 2.1] {($\langle 1, 0, \$, \$  \rangle$, ?)}}
+      	child {node[label=below: 2.01] {($\langle 1, 1, \$, \$  \rangle$, ?)}}
+	child {node[label=below: 2] {($\langle 1, 2, \$, \$  \rangle$, ?)}
+		child {node[label=below: 1] {($\langle 1, 2, 0, \$  \rangle$, ?)}
+			child {node[label=below: -1] {($\langle 1, 2, 0, 0  \rangle$, Yes)}}
+			child {node {($\langle 1, 2, 0, 1  \rangle$, ?)}}
+			child {node {($\langle 1, 2, 0, 2  \rangle$, ?)}} }
+		child {node[label=below: 1.1] {($\langle 1, 2, 1, \$  \rangle$, ?)}}
+		child {node[label=below: 1.1] {($\langle 1, 2, 2, \$  \rangle$, ?)}} }
+    }
+    child {node[label=below: 3.01] {($\langle 2, \$, \$, \$  \rangle$, ?)}};
+\end{tikzpicture}
+
+\noindent According to the Soft Constraints:
+\begin{enumerate}
+\item \textbf{Eval}($\langle 1, 1, 0, 0  \rangle$) = 10
+\item \textbf{Eval}($\langle 2, 2, 0, 1  \rangle$) = 0
+\item \textbf{Eval}($\langle 1, 2, 0, 0  \rangle$) = 5
+\end{enumerate}
+
+\noindent Therefore, $\langle 2, 2, 0, 1  \rangle$ would be the optimal solution after modelling the GA for a single generation.
 
 \newpage
 
@@ -322,74 +415,6 @@ We define our division relation, Div, as follows:\\
 
 \noindent Since we have access to \textbf{Constr$^{\ast}$}, derived from the provided function, \textbf{Constr}, we can allow  \textbf{Constr$^{\ast}$} to perform the work of assessing whether any particular problem instance, pr, is compliant with the problem's hard constraints.
 
-\noindent {\large\textbf{And-tree-based Search Process}}
-
-\noindent Having defined the search model we are now ready to define the Search Process and Control.
-
-\noindent A\textsubscript{tree} will begin with a single node, $s_0 = (pr, ?)$, and its expansion will be defined by the recursive relation $Erw_{\land}$.
-At each tree depth, the division relation, $Div$, will be used to expand the tree and create new nodes.
-After each application of $Div$, the search control will prune leaves that are irrelevant to our search.
-
-via branch and bound, by eliminating all leaves where $F_{bound}$(leaf) is less than the current $beta$\textsubscript{min}.
-
-After this, the search control will use $F_{leaf}$ to evaluate each remaining leaf at that tree depth. The search control will choose the leftmost leaf in the case that $F_{leaf}$ provides a tie between multiple leaves.
-The search control will prioritize applying $Div$ to the lowest value leaves first.
-
-\noindent $F_{leaf}$ uses an additional helper function, $F_{penalty}$, which evaluates a penalty score of an assignment, based on the soft and hard constraints. For partial assignments, $F_{penalty}$ $^*$ is used, which uses $Eval^*$ and $Constr^*$ instead. $F_{penalty}$ is used by both $F_{leaf}$ and $F_{bound}$.
-
-\noindent $F_{penalty}$ : $\{pr_1, \dots$, $pr_n \} $  $ \to \mathbb{R} $    where 1 $\leq i \leq n$
-
- \[
-          \text{F\textsubscript{penalty}} = \left\{\begin{array}{ll}
-            \infinity &	 \text{: if Constr}($pr_i$)= \text{false} \\
-            Eval(pr_i) & 	 \text{: else}\\
-            
-            \end{array}\right\}
-      \]
- 
-\noindent Using this we can define $F_{leaf}$ : 
-
-\noindent $F_{leaf}$ : $\{pr_1, \dots$, $pr_n \} $  $ \to \mathbb{R} $  
-
-\noindent $F_{leaf} = (F_{penalty}(\{pr_1, \dots$, $pr_n \}))$
-
-\noindent $F_{leaf}$ applies $F_{penalty}$ in order to calculate a numeric value for the search control.
-
-\noindent $F_{bound}$ is used by the search control to keep the tree size within reason. It uses $\beta$ pruning to remove leaves that fail to beat the best found solution so far.
-We can define $F_{bound}$ using $F_{bound}$. Once again we can use $F_{bound}$ $^*$ to evaluate partial assignments using $F_{penalty}$ $^*$.
-
-\noindent $F_{bound}$ : $\{pr_1, \dots$, $pr_n \} $  $ \to pr_i $    where 1 $\leq i\leq n$
-
- \[
-          \text{F\textsubscript{bound}} = \left\{\begin{array}{ll}
-            \beta = \infinity $: if $pr_i \in s_0 \\
-           \beta = F_{penalty} $: else$\\
-            
-            \end{array}\right\}
-      \]
-
-\noindent $\beta _{best}$ is the smallest $\beta$ value that $F_{bound}$ or  $F_{bound}$ $^*$ has evaluated to.
-
-\noindent if $\beta _{pr_i}$ $\leq \beta _{best}$ then $\beta_ {best} = \beta _{pr_i } $
-\noindent if $\beta _{pr_i}$  $> \beta _{best}$ then  $pr_i = null$, pruning the leaf from the tree.
-
-\noindent As our chosen $Div$ relation produces all possible subdivisions of a given problem instance, $F_{trans}$ is not used. Additionally, backtracking is not necessary when using an And-tree to solve this particular problem.
-
-\noindent A state is marked as $solved$ when: $\forall X \in Prob, X_i \cup \{ \$ \} = \o $ where $X_i$ is some $X$ in $Prob$. It is the state where each course and lab has a slot assigned to it. The state will take on the form (pr, solved).
-
-\noindent The search control operation operates in the following order:
-\begin{enumerate}
-\item Apply $F_{leaf}$ to the tree.
-\item Apply $Div$ to the tree, prioritizing the branch with the lowest $F_{leaf}$ value. In case of a tie, the left most branch is used. $Div$ is applied to all unsolved branches $(pr, ?)$. It is at this point that all lower leaves are checked for $(pr, solved)$.
-\item Apply $F_{bound}$ to the tree, pruning the leaves that are out of bounds if needed.
-\end{enumerate}
-
-\noindent {\large\textbf{And-tree-based Search Instance}}
-
-\noindent As before the initial search state is $s_0$:
-
-\noindent $s_0 = pr = \langle X_1, \dots, X_n \rangle $ such that $\forall X_i \in pr, X_i = \$ $ 
-
-\noindent The goal state is $G_{\land}$ is reached when all remaining leaves are of the form: $(pr, solved)$.
+%INSERT DAVIDS STUFF%
 
 \end{document}
