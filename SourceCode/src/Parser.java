@@ -3,7 +3,7 @@ import java.util.*;
 
 
 public class Parser{
-	private String fileName = "input.txt";
+	private String fileName;
 	private String line = null;
 	private String filecontents;
 	private String name;
@@ -16,6 +16,37 @@ public class Parser{
 	private ArrayList<ArrayList<List<String>>> preferences = new ArrayList<ArrayList<List<String>>>();
 	private ArrayList<ArrayList<List<String>>> pair = new ArrayList<ArrayList<List<String>>>();
 	private ArrayList<ArrayList<List<String>>> part_assign = new ArrayList<ArrayList<List<String>>>();
+	
+	public String getName() {
+		return name;
+	}
+	public ArrayList<List<String>> getCourseSlots() {
+		return course_slots;
+	}
+	public ArrayList<List<String>> getLabSlots() {
+		return lab_slots;
+	}
+	public ArrayList<List<String>> getCourses() {
+		return courses;
+	}
+	public ArrayList<List<String>> getLabs() {
+		return labs;
+	}
+	public ArrayList<ArrayList<List<String>>> getNotCompatible() {
+		return not_compatible;
+	}
+	public ArrayList<ArrayList<List<String>>> getUnwanted() {
+		return unwanted;
+	}
+	public ArrayList<ArrayList<List<String>>> getPreferences() {
+		return preferences;
+	}
+	public ArrayList<ArrayList<List<String>>> getPair() {
+		return pair;
+	}
+	public ArrayList<ArrayList<List<String>>> getPartAssign() {
+		return part_assign;
+	}
 	
 	public Parser() {}
 	public Parser(String name) {
@@ -41,7 +72,7 @@ public class Parser{
 			for (String s: cut) {
 				info_extractor(s);
 			}
-			
+			/*
 			System.out.println("name: "+name);
 			System.out.println("course_slots: "+course_slots);
 			System.out.println("lab_slots: "+lab_slots);
@@ -52,6 +83,7 @@ public class Parser{
 			System.out.println("preferences: "+preferences);
 			System.out.println("pair: "+pair);
 			System.out.println("part_assign: "+part_assign);
+			*/
 		}
 		catch(Exception e) {
 		    e.printStackTrace();
@@ -60,33 +92,37 @@ public class Parser{
 	}
 	
 	private void buildList(ArrayList<List<String>> list, String[] ls, String split_flag) { 
-		for (String l : ls[1].split("\n")){
-			l = l.replaceAll(" +", " ");
-			List<String> vals = new ArrayList<String>();
-			
-			for (String item : l.split(split_flag)){
-				item = item.replaceAll(" +", "");
-				vals.add(item);
+		if (ls.length > 1){
+			for (String l : ls[1].split("\n")){
+				l = l.replaceAll(" +", " ");
+				List<String> vals = new ArrayList<String>();
+				
+				for (String item : l.split(split_flag)){
+					item = item.replaceAll(" +", "");
+					vals.add(item);
+				}
+				list.add(vals);
 			}
-			list.add(vals);
 		}
 	}
 	
 	private void build2DList(ArrayList<ArrayList<List<String>>> list, String[] ls) { 
-		for (String l : ls[1].split("\n")){
-			l = l.trim().replaceAll(" +", " ");
-			ArrayList<List<String>> vals = new ArrayList<List<String>>();
-			
-			for (String item : l.split(",")){
-				item = item.trim().replaceAll(" +", " ");
-				List<String> val = new ArrayList<String>();
+		if (ls.length > 1){
+			for (String l : ls[1].split("\n")){
+				l = l.trim().replaceAll(" +", " ");
+				ArrayList<List<String>> vals = new ArrayList<List<String>>();
 				
-				for (String elem : item.split(" "))
-					val.add(elem);
-				
-				vals.add(val);
+				for (String item : l.split(",")){
+					item = item.trim().replaceAll(" +", " ");
+					List<String> val = new ArrayList<String>();
+					
+					for (String elem : item.split(" "))
+						val.add(elem);
+					
+					vals.add(val);
+				}
+				list.add(vals);
 			}
-			list.add(vals);
 		}
 	}
 	
