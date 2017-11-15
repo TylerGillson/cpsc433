@@ -10,6 +10,7 @@ public class OrTree {
 	
 	public OrTree(int[] pr) {
 		this.pr = pr;
+		System.out.println(Arrays.toString(this.pr));
 	}
 
 }
