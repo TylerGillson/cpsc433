@@ -3,8 +3,6 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.Set;
 
-
-
 public class SlotMap {
     private HashMap<String, int[] > hmap = new HashMap<String, int[]>();
     private static SlotMap instance;
@@ -14,9 +12,9 @@ public class SlotMap {
     }
     
     public SlotMap getInstances() {
-
     	return instance;	
     }
+    
     public void add(String day, String time, int max, int min) {
     	int[] maxmin = new int [2];
     	maxmin[0]=max;
@@ -39,7 +37,6 @@ public class SlotMap {
       	String key = day+'-'+time;	
     	maxmin = hmap.get(key);
     	return maxmin[0];
-    	
     }
     
     public void remove(String day, String time) {

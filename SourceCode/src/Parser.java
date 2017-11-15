@@ -6,24 +6,21 @@ public class Parser{
 	private String fileName = "input.txt";
 	private String line = null;
 	private String filecontents;
-	private String[] name;
-	private String[] course_slots;
-	private String[] lab_slots;
-	private String[] courses;
-	private String[] labs;
-	private String[] not_compatible;
-	private String[] Unwanted;
-	private String[] preferences;
-	private String[] pair;
-	private String[] partial_assignments;
-	
-	
+	private String name;
+	private ArrayList<List<String>> course_slots = new ArrayList<List<String>>();
+	private ArrayList<List<String>> lab_slots = new ArrayList<List<String>>();
+	private ArrayList<List<String>> courses = new ArrayList<List<String>>();
+	private ArrayList<List<String>> labs = new ArrayList<List<String>>();
+	private ArrayList<ArrayList<List<String>>> not_compatible = new ArrayList<ArrayList<List<String>>>();
+	private ArrayList<ArrayList<List<String>>> unwanted = new ArrayList<ArrayList<List<String>>>();
+	private ArrayList<ArrayList<List<String>>> preferences = new ArrayList<ArrayList<List<String>>>();
+	private ArrayList<ArrayList<List<String>>> pair = new ArrayList<ArrayList<List<String>>>();
+	private ArrayList<ArrayList<List<String>>> part_assign = new ArrayList<ArrayList<List<String>>>();
 	
 	public Parser() {}
 	public Parser(String name) {
 		fileName = name;	
 	}
-	
 	
 	public void build() {
 		try {
@@ -31,75 +28,104 @@ public class Parser{
 			FileReader fileReader = new FileReader(fileName);
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 		
-			//
 			while((line = bufferedReader.readLine()) != null) {
 				if (filecontents == null)
 					filecontents = line+"\n";
 				else
 					filecontents += line+"\n";
 			}   
-			
 			// Always close files.
 			bufferedReader.close();     
 			
 			String cut[] = filecontents.split("\n\n");
-			for (String e: cut) {
-				info_extractor(e);
+			for (String s: cut) {
+				info_extractor(s);
 			}
-			System.out.println(Arrays.toString(name));
-			System.out.println(Arrays.toString(course_slots));
-			System.out.println(Arrays.toString(lab_slots));
-			System.out.println(Arrays.toString(courses));
-			System.out.println(Arrays.toString(labs));
-
-
+			
+			System.out.println("name: "+name);
+			System.out.println("course_slots: "+course_slots);
+			System.out.println("lab_slots: "+lab_slots);
+			System.out.println("courses: "+courses);
+			System.out.println("labs: "+labs);
+			System.out.println("not_compatible: "+not_compatible);
+			System.out.println("unwanted: "+unwanted);
+			System.out.println("preferences: "+preferences);
+			System.out.println("pair: "+pair);
+			System.out.println("part_assign: "+part_assign);
 		}
 		catch(Exception e) {
-		    System.out.println("Unable to open file '" + fileName + "'");                
+		    e.printStackTrace();
+			System.out.println("Unable to open file '" + fileName + "'");                
+		}
+	}
+	
+	private void buildList(ArrayList<List<String>> list, String[] ls, String split_flag) { 
+		for (String l : ls[1].split("\n")){
+			l = l.replaceAll(" +", " ");
+			List<String> vals = new ArrayList<String>();
+			
+			for (String item : l.split(split_flag)){
+				item = item.replaceAll(" +", "");
+				vals.add(item);
+			}
+			list.add(vals);
+		}
+	}
+	
+	private void build2DList(ArrayList<ArrayList<List<String>>> list, String[] ls) { 
+		for (String l : ls[1].split("\n")){
+			l = l.trim().replaceAll(" +", " ");
+			ArrayList<List<String>> vals = new ArrayList<List<String>>();
+			
+			for (String item : l.split(",")){
+				item = item.trim().replaceAll(" +", " ");
+				List<String> val = new ArrayList<String>();
+				
+				for (String elem : item.split(" "))
+					val.add(elem);
+				
+				vals.add(val);
+			}
+			list.add(vals);
 		}
 	}
 	
 	private void info_extractor(String str) {
-		String[] l = str.split(":\n");
-		switch (l[0].toLowerCase().trim()) {
+		String[] ls = str.split(":\n");
+		
+		switch (ls[0].toLowerCase().trim()) {
 			case "name":
-				this.name = l[1].split("\n");
+				this.name = ls[1];
 				break;
 			case "course slots":
-				this.course_slots=l[1].split("\n");
+				buildList(this.course_slots,ls,",");
 				break;
 			case "lab slots":
-				this.lab_slots=l[1].split("\n");
+				buildList(this.lab_slots,ls,",");
 				break;
 			case "courses":
-				this.courses=l[1].split("\n");
+				buildList(this.courses,ls," ");
 				break;
 			case "labs":
-				this.labs=l[1].split("\n");
+				buildList(this.labs,ls," ");
 				break;
 			case "not compatible":
-				this.not_compatible=l[1].split("\n");
+				build2DList(this.not_compatible,ls);
 				break;
 			case "unwanted":
-				this.Unwanted=l[1].split("\n");
+				build2DList(this.unwanted,ls);
 				break;
 			case "preferences":
-				this.preferences=l[1].split("\n");
+				build2DList(this.preferences,ls);
 				break;
 			case "pair":
-				this.pair=l[1].split("\n");
+				build2DList(this.pair,ls);
 				break;
 			case "partial assignments":
-				this.partial_assignments=l[1].split("\n");
+				build2DList(this.part_assign,ls);
 				break;
 			default:
-				System.out.println("cannot assigns " + l[0].toLowerCase().trim());
-				
-		}
-
-
-		
-	}
-	
-	
+				System.out.println("Cannot assign " + ls[0]);	
+		}	
+	}	
 }
