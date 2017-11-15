@@ -18,10 +18,11 @@ public class Driver {
     		ArrayList<List<String>> labs = p.getLabs();
     		ArrayList<List<String>> courseSlots = p.getCourseSlots();
     		ArrayList<List<String>> labSlots = p.getLabSlots();
+    		ArrayList<ArrayList<List<String>>> partAssign = p.getPartAssign();
     		
-    		Iterator<ArrayList<List<String>>> partAssign = p.getPartAssign().iterator(); 
-    		while (partAssign.hasNext()) {
-    			ArrayList<List<String>> assign = partAssign.next();
+    		Iterator<ArrayList<List<String>>> partAssigns = partAssign.iterator(); 
+    		while (partAssigns.hasNext()) {
+    			ArrayList<List<String>> assign = partAssigns.next();
     			    			
     			int pr_idx = -99;
     			int slot_idx = -99;
@@ -53,10 +54,12 @@ public class Driver {
     			*/
     			pr[pr_idx] = slot_idx;
     		}
-    		OrTree oTree = new OrTree(pr);
+    		OrTree<int[]> oTree = new OrTree<int[]>(pr);
+    		System.out.println(oTree.toString());
     	}
     	else {
-    		OrTree oTree = new OrTree(pr_size);
+    		OrTree<int[]> oTree = new OrTree<int[]>(pr_size);
+    		System.out.println(oTree.toString());
     	}
     }
 }
