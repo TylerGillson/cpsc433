@@ -3,6 +3,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+// Credit: https://github.com/gt4dev/yet-another-tree-structure/blob/master/java/src/com/tree/TreeNode.java
+
 public class OrTree<T>{
 	
 	public int[] data;
@@ -49,6 +51,10 @@ public class OrTree<T>{
 				output = output + Arrays.toString(kids.next().data);
 		}
 		return output;
+	}
+	
+	public int[] buildCandidate(){
+		return this.data;
 	}
 }
 
