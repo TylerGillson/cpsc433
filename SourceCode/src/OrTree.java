@@ -28,20 +28,6 @@ public class OrTree<T>{
 		return childNode;
 	}
 	
-	public boolean isRoot(){
-		return parent == null;
-	}
-	public boolean isLeaf(){
-		return children.size() == 0;
-	}
-	
-	public int getLevel(){
-		if (this.isRoot())
-			return 0;
-		else
-			return parent.getLevel() + 1;
-	}
-	
 	public String toString(){
 		String output = Arrays.toString(this.data);
 		
@@ -54,6 +40,7 @@ public class OrTree<T>{
 	}
 	
 	public int[] buildCandidate(){
+		// Check for CPSC 313 & CPSC 413:
 		return this.data;
 	}
 }
