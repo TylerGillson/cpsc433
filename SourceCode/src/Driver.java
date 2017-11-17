@@ -148,6 +148,7 @@ public class Driver {
 	public static void manage313413(String course){
 		// Begin generating list of all CPSC 313/413-related sections:
 		ArrayList<List<String>> sections = new ArrayList<List<String>>();
+		
 		// Add each CPSC 313-related course to sections:
 		courses.forEach(c -> {
 			if (c.get(0).equals("CPSC") && c.get(1).equals(course))
@@ -198,7 +199,6 @@ public class Driver {
 				addUnwanted(s, "TU", "18:30");
 			});
 			System.out.println("unwanted post: "+unwanted);
-			//System.out.println("sections: "+sections);
 		}
 	}
 	
@@ -227,9 +227,11 @@ public class Driver {
 			int pr_idx = -99;
 			int slot_idx = -99;
 			int course_idx = courses.indexOf(assign.get(0));
+			
 			// The partial assignment refers to a course.
 			if (course_idx != -1) {
 				pr_idx = course_idx;
+				
 				// Iterate through course slots to find the index of the correct time slot:
 				Iterator<List<String>> slots = course_slots.iterator();
 				while (slots.hasNext()){
@@ -242,6 +244,7 @@ public class Driver {
 			// The partial assignment refers to a lab.
 			else if (labs.indexOf(assign.get(0)) != -1) {
 				pr_idx = courses.size() + labs.indexOf(assign.get(0));
+				
 				// Iterate through the lab slots to find the index of the correct time slot:
 				Iterator<List<String>> slots = lab_slots.iterator();
 				while (slots.hasNext()){

@@ -15,11 +15,13 @@ public class OrTree<T>{
 	public static Boolean quit;
 	public static int[] sol;
 	
+	// Constructor for beginning with a partial solution:
 	public OrTree(int[] pr){
 		this.data = pr;
 		this.children = new LinkedList<OrTree<T>>();
 	}
 	
+	// "Empty" Constructor:
 	public OrTree(int length){
 		this.data = new int[length];
 		this.children = new LinkedList<OrTree<T>>();
@@ -119,6 +121,7 @@ public class OrTree<T>{
 	 */
 	public Boolean pr_finished(OrTree<T> t){
 		Boolean finished = true;
+		// Iterate over the tree's data array to check for unassigned indices:
 		for (int i=0; i<t.data.length; i++){
 			if (t.data[i] == -99)
 				finished = false;
@@ -141,11 +144,14 @@ public class OrTree<T>{
 	public int[] getSolution(){		
 		while (quit == false){
 			for (OrTree<T> child : this.children){
+				// If the child is finished, return its data as the solution:
 				if (pr_finished(child)){
 					sol = child.data;
+					// Set global flag to kill other recursive calls:
 					quit = true;
 					break;
 				}
+				// Otherwise, generate a new set of recursive calls: 
 				else
 					child.getSolution();
 			}	
@@ -153,6 +159,10 @@ public class OrTree<T>{
 		return sol;
 	}
 	
+	/**
+	 * Print an OrTree to the console.
+	 * @param is_root - Boolean to avoid duplicate print statements.
+	 */
 	public void printTree(Boolean is_root){
 		if (is_root)
 			System.out.println("depth: " + this.getDepth() + " data: " + Arrays.toString(this.data));
