@@ -47,10 +47,13 @@ import java.util.List;
 public class Driver {
     public static Parser p;
     public static Generation generation;
-	public static int pop_init = 2;
+	
+    // Search constraints:
+    public static int pop_init = 2;
 	public static int pop_max  = 25;
 	public static int gen_max  = 50;
 	
+	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
 	public static ArrayList<List<String>> labs;
 	public static ArrayList<List<String>> lab_slots;
@@ -61,8 +64,15 @@ public class Driver {
 	public static ArrayList<ArrayList<List<String>>> pair;
 	public static ArrayList<ArrayList<List<String>>> part_assign;
 	
+	/**
+	 * Parse an input file containing scheduling information.
+	 * Generate and output an optimized schedule based on the information in the input file.
+	 * @param args
+	 */
 	public static void main(String[] args) {
-    	String filename = args[0];
+    	// Deal with command line args:
+		String filename = args[0];
+    	
     	p = new Parser(filename);
     	p.build();
     	generation = new Generation();
@@ -79,60 +89,28 @@ public class Driver {
     	part_assign = p.getPartAssign();
     	
     	// Check for / deal with CPSC 313 & CPSC 413:
-    	System.out.println("lab_slots pre: "+lab_slots);
+    	//System.out.println("lab_slots pre: "+lab_slots);
     	manage313413("313");
     	manage313413("413");
-    	System.out.println("lab_slots post: "+lab_slots);
+    	//System.out.println("lab_slots post: "+lab_slots);
     	
-    	// Determine size of problem data structure:
-    	int pr_size = courses.size() + labs.size();
-    	
-    	// Initialize an OrTree instance based on partial assignments (or not):
-    	OrTree<int[]> oTree;
-    	if (!part_assign.isEmpty()){
-    		int[] pr = build_pr(pr_size);
-    		oTree = new OrTree<int[]>(pr);
-    	}
-    	else {
-    		oTree = new OrTree<int[]>(pr_size);
-    	}
-    	
-    	// Build the first generation of candidate solutions:
-    	for (int i=0; i<pop_init; i++) {	
-        	// Perform an or-tree-based search to build a solution candidate:
-        	int[] candidate = new int[pr_size];
-        	OrTree<int[]> t = new OrTree<int[]>(oTree.data);
-        	candidate = t.buildCandidate();
-        	generation.add(candidate);
-        	
-        	// TESTING:
-        	//t.printTree(true);
-    	}
+    	// Initialize the first generation of candidate solutions:
+    	initGeneration0();
     	
     	// Run GA for specified # of generations:
     	for (int i=0; i<gen_max; i++){
     		generation.evolve();
     	}
     
-    	// Sort the final generation according to our fitness function:
-    	List<int[]> lastGen = generation.getGeneration();
-    	Collections.sort(lastGen, new Comparator<int[]>() {
-            public int compare(int[] sol1, int[] sol2){
-                if (eval(sol1) == eval(sol2))
-                	return 0;
-                else if (eval(sol1) > eval(sol2))
-                	return 1;
-                else
-                	return -1;
-            }
-        });
-    	
+    	// Sort the final generation according to our fitness function and select the optimal solution:
+    	int[] solution = sortLastGen();
+    	    	
     	// Print final generation:
     	generation.print();
     	System.out.print("\n");
     	
     	// Print final output schedule:
-    	printSchedule(lastGen.get(0));
+    	printSchedule(solution);
     }
     
 	public static int eval(int[] sol){
@@ -184,6 +162,55 @@ public class Driver {
 	}
 	
 	/**
+	 * 
+	 * @return
+	 */
+	public static void initGeneration0(){
+		// Determine size of problem data structure:
+		int pr_size = courses.size() + labs.size();
+		
+		// Initialize an OrTree instance based on partial assignments (or not):
+		OrTree<int[]> oTree;
+		if (!part_assign.isEmpty()){
+			int[] pr = build_pr(pr_size);
+			oTree = new OrTree<int[]>(pr);
+		}
+		else {
+			oTree = new OrTree<int[]>(pr_size);
+		}
+		
+		// Build the first generation of candidate solutions:
+    	for (int i=0; i<pop_init; i++) {	
+        	int[] candidate = new int[pr_size];
+        	OrTree<int[]> t = new OrTree<int[]>(oTree.data);
+        	// Perform an or-tree-based search to build a solution candidate:
+        	candidate = t.buildCandidate();
+        	generation.add(candidate);
+        	
+        	// TESTING:
+        	//t.printTree(true);
+    	}
+	}
+	
+	/**
+	 * 
+	 */
+	public static int[] sortLastGen(){
+		List<int[]> lastGen = generation.getGeneration();
+		Collections.sort(lastGen, new Comparator<int[]>() {
+	        public int compare(int[] sol1, int[] sol2){
+	            if (eval(sol1) == eval(sol2))
+	            	return 0;
+	            else if (eval(sol1) > eval(sol2))
+	            	return 1;
+	            else
+	            	return -1;
+	        }
+	    });
+		return lastGen.get(0);
+	}
+	
+	/**
 	 * Check for & deal with CPSC 313 / CPSC 413
 	 */
 	public static void manage313413(String course){
@@ -208,7 +235,7 @@ public class Driver {
 			
 			// Add CPSC 813/913's time slot to lab_slots if it is not already there.
 			// If it is, increment its lab_max and lab_min values by 1.
-			Boolean inLabSlots = false;
+			boolean inLabSlots = false;
 			Iterator<List<String>> labSlots = lab_slots.iterator();
 			while (labSlots.hasNext()){
 				List<String> slot = labSlots.next();
@@ -233,13 +260,13 @@ public class Driver {
 			
 			// Add unwanted(a,s) statements for members of sections:
 			
-			System.out.println("unwanted init: "+unwanted);
+			//System.out.println("unwanted init: "+unwanted);
 			sections.forEach(s -> {
 				addUnwanted(s, "MO", "18:00");
 				addUnwanted(s, "TU", "17:00");
 				addUnwanted(s, "TU", "18:30");
 			});
-			System.out.println("unwanted post: "+unwanted);
+			//System.out.println("unwanted post: "+unwanted);
 		}
 	}
 	

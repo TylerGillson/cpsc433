@@ -35,8 +35,8 @@ public class OrTree<T>{
 	}
 	
 	/**
-	 * Determine how tightly bound a particular section is. (within a pr array).
-	 * @param section_idx - An integer index into a pr array. Corresponds to a course/lab section.
+	 * Determine how tightly bound a particular section is. (within a pr instance).
+	 * @param section_idx - An integer index into a pr instance. Corresponds to a course/lab section.
 	 * @return
 	 */
 	public int num_constr(int section_idx){
@@ -44,14 +44,18 @@ public class OrTree<T>{
 		return rn.nextInt(10) + 1;
 	}
 	
+	public boolean constr(int[] candidate){
+		return true;
+	}
+	
 	/**
 	 * Find all possible slots, s, applicable to the section located at pr[idx].
 	 * Then, for each slot, create a child node representing assign(section) = s
-	 * @param idx - An integer index into a pr array. Corresponds to a course/lab section.
+	 * @param idx - An integer index into a pr instance. Corresponds to a course/lab section.
 	 */
 	public void altern(int section_idx){
 		// Determine is the section is a course or a lab:
-		Boolean isCourse;
+		boolean isCourse;
 		if (section_idx < Driver.courses.size())
 			isCourse = true;
 		else
@@ -64,13 +68,16 @@ public class OrTree<T>{
 		for (int i=0; i<slot_indices; i++){
 			int[] new_candidate = this.data.clone();
 			new_candidate[section_idx] = i;
-			this.addChild(new_candidate);
+			
+			// If successor is viable, add it to the current node's children:
+			if (constr(new_candidate))
+				this.addChild(new_candidate);
 		}
 	}
 	
 	/**
 	 * Perform an or-tree-based search to generate a candidate solution.
-	 * @return a completed pr instance.
+	 * @return int[] sol - An integer array which is a pr-solved instance.
 	 */
 	public int[] buildCandidate(){
 		// Index of element of pr that will be expanded by altern.
@@ -115,12 +122,12 @@ public class OrTree<T>{
 	}
 	
 	/**
-	 * Check a pr instance to determine if it is complete.
-	 * @param t - An OrTree instance.
-	 * @return finished - A Boolean indicating completeness.
+	 * Check an OrTree instance to determine if its data is in state: pr-solved.
+	 * @param t 		- An OrTree instance.
+	 * @return finished - A Boolean indicating whether a solution has been found.
 	 */
-	public Boolean pr_finished(OrTree<T> t){
-		Boolean finished = true;
+	public boolean pr_finished(OrTree<T> t){
+		boolean finished = true;
 		// Iterate over the tree's data array to check for unassigned indices:
 		for (int i=0; i<t.data.length; i++){
 			if (t.data[i] == -99)
@@ -139,7 +146,7 @@ public class OrTree<T>{
 	
 	/**
 	 * Recover a solution from a completed OrTree.
-	 * @return int[] sol - A completed pr instance.
+	 * @return int[] sol - An integer array which is a pr-solved instance.
 	 */
 	public int[] getSolution(){		
 		while (quit == false){

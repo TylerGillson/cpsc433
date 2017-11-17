@@ -72,18 +72,6 @@ public class Parser{
 			for (String s: cut) {
 				info_extractor(s);
 			}
-			/*
-			System.out.println("name: "+name);
-			System.out.println("course_slots: "+course_slots);
-			System.out.println("lab_slots: "+lab_slots);
-			System.out.println("courses: "+courses);
-			System.out.println("labs: "+labs);
-			System.out.println("not_compatible: "+not_compatible);
-			System.out.println("unwanted: "+unwanted);
-			System.out.println("preferences: "+preferences);
-			System.out.println("pair: "+pair);
-			System.out.println("part_assign: "+part_assign);
-			*/
 		}
 		catch(Exception e) {
 		    e.printStackTrace();
@@ -91,7 +79,13 @@ public class Parser{
 		}
 	}
 	
-	private void buildList(ArrayList<List<String>> list, String[] ls, String split_flag) { 
+	/**
+	 * Parses each string in an array of strings, creating a list of lists of data.
+	 * @param list 			- Data structure to be filled.
+	 * @param ls   			- Array of strings to be parsed.
+	 * @param split_flag	- Character sequence to split by.
+	 */
+	private void buildList1(ArrayList<List<String>> list, String[] ls, String split_flag) { 
 		if (ls.length > 1){
 			for (String l : ls[1].split("\n")){
 				l = l.replaceAll(" +", " ");
@@ -106,7 +100,12 @@ public class Parser{
 		}
 	}
 	
-	private void build2DList(ArrayList<ArrayList<List<String>>> list, String[] ls) { 
+	/**
+	 * Parses each string in an array of strings, creating a list of lists of lists of data.
+	 * @param list - Data structure to be filled.
+	 * @param ls   - Array of strings to be parsed.
+	 */
+	private void buildList2(ArrayList<ArrayList<List<String>>> list, String[] ls) { 
 		if (ls.length > 1){
 			for (String l : ls[1].split("\n")){
 				l = l.trim().replaceAll(" +", " ");
@@ -126,6 +125,10 @@ public class Parser{
 		}
 	}
 	
+	/**
+	 * Identifies input sub-sections and handles them individually.
+	 * @param str	- A string containing raw input.
+	 */
 	private void info_extractor(String str) {
 		String[] ls = str.split(":\n");
 		
@@ -134,31 +137,31 @@ public class Parser{
 				this.name = ls[1];
 				break;
 			case "course slots":
-				buildList(this.course_slots,ls,",");
+				buildList1(this.course_slots,ls,",");
 				break;
 			case "lab slots":
-				buildList(this.lab_slots,ls,",");
+				buildList1(this.lab_slots,ls,",");
 				break;
 			case "courses":
-				buildList(this.courses,ls," ");
+				buildList1(this.courses,ls," ");
 				break;
 			case "labs":
-				buildList(this.labs,ls," ");
+				buildList1(this.labs,ls," ");
 				break;
 			case "not compatible":
-				build2DList(this.not_compatible,ls);
+				buildList2(this.not_compatible,ls);
 				break;
 			case "unwanted":
-				build2DList(this.unwanted,ls);
+				buildList2(this.unwanted,ls);
 				break;
 			case "preferences":
-				build2DList(this.preferences,ls);
+				buildList2(this.preferences,ls);
 				break;
 			case "pair":
-				build2DList(this.pair,ls);
+				buildList2(this.pair,ls);
 				break;
 			case "partial assignments":
-				build2DList(this.part_assign,ls);
+				buildList2(this.part_assign,ls);
 				break;
 			default:
 				System.out.println("Cannot assign " + ls[0]);	
