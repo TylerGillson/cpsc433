@@ -129,6 +129,7 @@ public class Driver {
     	
     	// Print final generation:
     	generation.print();
+    	System.out.print("\n");
     	
     	// Print final output schedule:
     	printSchedule(lastGen.get(0));
@@ -138,8 +139,48 @@ public class Driver {
 		return 0;
 	}
 	
+	/**
+	 * "Output Converter" to print a textual schedule based on a pr instance.
+	 * @param sol - The completed pr instance to be converted.
+	 */
 	public static void printSchedule(int[] sol){
-		System.out.println(Arrays.toString(sol));
+		String output = "Eval-value: " + String.valueOf(eval(sol)) + "\n";
+		String line;
+		String day;
+		String time;
+		
+		// Iterate through sol's entries and re-construct section, day, and time info:
+		for (int i=0; i<sol.length-1; i++){
+			int slot_idx = sol[i];
+			String section = "";
+			List<String> section_elem;
+			
+			// The i-th sol-entry is a course:
+			if (i < courses.size()){
+				section_elem = courses.get(i);
+				for (int j=0; j<section_elem.size(); j++){
+					section = section + section_elem.get(j) + " ";
+				}
+				section = section.trim();
+				day = course_slots.get(slot_idx).get(0);
+				time = course_slots.get(slot_idx).get(1);
+			}
+			// The i-th sol-entry is a lab:
+			else {
+				section_elem = labs.get(i-courses.size());
+				for (int j=0; j<section_elem.size(); j++){
+					section = section + section_elem.get(j) + " ";
+				}
+				section = section.trim();
+				day = lab_slots.get(slot_idx).get(0);
+				time = lab_slots.get(slot_idx).get(1);
+			}
+			// Compute white space and construct a line:
+			String tabs = (section_elem.size() == 4) ? "\t\t\t" : "\t\t";
+			line = section + tabs + ": " + day + ", " + time;
+			output = output + line + "\n";
+		}
+		System.out.println(output);
 	}
 	
 	/**
