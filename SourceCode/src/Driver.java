@@ -47,7 +47,7 @@ import java.util.List;
 public class Driver {
     public static Parser p;
     public static Generation generation;
-	public static int pop_init = 25;
+	public static int pop_init = 2;
 	public static int pop_max  = 25;
 	public static int gen_max  = 50;
 	
@@ -87,21 +87,26 @@ public class Driver {
     	// Determine size of problem data structure:
     	int pr_size = courses.size() + labs.size();
     	
+    	// Initialize an OrTree instance based on partial assignments (or not):
+    	OrTree<int[]> oTree;
+    	if (!part_assign.isEmpty()){
+    		int[] pr = build_pr(pr_size);
+    		oTree = new OrTree<int[]>(pr);
+    	}
+    	else {
+    		oTree = new OrTree<int[]>(pr_size);
+    	}
+    	
     	// Build the first generation of candidate solutions:
-    	for (int i=0; i<pop_init; i++) {
-    		// Initialize an OrTree instance based on partial assignments (or not):
-        	OrTree<int[]> oTree;
-        	if (!part_assign.isEmpty()){
-        		int[] pr = build_pr(pr_size);
-        		oTree = new OrTree<int[]>(pr);
-        	}
-        	else {
-        		oTree = new OrTree<int[]>(pr_size);
-        	}
+    	for (int i=0; i<pop_init; i++) {	
         	// Perform an or-tree-based search to build a solution candidate:
-        	int[] candidate;
-        	candidate = oTree.buildCandidate();
+        	int[] candidate = new int[pr_size];
+        	OrTree<int[]> t = new OrTree<int[]>(oTree.data);
+        	candidate = t.buildCandidate();
         	generation.add(candidate);
+        	
+        	// TESTING:
+        	//t.printTree(true);
     	}
     	
     	// Run GA for specified # of generations:
@@ -121,6 +126,9 @@ public class Driver {
                 	return -1;
             }
         });
+    	
+    	// Print final generation:
+    	generation.print();
     	
     	// Print final output schedule:
     	printSchedule(lastGen.get(0));

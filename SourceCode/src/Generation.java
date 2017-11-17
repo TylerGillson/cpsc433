@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Generation{
@@ -17,5 +18,11 @@ public class Generation{
 	
 	public List<int[]> getGeneration(){
 		return this.generation;
+	}
+	
+	public void print(){
+		for (int[] sol : this.generation){
+			System.out.println(Arrays.toString(sol));
+		}
 	}
 }
