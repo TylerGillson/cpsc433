@@ -15,7 +15,7 @@ public class Eval {
 	private int W_pair;
 	private int W_secdiff;
 	private HashMap<List<List<String>>,Integer> pref = new HashMap<List<List<String>>,Integer>();
-
+	
 	
 	public Eval(int minfilledWeight,int prefWeight, int pairWeight,int secdiffWeight) {
 		this.W_minfilled=minfilledWeight;
@@ -32,7 +32,6 @@ public class Eval {
 			pref.put(key, value);
 		}
 		
-		
 	}
 	
 	public int getValue(int[] assign) {
@@ -46,8 +45,8 @@ public class Eval {
 		System.out.println("Eval_pref: "+ prefValue);
 		int pairValue = W_pair*E_pair(cAssign,lAssign);
 		System.out.println("Eval pair: "+pairValue);
-	//	int secdiffValue =W_secdiff*E_secdiff();
-		
+		int secdiffValue =W_secdiff*E_secdiff(cAssign,lAssign);
+		System.out.println("Eval secdiff: "+secdiffValue);
 	//	return minValue+prefValue+pairValue+secdiffValue;
 		return 0;
 	}
@@ -206,11 +205,138 @@ public class Eval {
 		
 		
 		
-		return result;
+		return 0-result;
 	}
 	
-	private int E_secdiff() {
-		return 0;
+	private int E_secdiff(int[] cAssign, int[]lAssign) {
+		int result =0;
+		//setup record to reduce the runtime to O(kn)
+		HashMap<List<String>,List<List<String>>> courseIndex = new HashMap<List<String>,List<List<String>>>();
+//		HashMap<List<String>,List<List<String>>> labIndex = new HashMap<List<String>,List<List<String>>>();
+
+		//setting up record of course-index for secdiff, to avoid nested loop 
+		for (int i = 0 ; i < Driver.courses.size(); i++) {
+			List<String> key  = new ArrayList<>();
+			//get the name of course
+			List<String> coursename = Driver.courses.get(i);
+			key.add(coursename.get(0));
+			key.add(coursename.get(1));
+//			System.out.println(key.toString() + " = " + cAssign[i]);
+			//get its corresponding value in the map
+			List<List<String>> value = new ArrayList<>();
+			if (courseIndex.containsKey(key))
+				value = courseIndex.get(key);
+			
+			else;
+			List<String> slotinfo = Driver.course_slots.get(cAssign[i]);
+			
+			List<String> slotTime = new ArrayList<>();
+			slotTime.add(slotinfo.get(0));
+			slotTime.add(slotinfo.get(1));
+
+			value.add(slotTime);
+			courseIndex.put(key,value);
+		}
+//		//same thing as above
+//		for (int i = 0 ; i < Driver.labs.size(); i++) {
+//			List<String> key  = new ArrayList<>();
+//			//get the name of course
+//			List<String> coursename = Driver.labs.get(i);
+//			key.add(coursename.get(0));
+//			key.add(coursename.get(1));
+//			
+//			//get its corresponding value in the map
+//			List<List<String>> value = new ArrayList<>();
+//			if (labIndex.containsKey(key))
+//				value = labIndex.get(key);
+//			
+//			else;
+//			List<String> slotinfo = Driver.lab_slots.get(lAssign[i]);
+//			
+//			List<String> slotTime = new ArrayList<>();
+//			slotTime.add(slotinfo.get(0));
+//			slotTime.add(slotinfo.get(1));
+//		
+//			value.add(slotTime);
+//			labIndex.put(key,value);
+//		}
+		//setting up record to limit the time it comparesn
+		List<String> cComppared = new ArrayList<>();
+//		System.out.println(courseIndex.toString());
+//		System.out.println(labIndex.toString());
+
+		//get the course slottime, and get all brother course slottime, compare their value, then record down that is compared
+//		for (int i = 0; i<cAssign.length ; i++) {
+//			//get the coursename base on its index in assign
+//			List<String> cName = Driver.courses.get(i);
+//			String cNameString = cName.get(0) + cName.get(1);
+//			if (cComppared.contains(cNameString) == false) {
+//				List<String> coursename = new ArrayList<>();
+//				coursename.add(cName.get(0));
+//				coursename.add(cName.get(1));
+//				//get all time of related courses
+//				List<List<String>> courseSlotAssigned=courseIndex.get(coursename);
+////				List<List<String>> labSlotAssigned = labIndex.get(coursename);
+//				
+//				//the current course info
+//				int slotindex = cAssign[i];
+//				List<String> initSlotTime = Driver.course_slots.get(slotindex);
+//				
+//				int timeMatched = 0;
+//				//compare to all record of brother course assigned time
+//				for (int j = 0; j < courseSlotAssigned.size(); j++ ) {
+//					List<String> checkingSlotTime = courseSlotAssigned.get(j);
+//					System.out.print(checkingSlotTime.toString() + "== ");
+//					System.out.println(initSlotTime.toString());
+//
+//					if (initSlotTime.equals(checkingSlotTime)) {
+//						timeMatched ++;
+//					}
+//					else;
+//				}
+////				for (int j = 0; j < labSlotAssigned.size(); j++ ) {
+////					List<String> checkingSlotTime = courseSlotAssigned.get(j);
+////					if (initSlotTime.equals(checkingSlotTime)) {
+////						timeMatched ++;
+////					}
+////					else;
+////				}
+//				//update result
+//				System.out.println(timeMatched);
+//				result += (timeMatched);
+//				//update checked record
+//				cComppared.add(cNameString);
+//			}
+//			else;
+//		}
+//		
+		for (List<String> key : courseIndex.keySet()) {
+//			System.out.println(key.toString());	
+			List<List<String>> value = courseIndex.get(key);
+			if (value.size() > 1) {	
+				HashMap<List<String>,Integer> Slot_AssignValue = new HashMap<>();
+				for (List<String> e: value) {
+					if (Slot_AssignValue.containsKey(e) == false) {
+						Slot_AssignValue.put(e, 1);
+					}
+					else {
+						int counts = Slot_AssignValue.get(e);
+						counts++;
+						Slot_AssignValue.put(e, counts);
+					}
+					
+				}
+				
+				for (List<String> k: Slot_AssignValue.keySet()) {
+					
+					if ( Slot_AssignValue.get(k)> 1) {
+						result += (Slot_AssignValue.get(k)-1);
+					}
+					
+				}
+			}
+		}
+		return 0-result;
 	}
 	
 	
