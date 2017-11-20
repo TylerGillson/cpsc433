@@ -72,21 +72,7 @@ public class Parser{
 			for (String s: cut) {
 				info_extractor(s);
 			}
-<<<<<<< HEAD
-			
-			System.out.println("name: "+name);
-			System.out.println("course_slots: "+course_slots);
-			System.out.println("lab_slots: "+lab_slots);
-			System.out.println("courses: "+courses);
-			System.out.println("labs: "+labs);
-			System.out.println("not_compatible: "+not_compatible);
-			System.out.println("unwanted: "+unwanted);
-			System.out.println("preferences: "+preferences);
-			System.out.println("pair: "+pair);
-			System.out.println("part_assign: "+part_assign);
-			
-=======
->>>>>>> 01e9ffa550a9ead978a1abc5f733e583ace76c6f
+
 		}
 		catch(Exception e) {
 		    e.printStackTrace();

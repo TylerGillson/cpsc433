@@ -106,24 +106,14 @@ public class Driver {
     	int[] solution = sortLastGen();
     	    	
     	// Print final generation:
-<<<<<<< HEAD
-    	//generation.print();
-    	
-    	// Print final output schedule:
-    	printSchedule(lastGen.get(0));
-    	//eval test
-    	Eval evaluation = new Eval(1,1,1,1);
-    	evaluation.getValue(lastGen.get(0));
-    	
-    	
-=======
     	generation.print();
     	System.out.print("\n");
     	
     	// Print final output schedule:
     	printSchedule(solution);
->>>>>>> 01e9ffa550a9ead978a1abc5f733e583ace76c6f
-    }
+    	Eval evaluation = new Eval(1,1,1,1);
+    	evaluation.getValue(solution);
+	}
     
 	public static int eval(int[] sol){
 		return 0;
