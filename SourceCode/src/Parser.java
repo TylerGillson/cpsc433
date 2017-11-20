@@ -72,7 +72,7 @@ public class Parser{
 			for (String s: cut) {
 				info_extractor(s);
 			}
-			/*
+			
 			System.out.println("name: "+name);
 			System.out.println("course_slots: "+course_slots);
 			System.out.println("lab_slots: "+lab_slots);
@@ -83,7 +83,7 @@ public class Parser{
 			System.out.println("preferences: "+preferences);
 			System.out.println("pair: "+pair);
 			System.out.println("part_assign: "+part_assign);
-			*/
+			
 		}
 		catch(Exception e) {
 		    e.printStackTrace();

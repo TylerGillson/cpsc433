@@ -128,10 +128,15 @@ public class Driver {
         });
     	
     	// Print final generation:
-    	generation.print();
+    	//generation.print();
     	
     	// Print final output schedule:
     	printSchedule(lastGen.get(0));
+    	//eval test
+    	Eval evaluation = new Eval(1,1,1,1);
+    	evaluation.getValue(lastGen.get(0));
+    	
+    	
     }
     
 	public static int eval(int[] sol){

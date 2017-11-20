@@ -1,17 +1,18 @@
+package DataMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Set;
 
-public class SlotMap {
+public class slotMap {
     private HashMap<String, int[] > hmap = new HashMap<String, int[]>();
-    private static SlotMap instance;
+    private static slotMap instance;
 
-    public SlotMap() {
-    	instance = new SlotMap();
+    public slotMap() {
+    	instance = new slotMap();
     }
     
-    public SlotMap getInstances() {
+    public slotMap getInstances() {
     	return instance;	
     }
     
