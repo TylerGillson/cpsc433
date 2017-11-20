@@ -47,10 +47,13 @@ import java.util.List;
 public class Driver {
     public static Parser p;
     public static Generation generation;
-	public static int pop_init = 2;
+	
+    // Search constraints:
+    public static int pop_init = 2;
 	public static int pop_max  = 25;
 	public static int gen_max  = 50;
 	
+	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
 	public static ArrayList<List<String>> labs;
 	public static ArrayList<List<String>> lab_slots;
@@ -61,8 +64,15 @@ public class Driver {
 	public static ArrayList<ArrayList<List<String>>> pair;
 	public static ArrayList<ArrayList<List<String>>> part_assign;
 	
+	/**
+	 * Parse an input file containing scheduling information.
+	 * Generate and output an optimized schedule based on the information in the input file.
+	 * @param args
+	 */
 	public static void main(String[] args) {
-    	String filename = args[0];
+    	// Deal with command line args:
+		String filename = args[0];
+    	
     	p = new Parser(filename);
     	p.build();
     	generation = new Generation();
@@ -79,55 +89,24 @@ public class Driver {
     	part_assign = p.getPartAssign();
     	
     	// Check for / deal with CPSC 313 & CPSC 413:
-    	System.out.println("lab_slots pre: "+lab_slots);
+    	//System.out.println("lab_slots pre: "+lab_slots);
     	manage313413("313");
     	manage313413("413");
-    	System.out.println("lab_slots post: "+lab_slots);
+    	//System.out.println("lab_slots post: "+lab_slots);
     	
-    	// Determine size of problem data structure:
-    	int pr_size = courses.size() + labs.size();
-    	
-    	// Initialize an OrTree instance based on partial assignments (or not):
-    	OrTree<int[]> oTree;
-    	if (!part_assign.isEmpty()){
-    		int[] pr = build_pr(pr_size);
-    		oTree = new OrTree<int[]>(pr);
-    	}
-    	else {
-    		oTree = new OrTree<int[]>(pr_size);
-    	}
-    	
-    	// Build the first generation of candidate solutions:
-    	for (int i=0; i<pop_init; i++) {	
-        	// Perform an or-tree-based search to build a solution candidate:
-        	int[] candidate = new int[pr_size];
-        	OrTree<int[]> t = new OrTree<int[]>(oTree.data);
-        	candidate = t.buildCandidate();
-        	generation.add(candidate);
-        	
-        	// TESTING:
-        	//t.printTree(true);
-    	}
+    	// Initialize the first generation of candidate solutions:
+    	initGeneration0();
     	
     	// Run GA for specified # of generations:
     	for (int i=0; i<gen_max; i++){
     		generation.evolve();
     	}
     
-    	// Sort the final generation according to our fitness function:
-    	List<int[]> lastGen = generation.getGeneration();
-    	Collections.sort(lastGen, new Comparator<int[]>() {
-            public int compare(int[] sol1, int[] sol2){
-                if (eval(sol1) == eval(sol2))
-                	return 0;
-                else if (eval(sol1) > eval(sol2))
-                	return 1;
-                else
-                	return -1;
-            }
-        });
-    	
+    	// Sort the final generation according to our fitness function and select the optimal solution:
+    	int[] solution = sortLastGen();
+    	    	
     	// Print final generation:
+<<<<<<< HEAD
     	//generation.print();
     	
     	// Print final output schedule:
@@ -137,14 +116,110 @@ public class Driver {
     	evaluation.getValue(lastGen.get(0));
     	
     	
+=======
+    	generation.print();
+    	System.out.print("\n");
+    	
+    	// Print final output schedule:
+    	printSchedule(solution);
+>>>>>>> 01e9ffa550a9ead978a1abc5f733e583ace76c6f
     }
     
 	public static int eval(int[] sol){
 		return 0;
 	}
 	
+	/**
+	 * "Output Converter" to print a textual schedule based on a pr instance.
+	 * @param sol - The completed pr instance to be converted.
+	 */
 	public static void printSchedule(int[] sol){
-		System.out.println(Arrays.toString(sol));
+		String output = "Eval-value: " + String.valueOf(eval(sol)) + "\n";
+		String line;
+		String day;
+		String time;
+		
+		// Iterate through sol's entries and re-construct section, day, and time info:
+		for (int i=0; i<sol.length-1; i++){
+			int slot_idx = sol[i];
+			String section = "";
+			List<String> section_elem;
+			
+			// The i-th sol-entry is a course:
+			if (i < courses.size()){
+				section_elem = courses.get(i);
+				for (int j=0; j<section_elem.size(); j++){
+					section = section + section_elem.get(j) + " ";
+				}
+				section = section.trim();
+				day = course_slots.get(slot_idx).get(0);
+				time = course_slots.get(slot_idx).get(1);
+			}
+			// The i-th sol-entry is a lab:
+			else {
+				section_elem = labs.get(i-courses.size());
+				for (int j=0; j<section_elem.size(); j++){
+					section = section + section_elem.get(j) + " ";
+				}
+				section = section.trim();
+				day = lab_slots.get(slot_idx).get(0);
+				time = lab_slots.get(slot_idx).get(1);
+			}
+			// Compute white space and construct a line:
+			String tabs = (section_elem.size() == 4) ? "\t\t\t" : "\t\t";
+			line = section + tabs + ": " + day + ", " + time;
+			output = output + line + "\n";
+		}
+		System.out.println(output);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public static void initGeneration0(){
+		// Determine size of problem data structure:
+		int pr_size = courses.size() + labs.size();
+		
+		// Initialize an OrTree instance based on partial assignments (or not):
+		OrTree<int[]> oTree;
+		if (!part_assign.isEmpty()){
+			int[] pr = build_pr(pr_size);
+			oTree = new OrTree<int[]>(pr);
+		}
+		else {
+			oTree = new OrTree<int[]>(pr_size);
+		}
+		
+		// Build the first generation of candidate solutions:
+    	for (int i=0; i<pop_init; i++) {	
+        	int[] candidate = new int[pr_size];
+        	OrTree<int[]> t = new OrTree<int[]>(oTree.data);
+        	// Perform an or-tree-based search to build a solution candidate:
+        	candidate = t.buildCandidate();
+        	generation.add(candidate);
+        	
+        	// TESTING:
+        	//t.printTree(true);
+    	}
+	}
+	
+	/**
+	 * 
+	 */
+	public static int[] sortLastGen(){
+		List<int[]> lastGen = generation.getGeneration();
+		Collections.sort(lastGen, new Comparator<int[]>() {
+	        public int compare(int[] sol1, int[] sol2){
+	            if (eval(sol1) == eval(sol2))
+	            	return 0;
+	            else if (eval(sol1) > eval(sol2))
+	            	return 1;
+	            else
+	            	return -1;
+	        }
+	    });
+		return lastGen.get(0);
 	}
 	
 	/**
@@ -153,6 +228,7 @@ public class Driver {
 	public static void manage313413(String course){
 		// Begin generating list of all CPSC 313/413-related sections:
 		ArrayList<List<String>> sections = new ArrayList<List<String>>();
+		
 		// Add each CPSC 313-related course to sections:
 		courses.forEach(c -> {
 			if (c.get(0).equals("CPSC") && c.get(1).equals(course))
@@ -171,7 +247,7 @@ public class Driver {
 			
 			// Add CPSC 813/913's time slot to lab_slots if it is not already there.
 			// If it is, increment its lab_max and lab_min values by 1.
-			Boolean inLabSlots = false;
+			boolean inLabSlots = false;
 			Iterator<List<String>> labSlots = lab_slots.iterator();
 			while (labSlots.hasNext()){
 				List<String> slot = labSlots.next();
@@ -196,14 +272,13 @@ public class Driver {
 			
 			// Add unwanted(a,s) statements for members of sections:
 			
-			System.out.println("unwanted init: "+unwanted);
+			//System.out.println("unwanted init: "+unwanted);
 			sections.forEach(s -> {
 				addUnwanted(s, "MO", "18:00");
 				addUnwanted(s, "TU", "17:00");
 				addUnwanted(s, "TU", "18:30");
 			});
-			System.out.println("unwanted post: "+unwanted);
-			//System.out.println("sections: "+sections);
+			//System.out.println("unwanted post: "+unwanted);
 		}
 	}
 	
@@ -232,9 +307,11 @@ public class Driver {
 			int pr_idx = -99;
 			int slot_idx = -99;
 			int course_idx = courses.indexOf(assign.get(0));
+			
 			// The partial assignment refers to a course.
 			if (course_idx != -1) {
 				pr_idx = course_idx;
+				
 				// Iterate through course slots to find the index of the correct time slot:
 				Iterator<List<String>> slots = course_slots.iterator();
 				while (slots.hasNext()){
@@ -247,6 +324,7 @@ public class Driver {
 			// The partial assignment refers to a lab.
 			else if (labs.indexOf(assign.get(0)) != -1) {
 				pr_idx = courses.size() + labs.indexOf(assign.get(0));
+				
 				// Iterate through the lab slots to find the index of the correct time slot:
 				Iterator<List<String>> slots = lab_slots.iterator();
 				while (slots.hasNext()){
