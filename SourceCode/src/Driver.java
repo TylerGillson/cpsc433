@@ -100,7 +100,9 @@ public class Driver {
     	
     	// Print final output schedule:
     	printSchedule(solution);
-    }
+    	Eval evaluation = new Eval(1,1,1,1);
+    	evaluation.getValue(solution);
+	}
     
 	public static int eval(int[] sol){
 		return 0;

@@ -72,6 +72,7 @@ public class Parser{
 			for (String s: cut) {
 				info_extractor(s);
 			}
+
 		}
 		catch(Exception e) {
 		    e.printStackTrace();
