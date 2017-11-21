@@ -21,21 +21,10 @@ import java.util.List;
 11. CPSC 813 cannot overlap with any labs/tutorials, or course sections of CPSC 313
 12. CPSC 813 cannot overlay with any courses that cannot overlap with CPSC 313
 	
-	-- Steps to take:
-	-- 1. Add "CPSC 813" to courses
-	-- 2. Add "TU, 18:00, 2, 1" to lab slots
-	-- 3. Generate list of all CPSC 313 labs & course sections & courses that cannot overlap w/ them
-	--															 WHAT THE HELL DOES THIS MEAN????
-	-- 4. Add unwanted(a,s) to unwanted for all a in above list, for: "MON, 18:00", "TU 17:00", and "TU 18:30".
-	-- 5. Schedule CPSC 813 for "TU, 18:00"
-		  MAYBE NOT... just add to Constr().
-
 	IF CPSC 413 IN COURSES:
 13. CPSC 913 must be scheduled for Tuesdays/Thursdays 18:00-19:00 
 14. CPSC 913 cannot overlap with any labs/tutorials, or course sections of CPSC 413
 15. CPSC 913 cannot overlay with any courses that cannot overlap with CPSC 413
-
-	-- Steps to take are same as above...
 
 16. ASSUMPTION: We can ignore the following (due to abstract slot representation):
 	-- If a course (course section) is put into a slot on Mondays, it has to be put into the corresponding time slots on Wednesdays and Fridays.
@@ -162,8 +151,10 @@ public class Driver {
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Initializes the first generation of candidate solutions.
+	 * If partial assignments exist, create a base pr instance that satisfies them.
+	 * Using either the latter instance (or an empty one) as a starting point,
+	 * conduct or-tree-based searches to create pop_init candidates.
 	 */
 	public static void initGeneration0(){
 		// Determine size of problem data structure:
@@ -193,7 +184,9 @@ public class Driver {
 	}
 	
 	/**
-	 * 
+	 * Sort the final generation of solutions according to the eval function
+	 * and return the most optimal solution.
+	 * @return sol - The most optimal solution from the last generation.
 	 */
 	public static int[] sortLastGen(){
 		List<int[]> lastGen = generation.getGeneration();
@@ -207,11 +200,16 @@ public class Driver {
 	            	return -1;
 	        }
 	    });
-		return lastGen.get(0);
+		int[] sol = lastGen.get(0); 
+		return sol;
 	}
 	
 	/**
-	 * Check for & deal with CPSC 313 / CPSC 413
+	 * Check for & deal with CPSC 313 / CPSC 413 as follows:
+	 * 1. Add CPSC 813/913 to courses.
+	 * 2. Add "TU, 18:00, 2, 1" to lab slots.
+	 * 3. Generate list of all CPSC 313 labs & course sections & courses that cannot overlap w/ them.
+	 * 4. Add unwanted(a,s) to unwanted for all a in above list, for: "MON, 18:00", "TU 17:00", and "TU 18:30".
 	 */
 	public static void manage313413(String course){
 		// Begin generating list of all CPSC 313/413-related sections:
@@ -270,6 +268,12 @@ public class Driver {
 		}
 	}
 	
+	/**
+	 * An a new entry to the 'unwanted' data structure.
+	 * @param section
+	 * @param day
+	 * @param time
+	 */
 	public static void addUnwanted(List<String> section, String day, String time){
 		ArrayList<List<String>> new_unwanted = new ArrayList<List<String>>();
 		new_unwanted.add(section);
@@ -281,7 +285,7 @@ public class Driver {
 	/**
 	 * Generate pr instances according to presence of partial assignments, or not.
 	 * @param pr_size
-	 * @return pr -- problem instance for or-tree-based search
+	 * @return pr - Problem instance for or-tree-based search.
 	 */
     public static int[] build_pr(int pr_size){
     	int[] pr = new int[pr_size];

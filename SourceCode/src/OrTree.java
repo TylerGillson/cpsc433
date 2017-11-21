@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class OrTree<T>{
 	
 	/**
 	 * Find all possible slots, s, applicable to the section located at pr[idx].
-	 * Then, for each slot, create a child node representing assign(section) = s
+	 * Then, for each slot, create a child node representing assign(section) = s.
 	 * @param idx - An integer index into a pr instance. Corresponds to a course/lab section.
 	 */
 	public void altern(int section_idx){
@@ -77,7 +78,7 @@ public class OrTree<T>{
 	
 	/**
 	 * Perform an or-tree-based search to generate a candidate solution.
-	 * @return int[] sol - An integer array which is a pr-solved instance.
+	 * @return sol - An integer array which is a pr-solved instance.
 	 */
 	public int[] buildCandidate(){
 		// Index of element of pr that will be expanded by altern.
@@ -122,6 +123,55 @@ public class OrTree<T>{
 	}
 	
 	/**
+	 * Perform an or-tree-based search to breed two candidate solutions.
+	 * @param par1 - Parent 1.
+	 * @param par2 - Parent 2.
+	 * @return sol - An integer array which is a new, hybrid pr-solved instance.
+	 */
+	public int[] breedCandidates(int[] par1, int[] par2){
+		int len = par1.length;
+		int[] child = new int[len];
+		boolean pick_par1;
+		boolean pick_par2;
+		
+		// Iterate over each index of the parent candidates and execute breeding logic:
+		for (int i=0; i<len; i++){
+			// If parents agree, preserve mutual genetics:
+			if (par1[i] == par2[i])
+				child[i] = par1[i];
+			else {
+				// Assess the viability of selecting each parent's assignment:
+				child[i] = par1[i];
+				pick_par1 = constr(child);
+				child[i] = par2[i];
+				pick_par2 = constr(child);
+				
+				// If only par1 is viable, choose par1's assignment:
+				if (pick_par1 && !pick_par2)
+					child[i] = par1[i];
+				// If only par2 is viable, choose par2's assignment:
+				else if (!pick_par1 && pick_par2)
+					child[i] = par2[i];
+				// Otherwise, perform altern and randomly select from among viable options:
+				else {
+					altern(i);
+					ArrayList<int[]> options = new ArrayList<int[]>();
+					for (OrTree<T> c : this.children){
+						if (constr(c.data))
+							options.add(c.data);
+					}
+					Random rn = new Random();
+					int select = rn.nextInt(options.size());
+					child = options.get(select);
+				}
+			}
+		}
+		
+		// Return the new, hybridized pr-instance:
+		return child;
+	}
+	
+	/**
 	 * Check an OrTree instance to determine if its data is in state: pr-solved.
 	 * @param t 		- An OrTree instance.
 	 * @return finished - A Boolean indicating whether a solution has been found.
@@ -146,7 +196,7 @@ public class OrTree<T>{
 	
 	/**
 	 * Recover a solution from a completed OrTree.
-	 * @return int[] sol - An integer array which is a pr-solved instance.
+	 * @return sol - An integer array which is a pr-solved instance.
 	 */
 	public int[] getSolution(){		
 		while (quit == false){
