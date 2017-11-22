@@ -11,10 +11,11 @@ public class OrTree<T>{
 	public int[] data;
 	public OrTree<T> parent;
 	public List<OrTree<T>> children;
-	
+	public boolean finish;
 	// Recursion Control Globals:
-	public static Boolean quit;
-	public static int[] sol;
+//		public static Boolean quit = false;
+		public static int[] sol;
+
 	
 	// Constructor for beginning with a partial solution:
 	public OrTree(int[] pr){
@@ -85,40 +86,38 @@ public class OrTree<T>{
 		int expand_idx;
 		
 		//	Array format: {num_constr,index}
-		int[] max_constr = {0,0};
-		
+		int max_constr0 = 0;
+		int max_constr1 = 0;
 		// Determine most tightly bound section within pr:
 		for (int i=0; i<this.data.length; i++){
 			// Only consider unassigned sections
 			if (this.data[i] == -99){
 				int cur_constr = num_constr(i);
-				if (cur_constr > max_constr[0]){
-					max_constr[0] = cur_constr;
-					max_constr[1] = i;
+				if (cur_constr > max_constr0){
+					max_constr0 = cur_constr;
+					max_constr1 = i;
 				}
 			}
 		}
 		// We expand the most tightly bound section.
-		expand_idx = max_constr[1];	
-		
+		expand_idx = max_constr1;	
+	
 		// Generate successor nodes for said section:
 		altern(expand_idx);
 		
 		// Recursively expand successor nodes until completion:
-		quit = false;
-		while (quit == false){
-			if (!pr_finished(this)){
-				for (OrTree<T> child : this.children){
-					if (!pr_finished(child))
-						child.buildCandidate();
-					else
-						quit = true;
-				}
+		if (!pr_finished(this)){
+			for (OrTree<T> child : this.children){
+				if (!pr_finished(child))
+					child.buildCandidate();
+				else
+					break;
 			}
 		}
+
 		
 		// Return a solution from the completed OrTree:
-		quit = false;
+
 		return getSolution();
 	}
 	
@@ -198,20 +197,22 @@ public class OrTree<T>{
 	 * @return sol - An integer array which is a pr-solved instance.
 	 */
 	public int[] getSolution(){		
-		while (quit == false){
+//		while (quit == false){
 			for (OrTree<T> child : this.children){
 				// If the child is finished, return its data as the solution:
 				if (pr_finished(child)){
 					sol = child.data;
 					// Set global flag to kill other recursive calls:
-					quit = true;
+//					quit = true;
 					break;
 				}
 				// Otherwise, generate a new set of recursive calls: 
-				else
+				else {
 					child.getSolution();
+					break; //newline
+				}
 			}	
-		}
+//		}
 		return sol;
 	}
 	
