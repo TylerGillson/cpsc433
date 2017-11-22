@@ -177,13 +177,12 @@ public class OrTree<T>{
 	 * @return finished - A Boolean indicating whether a solution has been found.
 	 */
 	public boolean pr_finished(OrTree<T> t){
-		boolean finished = true;
 		// Iterate over the tree's data array to check for unassigned indices:
 		for (int i=0; i<t.data.length; i++){
 			if (t.data[i] == -99)
-				finished = false;
+				return false;
 		}
-		return finished;
+		return true;
 	}
 	
 	public int getDepth(){
