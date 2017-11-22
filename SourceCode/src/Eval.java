@@ -9,7 +9,6 @@ public class Eval {
 	private int pen_coursemin;
 	private int pen_labmin;
 	private int not_paired;
-	private int preference;
 	private int W_minfilled;
 	private int W_pref;
 	private int W_pair;
@@ -22,8 +21,9 @@ public class Eval {
 		this.W_pref=prefWeight;
 		this.W_pair=pairWeight;
 		this.W_secdiff=secdiffWeight;
+		
 		//set up hashmap for preference to perform faster search, O(1) vs O(n)
-		for (List<List<String>> Info: Driver.preferences) {
+		for (ArrayList<List<String>> Info : Driver.preferences) {
 			List<List<String>> key = new ArrayList<List<String>>(3);
 			key.add(Info.get(0));
 			key.add(Info.get(1));
@@ -40,15 +40,15 @@ public class Eval {
 
 
 		int minValue = W_minfilled*E_minfilled(cAssign,lAssign);
-		System.out.println("Eval_min: " + minValue);
+//		System.out.println("Eval_min: " + minValue);
 		int prefValue= W_pref*E_pref(cAssign,lAssign);
-		System.out.println("Eval_pref: "+ prefValue);
+//		System.out.println("Eval_pref: "+ prefValue);
 		int pairValue = W_pair*E_pair(cAssign,lAssign);
-		System.out.println("Eval pair: "+pairValue);
+//		System.out.println("Eval pair: "+pairValue);
 		int secdiffValue =W_secdiff*E_secdiff(cAssign,lAssign);
-		System.out.println("Eval secdiff: "+secdiffValue);
-	//	return minValue+prefValue+pairValue+secdiffValue;
-		return 0;
+//		System.out.println("Eval secdiff: "+secdiffValue);
+		return minValue+prefValue+pairValue+secdiffValue;
+
 	}
 	
 	//eval minfilled
@@ -102,40 +102,37 @@ public class Eval {
 			List<List<String>> key = new ArrayList<List<String>>();
 			//get the daytime base on slot index
 			int SlotIndex = courseAssign[i];
-			List<String> DAY =new ArrayList<String>(1);
-			DAY.add(Driver.course_slots.get(SlotIndex).get(0));
-			List<String> TIME = new ArrayList<String>(1);
-			TIME.add(Driver.course_slots.get(SlotIndex).get(1));
-			List<String> CLASS = (List<String>) Driver.courses.get(i);
+			List<String> day =new ArrayList<String>(1);
+			day.add(Driver.course_slots.get(SlotIndex).get(0));
+			List<String> time = new ArrayList<String>(1);
+			time.add(Driver.course_slots.get(SlotIndex).get(1));
+			List<String> classid = (List<String>) Driver.courses.get(i);
 
 			
-			key.add(DAY);
-			key.add(TIME);
-			key.add(CLASS);
+			key.add(day);
+			key.add(time);
+			key.add(classid);
 			
-//			System.out.println("Looking for "+key);
 			//find if key exist, if it does result increase by its pref value
-			if (pref.containsKey(key)) {
-//				System.out.println(">>Found value: "+pref.get(key));
+			if (pref.containsKey(key)) 
 				result += pref.get(key);
-			}
+			
 		}
-//		System.out.println("==Lab==");
 		
 		for (int i=0; i < labAssign.length; i++) {
 			List<List<String>> key = new ArrayList<List<String>>();
 			//get the daytime base on slot index
 			int SlotIndex = labAssign[i];
-			List<String> DAY =new ArrayList<String>(1);
-			DAY.add(Driver.lab_slots.get(SlotIndex).get(0));
-			List<String> TIME = new ArrayList<String>(1);
-			TIME.add(Driver.lab_slots.get(SlotIndex).get(1));
-			List<String> CLASS = (List<String>) Driver.labs.get(i);
+			List<String> day =new ArrayList<String>(1);
+			day.add(Driver.lab_slots.get(SlotIndex).get(0));
+			List<String> time = new ArrayList<String>(1);
+			time.add(Driver.lab_slots.get(SlotIndex).get(1));
+			List<String> classid = (List<String>) Driver.labs.get(i);
 
 			
-			key.add(DAY);
-			key.add(TIME);
-			key.add(CLASS);
+			key.add(day);
+			key.add(time);
+			key.add(classid);
 //			System.out.println("SlotIndex = " + SlotIndex);
 //			
 //			System.out.println("Looking for "+key);

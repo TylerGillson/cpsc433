@@ -53,6 +53,10 @@ public class Driver {
 	public static ArrayList<ArrayList<List<String>>> pair;
 	public static ArrayList<ArrayList<List<String>>> part_assign;
 	
+	
+	//
+	public static Eval eval;
+	
 	/**
 	 * Parse an input file containing scheduling information.
 	 * Generate and output an optimized schedule based on the information in the input file.
@@ -61,7 +65,6 @@ public class Driver {
 	public static void main(String[] args) {
     	// Deal with command line args:
 		String filename = args[0];
-    	
     	p = new Parser(filename);
     	p.build();
     	generation = new Generation();
@@ -76,6 +79,9 @@ public class Driver {
     	preferences = p.getPreferences();
     	pair = p.getPair();
     	part_assign = p.getPartAssign();
+    	
+    	eval = new Eval(1,1,1,1);
+
     	
     	// Check for / deal with CPSC 313 & CPSC 413:
     	//System.out.println("lab_slots pre: "+lab_slots);
@@ -105,7 +111,7 @@ public class Driver {
 	}
     
 	public static int eval(int[] sol){
-		return 0;
+		return eval.getValue(sol);
 	}
 	
 	/**
