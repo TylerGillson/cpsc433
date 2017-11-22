@@ -54,7 +54,7 @@ public class Driver {
 	public static ArrayList<ArrayList<List<String>>> part_assign;
 	
 	
-	//
+	//random stuff
 	public static Eval eval;
 	
 	/**
@@ -63,26 +63,37 @@ public class Driver {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		String configfile;
+		String filename;
     	// Deal with command line args:
-		String filename = args[0];
-    	p = new Parser(filename);
-    	p.build();
-    	generation = new Generation();
-    	
-    	// Initialize data structures:
-    	courses = p.getCourses();
-    	labs = p.getLabs();
-    	lab_slots = p.getLabSlots();
-    	course_slots = p.getCourseSlots();
-    	not_compatible = p.getNotCompatible();
-    	unwanted = p.getUnwanted();
-    	preferences = p.getPreferences();
-    	pair = p.getPair();
-    	part_assign = p.getPartAssign();
-    	
-    	eval = new Eval(1,1,1,1);
+		try {
+			configfile = args[0];
+			filename = args[1];
 
-    	
+			//bulid parser
+	    	p = new Parser(filename);
+	    	p.build();
+	    	
+	    	generation = new Generation();
+	    	
+	    	// Initialize data structures:
+	    	courses = p.getCourses();
+	    	labs = p.getLabs();
+	    	lab_slots = p.getLabSlots();
+	    	course_slots = p.getCourseSlots();
+	    	not_compatible = p.getNotCompatible();
+	    	unwanted = p.getUnwanted();
+	    	preferences = p.getPreferences();
+	    	pair = p.getPair();
+	    	part_assign = p.getPartAssign();
+	    	
+	    	eval = new Eval(configfile);
+
+		}
+		catch(Exception e) {
+			System.out.println("Invalid argument: try \t java Driver [configFile] [inputfile]");
+			System.exit(0);
+		}
     	// Check for / deal with CPSC 313 & CPSC 413:
     	//System.out.println("lab_slots pre: "+lab_slots);
     	manage313413("313");
@@ -106,8 +117,7 @@ public class Driver {
     	
     	// Print final output schedule:
     	printSchedule(solution);
-    	Eval evaluation = new Eval(1,1,1,1);
-    	evaluation.getValue(solution);
+    	eval.getValue(solution);
 	}
     
 	public static int eval(int[] sol){

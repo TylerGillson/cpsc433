@@ -1,3 +1,5 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -6,21 +8,63 @@ import java.util.Set;
 
 //this code is trying to optimize for speed
 public class Eval {
-	private int pen_coursemin;
-	private int pen_labmin;
-	private int not_paired;
-	private int W_minfilled;
-	private int W_pref;
-	private int W_pair;
-	private int W_secdiff;
+	private int pen_coursemin = 1;
+	private int pen_labmin =1;
+	private int not_paired =1;
+	private int pen_section =1;
+	private int W_minfilled =1;
+	private int W_pref =1;
+	private int W_pair =1;
+	private int W_secdiff =1;
 	private HashMap<List<List<String>>,Integer> pref = new HashMap<List<List<String>>,Integer>();
+
+	public Eval(String configFile) {
+		//load config file
+		try {
+		    // FileReader reads text files
+			FileReader fileReader = new FileReader(configFile);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			String line;
+			while((line = bufferedReader.readLine()) != null) {
+				line = line.replaceAll("\\s", "");
+				String[] setting = line.split("=");
+				if (setting[0].equals("minfilledWeight")) {
+					this.W_minfilled = Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("prefWeight")) {
+					this.W_pref = Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("pairWeight")) {
+					this.W_pair= Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("secdiffWeight")){
+					this.W_secdiff= Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("courseminPenalty")) {
+					this.pen_coursemin = Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("labminPenalty")) {
+					this.pen_labmin= Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("notpairedPenalty")) {
+					this.not_paired= Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("sectionPenalty")) {
+					this.pen_section = Integer.parseInt(setting[1]); 
+				}
+				else;
 	
-	
-	public Eval(int minfilledWeight,int prefWeight, int pairWeight,int secdiffWeight) {
-		this.W_minfilled=minfilledWeight;
-		this.W_pref=prefWeight;
-		this.W_pair=pairWeight;
-		this.W_secdiff=secdiffWeight;
+					
+			}   
+
+			
+			// Always close files.
+			bufferedReader.close();     
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Unable to load config file");                
+		}
 		
 		//set up hashmap for preference to perform faster search, O(1) vs O(n)
 		for (ArrayList<List<String>> Info : Driver.preferences) {
@@ -68,7 +112,7 @@ public class Eval {
 			int minValue = Integer.parseInt(x);
 
 			if (CassignCount[i] < minValue) {
-				result++;
+				result += this.pen_coursemin;
 			}
 		}
 		
@@ -80,7 +124,7 @@ public class Eval {
 			int minValue = Integer.parseInt(x);
 			
 			if (LassignCount[i] < minValue) {
-				result++;
+				result += this.pen_labmin;
 			}
 		}
 		
@@ -177,7 +221,7 @@ public class Eval {
 			}
 			
 			if (X1Time.get(0).equals(X2Time.get(0)) && X1Time.get(1).equals(X2Time.get(1)) ) {
-				result ++;
+				result += this.not_paired;
 			}
 			
 			
@@ -237,7 +281,7 @@ public class Eval {
 				for (List<String> k: Slot_AssignValue.keySet()) {
 					
 					if ( Slot_AssignValue.get(k)> 1) {
-						result += (Slot_AssignValue.get(k)-1);
+						result += (Slot_AssignValue.get(k)-1) * this.pen_section;
 					}
 					
 				}
