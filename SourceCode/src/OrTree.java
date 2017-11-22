@@ -14,7 +14,7 @@ public class OrTree<T>{
 	public boolean finish;
 	// Recursion Control Globals:
 //		public static Boolean quit = false;
-		public static int[] sol;
+//		public static int[] sol;
 
 	
 	// Constructor for beginning with a partial solution:
@@ -201,19 +201,18 @@ public class OrTree<T>{
 			for (OrTree<T> child : this.children){
 				// If the child is finished, return its data as the solution:
 				if (pr_finished(child)){
-					sol = child.data;
+					return child.data;
 					// Set global flag to kill other recursive calls:
 //					quit = true;
-					break;
+				
 				}
 				// Otherwise, generate a new set of recursive calls: 
 				else {
-					child.getSolution();
-					break; //newline
+					return child.getSolution();
 				}
 			}	
 //		}
-		return sol;
+		return null;
 	}
 	
 	/**
