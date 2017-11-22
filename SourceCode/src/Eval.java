@@ -64,38 +64,32 @@ public class Eval {
 		for (int i = 0; i < labAssign.length;i++) {
 			LassignCount[labAssign[i]] += 1;
 		}
-//		
-//		System.out.println(Arrays.toString(CassignCount));
-//		System.out.println(Arrays.toString(LassignCount));
-		
+
+		//find the minvalue of each class then compared to the counted total
 		for (int i = 0; i < Driver.course_slots.size(); i ++) {
 			List<String> slotInfo= Driver.course_slots.get(i);
 			String x = slotInfo.get(3);
 			int minValue = Integer.parseInt(x);
-//			System.out.print("course > ");
-//			System.out.println(slotInfo.get(0) + slotInfo.get(1)+" min= "+minValue);
 			if (CassignCount[i] < minValue) {
-//				System.out.println(CassignCount[i]);
 				result++;
 			}
 		}
 		
 		
-		
+		//same for lab
 		for (int i = 0; i< Driver.lab_slots.size(); i ++) {
 			List<String> slotInfo=(List<String>) Driver.lab_slots.get(i);
 			String x = slotInfo.get(3);
 			int minValue = Integer.parseInt(x);
-//			System.out.print("lab > ");
-//			System.out.println(slotInfo.get(0) + slotInfo.get(1)+" min= "+minValue);
 			if (LassignCount[i] < minValue) {
-//				System.out.println(LassignCount[i]);
+
 				result++;
 			}
 		}
 		
 		return 0-result;
 	}
+	
 	private int E_pref(int[] courseAssign, int[] labAssign) {
 		int result =0;
 		for (int i =0; i < courseAssign.length;i++) {
