@@ -47,7 +47,10 @@ public class OrTree<T>{
 	}
 	
 	public boolean constr(int[] candidate){
+		Random rand = new Random();
+		if (rand.nextFloat()> 0.5)
 		return true;
+		else return false;
 	}
 	
 	/**
@@ -99,6 +102,7 @@ public class OrTree<T>{
 				}
 			}
 		}
+		
 		// We expand the most tightly bound section.
 		expand_idx = max_constr1;	
 	
@@ -187,13 +191,14 @@ public class OrTree<T>{
 	public int getDepth(){
 		if (this.parent == null)
 			return 0;
-		else {
+		else 
 			return this.parent.getDepth() + 1;
-		}
+		
 	}
 	
 	/**
 	 * Recover a solution from a completed OrTree.
+	 * By performing a search for viable solution in the tree, from left leaf to right leaf, 
 	 * @return sol - An integer array which is a pr-solved instance.
 	 */
 	public int[] getSolution(){		
@@ -208,7 +213,9 @@ public class OrTree<T>{
 				}
 				// Otherwise, generate a new set of recursive calls: 
 				else {
-					return child.getSolution();
+					int[] sol= child.getSolution();
+					if (sol != null) 
+						return sol;
 				}
 			}	
 //		}
