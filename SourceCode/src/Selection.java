@@ -74,7 +74,7 @@ public class Selection
 	public int[] select(int ignoreFactIndex)
 	{
 		float randFloat = rand.nextFloat();  //We now have our random index.
-		for (int i = 0; i < evalArray.length; i++)
+		for (int i = evalArray.length-1; i >=0; i--)
 		{
 			if ( i != ignoreFactIndex)
 			{
@@ -99,7 +99,7 @@ public class Selection
 	public int[] select()
 	{
 		float randFloat = rand.nextFloat();  //We now have our random index.
-		for (int i = 0; i < evalArray.length; i++)
+		for (int i = evalArray.length-1; i >=0; i--)
 		{
 
 			if (evalArray[Math.round(indexArray[i])] >= randFloat)
