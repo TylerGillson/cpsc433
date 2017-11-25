@@ -11,7 +11,7 @@ public class OrTree<T>{
 	public int[] data;
 	public OrTree<T> parent;
 	public List<OrTree<T>> children;
-	public boolean finish;
+	public boolean pr_finish;
 	// Recursion Control Globals:
 //		public static Boolean quit = false;
 //		public static int[] sol;
@@ -21,12 +21,14 @@ public class OrTree<T>{
 	public OrTree(int[] pr){
 		this.data = pr;
 		this.children = new LinkedList<OrTree<T>>();
+		this.pr_finish = pr_finished(pr);
 	}
 	
 	// "Empty" Constructor:
 	public OrTree(int length){
 		this.data = new int[length];
 		this.children = new LinkedList<OrTree<T>>();
+		this.pr_finish = false;
 	}
 	
 	public OrTree<T> addChild(int[] child){
@@ -48,9 +50,8 @@ public class OrTree<T>{
 	
 	public boolean constr(int[] candidate){
 		Random rand = new Random();
-		if (rand.nextFloat()> 0.5)
-		return true;
-		else return false;
+		return rand.nextBoolean();
+		
 	}
 	
 	/**
@@ -75,8 +76,10 @@ public class OrTree<T>{
 			new_candidate[section_idx] = i;
 			
 			// If successor is viable, add it to the current node's children:
-			if (constr(new_candidate))
+			if (constr(new_candidate)) 
 				this.addChild(new_candidate);
+//			
+
 		}
 	}
 	
@@ -86,6 +89,7 @@ public class OrTree<T>{
 	 */
 	public int[] buildCandidate(){
 		// Index of element of pr that will be expanded by altern.
+		//aka the index of assign
 		int expand_idx;
 		
 		//	Array format: {num_constr,index}
@@ -109,15 +113,31 @@ public class OrTree<T>{
 		// Generate successor nodes for said section:
 		altern(expand_idx);
 		
-		// Recursively expand successor nodes until completion:
-		if (!pr_finished(this)){
-			for (OrTree<T> child : this.children){
-				if (!pr_finished(child))
-					child.buildCandidate();
-				else
-					break;
-			}
+		
+		//expand 
+		//consider the pr is not solved and there is no children 	
+		if (this.children.size() == 0 &&  this.pr_finish == false) {
+			/*
+			 * caution, magical code 
+			 */
+			
+			this.parent.children.remove(this);
+			parent.buildCandidate();
+			
 		}
+		else {
+			//Random number generator
+			Random rand = new Random();
+			int randIndex=rand.nextInt(this.children.size());
+			
+			//
+			OrTree<T> child = this.children.get(randIndex);
+			// Recursively expand successor nodes until completion:
+			if (!child.pr_finish)
+				child.buildCandidate();
+
+		}
+
 
 		
 		// Return a solution from the completed OrTree:
@@ -179,10 +199,10 @@ public class OrTree<T>{
 	 * @param t 		- An OrTree instance.
 	 * @return finished - A Boolean indicating whether a solution has been found.
 	 */
-	public boolean pr_finished(OrTree<T> t){
+	public boolean pr_finished(int[] data){
 		// Iterate over the tree's data array to check for unassigned indices:
-		for (int i=0; i<t.data.length; i++){
-			if (t.data[i] == -99)
+		for (int i=0; i<data.length; i++){
+			if (data[i] == -99)
 				return false;
 		}
 		return true;
@@ -205,7 +225,7 @@ public class OrTree<T>{
 //		while (quit == false){
 			for (OrTree<T> child : this.children){
 				// If the child is finished, return its data as the solution:
-				if (pr_finished(child)){
+				if (child.pr_finish){
 					return child.data;
 					// Set global flag to kill other recursive calls:
 //					quit = true;
