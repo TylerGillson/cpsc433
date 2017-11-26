@@ -107,5 +107,99 @@ public class Constr
 				}
 			}			
 		}
-	}	
+	}
+	
+	
+	/**
+	* Method totals the number of incampatibilies and unwanted preferences
+	* It will then sort so that the first returned index is of the class that has the most incampatibilies and unwanted preferences
+	* Note that an unwanted preference is worth 0.01% of an incompatible weight. This acts as a tie breaker when sorting.
+	* This will only cause issues if there is a class that has over 10000 unwanted preference, and so is deemed legal for now
+	* @param Parser parse, the parser used to read the file
+	* @return float[] indexes, the sorted array of class indexes. The first value is the most constrained. This can be safely cast to an int without any issues.
+	*/
+	public static float[] getTightestBoundClass(Parser parse){
+		
+		
+		if (parse == null) throw new NullPointerException();
+		
+		try{
+			
+		float incompatibleWeight = 1;
+		float unwantedWeight = 0.0001f;
+			
+		ArrayList<ArrayList<List<String>>> not_compatible = parse.getNotCompatible();
+		ArrayList<ArrayList<List<String>>> unwanted = parse.getUnwanted();
+		
+		
+		//First we go throught the array and find out which class has the most restraints numerically
+		float[] restraintCount = new float[parse.getCourses().size() + parse.getLabs().size()];
+		
+		
+		//The coursemap hashmap is essentially a lookup table to find out which index correspons with what class
+		HashMap courseMap = new HashMap();
+		
+		//We start by adding in all the courses to it
+		for (int i = 0; i < parse.getCourses().size(); i++){
+			courseMap.put(parse.getCourses().get(i), i);
+		}
+		
+		//Then add all the labs
+		for (int i = parse.getCourses().size(); i <parse.getCourses().size() + parse.getLabs().size(); i++){
+			
+			courseMap.put(parse.getLabs().get(i - parse.getCourses().size()), i);
+		}
+		
+		//We are now ready to go through all of the incompatible classes, and find the most mentioned class
+		for(int i = 0; i < not_compatible.size(); i++){
+			
+			for(int j = 0 ; j < not_compatible.get(i).size(); j++)
+			{
+				//When a class is incremented, use the hashmap to find its index, and incriment its counter
+				restraintCount[(int)courseMap.get(not_compatible.get(i).get(j))]+=incompatibleWeight;  
+			}	
+			
+		}
+		
+	
+		
+		//We then go back through and include the soft preferences for unwanted, and use it as a half interval.
+		//System.out.println("Unwanted is: " + unwanted);
+		for(int i = 0; i < unwanted.size(); i++){
+			//System.out.println("OUTER");
+			
+			//When a class is incremented, use the hashmap to find its index, and incriment its counter
+			restraintCount[(int)courseMap.get(unwanted.get(i).get(0))]+=unwantedWeight;  
+		
+			
+		}
+			
+		
+		
+
+		//Use quick sort to sort by lowest mentioned. We then flip this.
+		QuickSortWithIndex sorter = new QuickSortWithIndex(restraintCount);
+		float[] sortedIndexes = sorter.sort()[1];
+
+		float temp;
+		for (int i = 0; i < sortedIndexes.length/2; i++){
+			temp = sortedIndexes[i];
+			sortedIndexes[i] = sortedIndexes[sortedIndexes.length - i -1];
+			sortedIndexes[sortedIndexes.length - i -1] = temp;
+		}
+		
+		//Return the flipped array
+		return sortedIndexes;
+		
+		
+		}
+		catch(Exception e){
+		e.getStackTrace();
+		System.out.println(e);
+			throw new IllegalStateException();
+		}
+	
+		
+		
+	}
 }
