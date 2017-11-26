@@ -11,6 +11,10 @@ public class QuickSortWithIndex
 	{
 		this.array = array;
 		this.indexArray = new float[array.length];
+		for(int i = 0; i <indexArray.length; i++)
+		{
+			indexArray[i] = i;
+		}
 	}
 	
 	/**
