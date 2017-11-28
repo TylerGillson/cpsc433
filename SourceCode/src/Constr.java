@@ -36,6 +36,118 @@ public class Constr
 		return valid;
 	}
 	
+	/**
+	* Method checks to see if two classes have any time overlap using the index of an a slot in currentAssign
+	* @param assignIndex1, assignIndex2 are the indexes of the classes in currentAssign
+	* @return true if there is no conflict, false if there is a time conflict
+	*/
+	public  boolean checkCourseTimeConflict(int assignIndex1, int assignIndex2)
+	{
+		
+		if (currentAssign == null) throw new NullPointerException();
+		List<String> time1 = getTimeSlot(assignIndex1);
+		List<String> time2 = getTimeSlot(assignIndex2);
+		
+		//Check to see if they are on the same day
+		if(time1.get(0).compareTo(time2.get(0)) != 0){
+			return true;
+		} 
+		
+		
+		float classDuration;
+		if (time1.get(0).compareTo("MO") ==0){
+			classDuration = 100; // 1 hour classes
+		}
+		else
+			classDuration = 115f; // 1 hour 15 classes
+		
+		//We now need to compute the end start time as an integer for each class
+		
+		float time1start;
+		
+		char digit1 = time1.get(1).charAt(0);
+		char digit2 = time1.get(1).charAt(1);
+		
+		if (digit2 == ':')
+		{
+			time1start = (digit1 - 48)* 100;
+		}
+		else{
+			
+			time1start = (digit1 -48)*1000 + (digit2 -48)*100;
+			
+		}
+		
+		//Do the same for the other time
+		float time2start;
+		
+		digit1 = time2.get(1).charAt(0);
+		digit2 = time2.get(1).charAt(1);
+		
+		if (digit2 == ':')
+		{
+			time2start = (digit1 - 48)* 100;
+		}
+		else{
+			
+			time2start = (digit1 -48)*1000 + (digit2 -48)*100;
+		}
+		
+		//Use this to find the end times
+		float time1end = time1start + classDuration;
+		float time2end = time2start + classDuration;
+		
+		//Check for conflicts
+		if (time1start == time2start)
+			return false;
+		
+		//Check to see if they end before the other starts
+		if(time1end <= time2start)
+			return true;
+		
+		if(time2end <= time1start)
+			return true;
+		
+		//Check to see if one starts in the middle of the other
+		if((time1start < time2start) && (time2start < time1end))
+			return false;
+		
+		if((time2start < time1start)&& (time1start < time2end))
+			return false;
+		
+		//Check to see if one ends in the middle of the other
+		if((time1start < time2end) && (time2end < time1end))
+			return false;
+		
+		if((time2start < time1end) && (time1end < time2end))
+			return false;
+		
+		
+		return true;
+	}
+	
+	
+	/**
+	* Method returns the time slot based on desired assignment index
+	* @param int index, the index of course assign 
+	* @return List<String> the time slot
+	*/
+	private List<String> getTimeSlot(int index)
+	{
+		int firstLab = Driver.courses.size();
+		
+		if (index < firstLab){
+			return Driver.course_slots.get(currentAssign[index]);
+			
+		}
+		else{
+
+			return Driver.lab_slots.get(currentAssign[index]);
+		}
+			
+	}
+	
+	
 	//Optimize so stops looping when invalid
 	//Checks each course to see if it is an evening course
 	//If so checks if it's in evening slot
