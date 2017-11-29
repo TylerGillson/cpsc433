@@ -1,0 +1,9 @@
+minfilledWeight=20
+prefWeight=10
+pairWeight=20
+secdiffWeight=50
+
+courseminPenalty=1
+labminPenalty=1
+notpairedPenalty=1
+sectionPenalty=1

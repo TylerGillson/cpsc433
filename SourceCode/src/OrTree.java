@@ -8,24 +8,27 @@ import java.util.Random;
 
 public class OrTree<T>{
 	
-	private int[] data;
-	private OrTree<T> parent;
-	private List<OrTree<T>> children;
-	
+	public int[] data;
+	public OrTree<T> parent;
+	public List<OrTree<T>> children;
+	public boolean pr_finish;
 	// Recursion Control Globals:
-	public static Boolean quit;
-	public static int[] sol;
+//		public static Boolean quit = false;
+//		public static int[] sol;
+
 	
 	// Constructor for beginning with a partial solution:
 	public OrTree(int[] pr){
 		this.data = pr;
 		this.children = new LinkedList<OrTree<T>>();
+		this.pr_finish = pr_finished(pr);
 	}
 	
 	// "Empty" Constructor:
 	public OrTree(int length){
 		this.data = new int[length];
 		this.children = new LinkedList<OrTree<T>>();
+		this.pr_finish = false;
 	}
 	
 	public OrTree<T> addChild(int[] child){
@@ -50,7 +53,9 @@ public class OrTree<T>{
 	}
 	
 	public boolean constr(int[] candidate){
-		return true;
+		Random rand = new Random();
+		return rand.nextBoolean();
+		
 	}
 	
 	/**
@@ -75,8 +80,10 @@ public class OrTree<T>{
 			new_candidate[section_idx] = i;
 			
 			// If successor is viable, add it to the current node's children:
-			if (constr(new_candidate))
+			if (constr(new_candidate)) 
 				this.addChild(new_candidate);
+//			
+
 		}
 	}
 	
@@ -86,45 +93,57 @@ public class OrTree<T>{
 	 */
 	public int[] buildCandidate(){
 		// Index of element of pr that will be expanded by altern.
+		//aka the index of assign
 		int expand_idx;
 		
 		//	Array format: {num_constr,index}
-		int[] max_constr = {0,0};
-		
+		int max_constr0 = 0;
+		int max_constr1 = 0;
 		// Determine most tightly bound section within pr:
 		for (int i=0; i<this.data.length; i++){
 			// Only consider unassigned sections
 			if (this.data[i] == -99){
 				int cur_constr = num_constr(i);
-				if (cur_constr > max_constr[0]){
-					max_constr[0] = cur_constr;
-					max_constr[1] = i;
+				if (cur_constr > max_constr0){
+					max_constr0 = cur_constr;
+					max_constr1 = i;
 				}
 			}
 		}
-		// We expand the most tightly bound section.
-		expand_idx = max_constr[1];	
 		
+		// We expand the most tightly bound section.
+		expand_idx = max_constr1;	
+	
 		// Generate successor nodes for said section:
 		altern(expand_idx);
 		
-		// Recursively expand successor nodes until completion:
-		quit = false;
-		while (quit == false){
-			if (!pr_finished(this)){
-				for (OrTree<T> child : this.children){
-					if (!pr_finished(child))
-						child.buildCandidate();
-					else
-						quit = true;
-				}
-			}
-		}
 		
+		//expand 
+		//consider the pr is not solved and there is no children 	
+		if (this.children.size() == 0 &&  this.pr_finish == false) {
+			/*
+			 * caution, magical code 
+			 */
+			
+			this.parent.children.remove(this);
+			parent.buildCandidate();
+			
+		}
+		else {
+			//Random number generator
+			Random rand = new Random();
+			int randIndex=rand.nextInt(this.children.size());
+			
+			//
+			OrTree<T> child = this.children.get(randIndex);
+			// Recursively expand successor nodes until completion:
+			if (!child.pr_finish)
+				child.buildCandidate();
+
+		}
+
 		// Return a solution from the completed OrTree:
-		quit = false;
-		getSolution();
-		return sol;
+		return getSolution();
 	}
 	
 	/**
@@ -181,43 +200,47 @@ public class OrTree<T>{
 	 * @param t 		- An OrTree instance.
 	 * @return finished - A Boolean indicating whether a solution has been found.
 	 */
-	public boolean pr_finished(OrTree<T> t){
-		boolean finished = true;
+	public boolean pr_finished(int[] data){
 		// Iterate over the tree's data array to check for unassigned indices:
-		for (int i=0; i<t.data.length; i++){
-			if (t.data[i] == -99)
-				finished = false;
+		for (int i=0; i<data.length; i++){
+			if (data[i] == -99)
+				return false;
 		}
-		return finished;
+		return true;
 	}
 	
 	public int getDepth(){
 		if (this.parent == null)
 			return 0;
-		else {
+		else 
 			return this.parent.getDepth() + 1;
-		}
+		
 	}
 	
 	/**
 	 * Recover a solution from a completed OrTree.
-	 * (By setting the value of the global variable, sol)
+	 * By performing a search for viable solution in the tree, from left leaf to right leaf, 
+	 * @return sol - An integer array which is a pr-solved instance.
 	 */
-	public void getSolution(){		
-		while (quit == false){
+	public int[] getSolution(){		
+//		while (quit == false){
 			for (OrTree<T> child : this.children){
 				// If the child is finished, return its data as the solution:
-				if (pr_finished(child)){
-					sol = child.data;
+				if (child.pr_finish){
+					return child.data;
 					// Set global flag to kill other recursive calls:
-					quit = true;
-					break;
+//					quit = true;
+				
 				}
 				// Otherwise, generate a new set of recursive calls: 
-				else
-					child.getSolution();
+				else {
+					int[] sol= child.getSolution();
+					if (sol != null) 
+						return sol;
+				}
 			}	
-		}
+//		}
+		return null;
 	}
 	
 	/**
