@@ -8,9 +8,9 @@ import java.util.Random;
 
 public class OrTree<T>{
 	
-	public int[] data;
-	public OrTree<T> parent;
-	public List<OrTree<T>> children;
+	private int[] data;
+	private OrTree<T> parent;
+	private List<OrTree<T>> children;
 	
 	// Recursion Control Globals:
 	public static Boolean quit;
@@ -33,6 +33,10 @@ public class OrTree<T>{
 		childNode.parent = this;
 		this.children.add(childNode);
 		return childNode;
+	}
+	
+	public int[] getData(){
+		return this.data;
 	}
 	
 	/**
@@ -119,7 +123,8 @@ public class OrTree<T>{
 		
 		// Return a solution from the completed OrTree:
 		quit = false;
-		return getSolution();
+		getSolution();
+		return sol;
 	}
 	
 	/**
@@ -196,9 +201,9 @@ public class OrTree<T>{
 	
 	/**
 	 * Recover a solution from a completed OrTree.
-	 * @return sol - An integer array which is a pr-solved instance.
+	 * (By setting the value of the global variable, sol)
 	 */
-	public int[] getSolution(){		
+	public void getSolution(){		
 		while (quit == false){
 			for (OrTree<T> child : this.children){
 				// If the child is finished, return its data as the solution:
@@ -213,7 +218,6 @@ public class OrTree<T>{
 					child.getSolution();
 			}	
 		}
-		return sol;
 	}
 	
 	/**

@@ -175,7 +175,7 @@ public class Driver {
 		// Build the first generation of candidate solutions:
     	for (int i=0; i<pop_init; i++) {	
         	int[] candidate = new int[pr_size];
-        	OrTree<int[]> t = new OrTree<int[]>(oTree.data);
+        	OrTree<int[]> t = new OrTree<int[]>(oTree.getData());
         	// Perform an or-tree-based search to build a solution candidate:
         	candidate = t.buildCandidate();
         	generation.add(candidate);

@@ -4,19 +4,50 @@ public class Constr
 {
 	private boolean valid = true;
 	private int [] currentAssign;
-	private Course [] courseList;
+	private Course [] sectionList;
 	private Slot [] slotList;
 	private int [] slotMax;
+	private int pr_size;
+	private int all_slots_size;
 	
-	public Constr (Course [] courses, Slot [] slots)
+	public Constr ()
 	{
-		courseList = courses;
-		slotList = slots;
-		slotMax = new int[slots.length];
+		pr_size = Driver.courses.size() + Driver.labs.size();
+		all_slots_size = Driver.course_slots.size() + Driver.lab_slots.size();
+		makeCoursesAndSlots();
+	}
+	
+	public void makeCoursesAndSlots(){
+		Course [] all_sections = new Course[pr_size]; 
+		Slot [] all_slots = new Slot[all_slots_size];
+		
+		Driver.courses.forEach(c -> {
+    		int idx = Driver.courses.indexOf(c);
+			Course section = new Course("course", idx);
+			all_sections[idx] = section;});
+		
+		Driver.labs.forEach(l -> {
+    		int idx = Driver.labs.indexOf(l);
+			Course section = new Course("lab", idx);
+			all_sections[idx] = section;});
+		
+		Driver.course_slots.forEach(cs -> {
+    		int idx = Driver.course_slots.indexOf(cs);
+			Slot course_slot = new Slot("course", idx);
+			all_slots[idx] = course_slot;});
+		
+		Driver.lab_slots.forEach(ls -> {
+    		int idx = Driver.lab_slots.indexOf(ls);
+			Slot lab_slot = new Slot("lab", idx);
+			all_slots[idx] = lab_slot;});
+		
+		sectionList = all_sections;
+		slotList = all_slots;
+		slotMax = new int[all_slots.length];
 	}
 	
 	//Potentially combine into one or two bigger functions?
-	//What's the most effiecient?
+	//What's the most efficient?
 	public boolean evaluate (int [] assign)
 	{
 		currentAssign = assign;
@@ -43,7 +74,9 @@ public class Constr
 	{
 		for (int i = 0; i < currentAssign.length; i++)
 		{
-			if (courseList[i].getEvening() == true && slotList[currentAssign[i]].getEvening() == false)
+			if (sectionList[i].getEvening() == true && slotList[currentAssign[i]].getEvening() == false)
+				valid = false;
+			else if (sectionList[i].getEvening() == false && slotList[currentAssign[i]].getEvening() == true)
 				valid = false;
 		}			
 	}
@@ -60,8 +93,10 @@ public class Constr
 		
 		for (int i = 0; i < slotList.length; i++)
 		{
-			if (slotList[i].getMax() < slotMax[i])
+			if (slotList[i].getMax() < slotMax[i]){
 				valid = false;
+				break;
+			}
 		}
 	}	
 	
@@ -71,10 +106,15 @@ public class Constr
 	{
 		for (int i = 0; i < currentAssign.length; i++)
 		{
-			for (int j = 0; j < courseList[i].getUnwanted().size(); j++)
+			if (!valid)
+				break;
+			
+			for (int j = 0; j < sectionList[i].getUnwanted().size(); j++)
 			{
-				if (courseList[i].getUnwanted().get(j).equals(slotList[currentAssign[i]].getName()))
+				if (sectionList[i].getUnwanted().get(j).equals(slotList[currentAssign[i]].getName())){
 					valid = false;
+					break;
+				}
 			}
 		}
 	}
@@ -86,15 +126,15 @@ public class Constr
 	{
 		for (int i = 0; i < slotList.length; i++)
 		{
-			ArrayList<String> currentIncompatible = new ArrayList<String>();
+			ArrayList<List<String>> currentIncompatible = new ArrayList<List<String>>();
 			ArrayList<Course> currentCourses = new ArrayList<Course>();
 			
 			for (int j = 0; j < currentAssign.length; j++)
 			{
 				if (currentAssign[j] == i)
 				{
-					currentIncompatible.addAll(courseList[j].getIncompatible());
-					currentCourses.add(courseList[j]);
+					currentIncompatible.addAll(sectionList[j].getIncompatible());
+					currentCourses.add(sectionList[j]);
 				}
 			}
 			
