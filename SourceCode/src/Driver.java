@@ -10,7 +10,7 @@ public class Driver {
     public static Generation generation;
 	
     // Search constraints:
-    public static int pop_init = 2;
+    public static int pop_init = 10;
 	public static int pop_max  = 25;
 	public static int gen_max  = 50;
 	
@@ -24,6 +24,7 @@ public class Driver {
 	public static ArrayList<ArrayList<List<String>>> preferences;
 	public static ArrayList<ArrayList<List<String>>> pair;
 	public static ArrayList<ArrayList<List<String>>> part_assign;
+	public static int[] pr;
 	
 	// Assign Checking Objects:
 	public static Constr constr;
@@ -76,10 +77,11 @@ public class Driver {
     	
     	// Initialize the first generation of candidate solutions:
     	initGeneration0();
+    	System.out.println();
     	
     	// Run GA for specified # of generations:
     	for (int i=0; i<gen_max; i++){
-    		//generation.evolve();
+    		generation.evolve();
     	}
     
     	// Sort the final generation according to our fitness function and select the optimal solution:
@@ -89,7 +91,8 @@ public class Driver {
     	generation.print();
     	System.out.print("\n");
     	
-    	// Print final output schedule:
+    	// Print final solution + output schedule:
+    	System.out.println("Final Solution:" + "\n" + Arrays.toString(solution) + "\n");
     	printSchedule(solution);
 	}
     
@@ -151,10 +154,15 @@ public class Driver {
 		// Determine size of problem data structure:
 		int pr_size = courses.size() + labs.size();
 		
+		// Instantiate pr
+		pr = new int[pr_size];
+		Arrays.fill(pr, -99);
+		
 		// Initialize an OrTree instance based on partial assignments (or not):
 		OrTree<int[]> oTree;
 		if (!part_assign.isEmpty()){
-			int[] pr = build_pr(pr_size);
+			// build_pr initializes the global variable, pr, according to partial assignments.
+			build_pr(pr_size);
 			oTree = new OrTree<int[]>(pr);
 		}
 		else {
@@ -165,12 +173,11 @@ public class Driver {
     	for (int i=0; i<pop_init; i++) {	
         	int[] candidate = new int[pr_size];
         	OrTree<int[]> t = new OrTree<int[]>(oTree.getData());
+        	
         	// Perform an or-tree-based search to build a solution candidate:
         	candidate = t.buildCandidate();
+        	System.out.println("CANDIDATE " + i + ": " + Arrays.toString(candidate));
         	generation.add(candidate);
-        	
-        	// TESTING:
-        	//t.printTree(true);
     	}
 	}
 	
@@ -256,10 +263,7 @@ public class Driver {
 	 * @param pr_size
 	 * @return pr - Problem instance for or-tree-based search.
 	 */
-    public static int[] build_pr(int pr_size){
-    	int[] pr = new int[pr_size];
-		Arrays.fill(pr, -99);
-    	
+    public static void build_pr(int pr_size){
 		// Iterate over each partial assignment that was in the input file:
 		Iterator<ArrayList<List<String>>> partAssigns = part_assign.iterator(); 
 		while (partAssigns.hasNext()) {
@@ -302,6 +306,5 @@ public class Driver {
 			// Update pr to ensure that the course/lab is assigned the specified time slot:
 			pr[pr_idx] = slot_idx;
 		}
-		return pr;
 	}
 }

@@ -8,13 +8,13 @@ public class Slot
 	
 	public Slot (String type, int idx)
 	{
-		name = type.equals("course") ? Driver.courses.get(idx) : Driver.labs.get(idx);
+		name = type.equals("course") ? Driver.course_slots.get(idx) : Driver.lab_slots.get(idx);
 		max = type.equals("course") ? Integer.valueOf(Driver.course_slots.get(idx).get(2)) : Integer.valueOf(Driver.lab_slots.get(idx).get(2));
-		setEvening(type, idx); 
+		setEvening(); 
 	}
 	
-	public void setEvening(String type, int idx){
-		String time = type.equals("course") ? Driver.course_slots.get(idx).get(1) : Driver.lab_slots.get(idx).get(1);
+	public void setEvening(){
+		String time = name.get(1);
 		int hr = Integer.valueOf(time.substring(0, time.indexOf(':')));
 		evening = (hr >= 18) ? true : false;
 	}
@@ -32,5 +32,9 @@ public class Slot
 	public int getMax()
 	{
 		return max;
+	}
+	
+	public String toString(){
+		return "Name: " + name + " Evening: " + String.valueOf(evening) + " max: " + String.valueOf(max);
 	}
 }

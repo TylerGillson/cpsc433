@@ -75,28 +75,31 @@ public class Eval {
 	
 	public int getValue(int[] assign) {
 		int[] cAssign = Arrays.copyOfRange(assign, 0, Driver.courses.size());
-		int[] lAssign = Arrays.copyOfRange(assign,Driver.courses.size(),assign.length);
+		int[] lAssign = Arrays.copyOfRange(assign, Driver.courses.size(), assign.length);
 
-		int minValue = W_minfilled*E_minfilled(cAssign,lAssign);
-		int prefValue= W_pref*E_pref(cAssign,lAssign);
-		int pairValue = W_pair*E_pair(cAssign,lAssign);
-		int secdiffValue =W_secdiff*E_secdiff(cAssign,lAssign);
+		int minValue     = W_minfilled * E_minfilled(cAssign,lAssign);
+		int prefValue    = W_pref      * E_pref(cAssign,lAssign);
+		int pairValue    = W_pair      * E_pair(cAssign,lAssign);
+		int secdiffValue = W_secdiff   * E_secdiff(cAssign,lAssign);
 		return minValue+prefValue+pairValue+secdiffValue;
 
 	}
 	
 	//eval minfilled
-	private int E_minfilled(int[] courseAssign,int[] labAssign) {
+	private int E_minfilled(int[] courseAssign, int[] labAssign) {
 		// for each min not meet +1
 		int result = 0; 
 		int[] CassignCount = new int[Driver.course_slots.size()];
 		int[] LassignCount = new int[Driver.lab_slots.size()];
+		
 		//count the total of assign of each slot
-		for (int i =0; i < courseAssign.length;i++) {
-			CassignCount[courseAssign[i]] += 1;
+		for (int i = 0; i < courseAssign.length; i++) {
+			if (courseAssign[i] != -99)
+				CassignCount[courseAssign[i]] += 1;
 		}
 		for (int i = 0; i < labAssign.length;i++) {
-			LassignCount[labAssign[i]] += 1;
+			if (labAssign[i] != -99)
+				LassignCount[labAssign[i]] += 1;
 		}
 	
 		for (int i = 0; i < Driver.course_slots.size(); i ++) {
@@ -128,6 +131,10 @@ public class Eval {
 			List<List<String>> key = new ArrayList<List<String>>();
 			//get the daytime base on slot index
 			int SlotIndex = courseAssign[i];
+			
+			if (SlotIndex == -99)
+				break;
+			
 			List<String> day =new ArrayList<String>(1);
 			day.add(Driver.course_slots.get(SlotIndex).get(0));
 			List<String> time = new ArrayList<String>(1);
@@ -148,7 +155,11 @@ public class Eval {
 			List<List<String>> key = new ArrayList<List<String>>();
 			//get the daytime base on slot index
 			int SlotIndex = labAssign[i];
-			List<String> day =new ArrayList<String>(1);
+			
+			if (SlotIndex == -99)
+				break;
+			
+			List<String> day = new ArrayList<String>(1);
 			day.add(Driver.lab_slots.get(SlotIndex).get(0));
 			List<String> time = new ArrayList<String>(1);
 			time.add(Driver.lab_slots.get(SlotIndex).get(1));
@@ -174,12 +185,17 @@ public class Eval {
 			List<List<String>> pairX = Driver.pair.get(i);
 			List<String> pairX1 = pairX.get(0);
 			List<String> pairX2 = pairX.get(1);
+			
 			//find the time for left 
 			List<String> X1Time = new ArrayList<>(); 
 			int indexX1 = Driver.courses.indexOf(pairX1);
 			if (indexX1 == -1) {
 				indexX1 = Driver.labs.indexOf(pairX1);
 				int slotIndex = labAssign[indexX1];
+				
+				if (slotIndex == -99)
+					break;
+				
 				List<String> x =Driver.lab_slots.get(slotIndex);
 				X1Time.add(x.get(0));
 				X1Time.add(x.get(1));
@@ -187,18 +203,25 @@ public class Eval {
 			}
 			else {
 				int slotIndex = courseAssign[indexX1];
+				
+				if (slotIndex == -99)
+					break;
+				
 				List<String> x =Driver.course_slots.get(slotIndex);
 				X1Time.add(x.get(0));
 				X1Time.add(x.get(1));
 			}
-			
-			
+					
 			//find the time for right
 			List<String> X2Time = new ArrayList<>(); 
 			int indexX2 = Driver.courses.indexOf(pairX2);
 			if (indexX2 == -1) {
 				indexX2 = Driver.labs.indexOf(pairX2);
 				int slotIndex = labAssign[indexX2];
+				
+				if (slotIndex == -99)
+					break;
+				
 				List<String> x =Driver.lab_slots.get(slotIndex);
 				X2Time.add(x.get(0));
 				X2Time.add(x.get(1));
@@ -206,6 +229,10 @@ public class Eval {
 			}
 			else {
 				int slotIndex = courseAssign[indexX2];
+				
+				if (slotIndex == -99)
+					break;
+				
 				List<String> x =Driver.course_slots.get(slotIndex);
 				X2Time.add(x.get(0));
 				X2Time.add(x.get(1));
@@ -214,8 +241,6 @@ public class Eval {
 			if (X1Time.get(0).equals(X2Time.get(0)) && X1Time.get(1).equals(X2Time.get(1)) ) {
 				result += this.not_paired;
 			}
-			
-			
 		}
 		return 0-result;
 	}
@@ -228,16 +253,22 @@ public class Eval {
 		//setting up record of course-index for secdiff, to avoid nested loop 
 		for (int i = 0 ; i < Driver.courses.size(); i++) {
 			List<String> key  = new ArrayList<>();
+			
 			//get the name of course
 			List<String> coursename = Driver.courses.get(i);
 			key.add(coursename.get(0));
 			key.add(coursename.get(1));
+			
 			//get its corresponding value in the map
 			List<List<String>> value = new ArrayList<>();
 			if (courseIndex.containsKey(key))
 				value = courseIndex.get(key);
 			
 			else;
+			
+			if (cAssign[i] == -99)
+				break;
+			
 			List<String> slotinfo = Driver.course_slots.get(cAssign[i]);	
 			List<String> slotTime = new ArrayList<>();
 			slotTime.add(slotinfo.get(0));
@@ -275,7 +306,4 @@ public class Eval {
 		}
 		return 0-result;
 	}
-	
-	
-	
 }

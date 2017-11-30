@@ -14,13 +14,14 @@ public class OrTree<T>{
 	
 	// Constructor for beginning with a partial solution:
 	public OrTree(int[] pr){
-		this.data = pr;
+		this.data = pr.clone();
 		this.children = new LinkedList<OrTree<T>>();
 	}
 	
 	// "Empty" Constructor:
 	public OrTree(int length){
 		this.data = new int[length];
+		Arrays.fill(this.data, -99);
 		this.children = new LinkedList<OrTree<T>>();
 	}
 	
@@ -66,7 +67,7 @@ public class OrTree<T>{
 			int[] new_candidate = this.data.clone();
 			new_candidate[section_idx] = i;
 			
-			//System.out.println(Arrays.toString(new_candidate));
+			//System.out.println("CANDIDATE: " + Arrays.toString(new_candidate));
 			//System.out.println(Driver.constr.evaluate(new_candidate));
 			
 			// If successor is viable, add it to the current node's children:
@@ -129,15 +130,27 @@ public class OrTree<T>{
 	 */
 	public int[] breedCandidates(int[] par1, int[] par2){
 		int len = par1.length;
-		int[] child = new int[len];
+		
+		// Initialize child
+		int[] child = Driver.pr.clone();
+		
 		boolean pick_par1;
 		boolean pick_par2;
 		
+		System.out.println("PARENT 1: " + Arrays.toString(par1));
+		System.out.println("PARENT 2: " + Arrays.toString(par2));
+		
 		// Iterate over each index of the parent candidates and execute breeding logic:
 		for (int i=0; i<len; i++){
+			// Skip indices that are governed by partial assignments:
+			if (child[i] != -99)
+				continue;
+			
 			// If parents agree, preserve mutual genetics:
-			if (par1[i] == par2[i])
+			if (par1[i] == par2[i]){
 				child[i] = par1[i];
+				System.out.println("PRESERVE: " + Arrays.toString(child));
+			}
 			else {
 				// Assess the viability of selecting each parent's assignment:
 				child[i] = par1[i];
@@ -146,27 +159,43 @@ public class OrTree<T>{
 				pick_par2 = Driver.constr.evaluate(child);
 				
 				// If only par1 is viable, choose par1's assignment:
-				if (pick_par1 && !pick_par2)
+				if (pick_par1 && !pick_par2){
 					child[i] = par1[i];
+					System.out.println("PAR1:     " + Arrays.toString(child));	
+				}
 				// If only par2 is viable, choose par2's assignment:
-				else if (!pick_par1 && pick_par2)
+				else if (!pick_par1 && pick_par2){
 					child[i] = par2[i];
+					System.out.println("PAR2:     " + Arrays.toString(child));
+				}	
 				// Otherwise, perform altern and randomly select from among viable options:
 				else {
+					this.data = child;
+					this.children.clear();
 					altern(i);
+					
 					ArrayList<int[]> options = new ArrayList<int[]>();
 					for (OrTree<T> c : this.children){
 						if (Driver.constr.evaluate(c.data) == true)
 							options.add(c.data);
 					}
+					
+					// Restart if altern failed to produce a viable option:
+					if (options.size() == 0){
+						breedCandidates(par1, par2);
+						return null;
+					}	
+					
 					Random rn = new Random();
 					int select = rn.nextInt(options.size());
 					child = options.get(select);
+					System.out.println("ALTERN:   " + Arrays.toString(child));
 				}
 			}
 		}
 		
 		// Return the new, hybridized pr-instance:
+		System.out.println("CHILD:    " + Arrays.toString(child) + "\n");
 		return child;
 	}
 	

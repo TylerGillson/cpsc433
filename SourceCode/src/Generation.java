@@ -10,8 +10,7 @@ public class Generation{
 	private boolean debug = false;
 	
 	public Generation(){
-		pop_max = Driver.pop_max; //for now get the population max everytime. Eventually this can just be called in the constructor
-	
+		pop_max = Driver.pop_max;
 	}
 	
 	public void add(int[] candidate){
@@ -23,7 +22,7 @@ public class Generation{
 		if (debug) System.out.println("I am evolving!");
 
 
-		//check to seethat out generation is not Empty
+		//check to see that the generation is not Empty
 		if(generation.isEmpty())
 		{
 			throw new IllegalStateException();
@@ -41,11 +40,19 @@ public class Generation{
 		
 		
 		//We now have the two facts that we can use with the or-tree, and use the alt-search Control
-		OrTree tree = new OrTree(2); //I am unsure what the length represents
-		int[] child = tree.breedCandidates(a, b);
-
+		int pr_size = Driver.courses.size() + Driver.labs.size();
+		int[] child = new int[pr_size];
+		
+		while (true){
+			OrTree<int[]> tree = new OrTree<int[]>(pr_size);
+			child = tree.breedCandidates(a, b);
+			
+			if (child != null)
+				break;
+		}
+			
 		generation.add(child);
-		if (generation.size() < pop_max){
+		if (generation.size() <= pop_max){
 			if (debug) {
 				System.out.println("The child created is : ");
 				for (int i = 0; i < child.length -1; i++){
@@ -73,9 +80,8 @@ public class Generation{
 	}
 	
 	public void print(){
-		System.out.println("Printing Generation:");
-		for (int[] sol : this.generation){
+		System.out.println("Final Generation:");
+		for (int[] sol : this.generation)
 			System.out.println(Arrays.toString(sol));
-		}
 	}
 }

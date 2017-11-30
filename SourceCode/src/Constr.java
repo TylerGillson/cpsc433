@@ -39,7 +39,7 @@ public class Constr
 	// Change every time:
 	private boolean valid;
 	private int [] currentAssign;
-	private int [] slotMax;
+	private int [] slotHas;
 	
 	public Constr ()
 	{
@@ -84,7 +84,7 @@ public class Constr
 	{
 		currentAssign = assign;
 		valid = true;
-		slotMax = new int[all_slots_size];
+		slotHas = new int[all_slots_size];
 		
 		//System.out.println("TOP: "+Arrays.toString(currentAssign));
 		
@@ -148,20 +148,28 @@ public class Constr
 		{
 			int num_courses = Driver.courses.size();
 			int offset = (i < num_courses) ? 0 : Driver.course_slots.size();
-			if (currentAssign[i] != -99)
-				slotMax[currentAssign[i] + offset]++;
+			if (currentAssign[i] != -99){
+				if (i < num_courses)
+					slotHas[currentAssign[i]]++;
+				else
+					slotHas[currentAssign[i] + offset]++;
+			}
+				
 		}
 		
-		//System.out.println(Arrays.toString(slotMax));
+		//System.out.println(Arrays.toString(slotList));
 		
 		for (int i = 0; i < slotList.length; i++)
 		{
-			if (slotList[i].getMax() < slotMax[i]){
+			//System.out.println(slotList[i].getMax() + " " + slotHas[i]);
+			if (slotList[i].getMax() < slotHas[i]){
+				//System.out.println(Arrays.toString(slotHas));
+				//System.out.println("FAILING MAX, i=" + i);
 				valid = false;
 				break;
 			}
 		}
-		//System.out.println(Arrays.toString(slotMax));
+		//System.out.println(Arrays.toString(slotHas));
 	}	
 	
 	//For each course gets the list of unwanted slots and checks through all of them 
