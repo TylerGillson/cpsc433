@@ -1,7 +1,5 @@
 import java.lang.Math;
 import java.util.Random;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Selection
@@ -12,9 +10,6 @@ public class Selection
 	private float[] indexArray;
 	private Random rand;
 	private int lastChoice;
-
-
-
 
 	/**
 	* Constructor takes in a population (the array of facts), and a Random object.
@@ -33,6 +28,7 @@ public class Selection
 		{
 			indexArray[i] = i;
 		}
+		
 		int sum = 0;
 		int tempValue;
 		for (int i = 0; i< generationSize; i++)
@@ -41,39 +37,42 @@ public class Selection
 			evalArray[i] = tempValue;
 			sum += tempValue;
 		}
+		
 		//Next we need to normalize each of the eval weights of the facts
-		for (int i = 0; i< generationSize; i++)
+		for (int i = 0; i < generationSize; i++)
 		{
-			evalArray[i] = evalArray[i] /sum;
+			evalArray[i] = evalArray[i] / sum;
 		}
 
 		QuickSortWithIndex sorter = new QuickSortWithIndex(evalArray);
 		//We now need to sort the now normalized factEvals
-		float[][] temp = sorter.sort();
-		evalArray = temp[0];
-		indexArray=  temp[1];
+		float[][] sorted = sorter.sort();
+		evalArray = sorted[0];
+		indexArray=  sorted[1];
+		
+		//System.out.println(Arrays.toString(evalArray));
+		//System.out.println(Arrays.toString(indexArray));
 	}
 
 	public int getLastIndexChoice()
 	{
-		try{
-			lastChoice +=0;
-		}catch(Exception e)
-		{
-			throw new IllegalStateException();
-		}
-
 		return lastChoice;
 	}
 	
 	/**
 	* Method performs f_select based on the population that the object was instantiated with
 	* @param int ignoreFactIndex, the fact that is to not be used.
-	* @return int[] some random fact based on the eval evalue of the roulette selection
+	* @return int[] some random fact based on the eval value of the roulette selection
 	*/
 	public int[] select(int ignoreFactIndex)
 	{
-		float randFloat = rand.nextFloat();  //We now have our random index.
+		//float randFloat = rand. nextFloat();  //We now have our random index.
+		
+		// Generate a random float within the range of existing eval values:
+		float min = evalArray[0];
+		float max = evalArray[evalArray.length-1];
+		float randFloat = min + rand.nextFloat() * (max - min);
+		
 		for (int i = evalArray.length-1; i >=0; i--)
 		{
 			if ( i != ignoreFactIndex)
@@ -86,29 +85,6 @@ public class Selection
 			}
 		}
 
-		lastChoice = Math.round(indexArray[0]);
-		return generation.get(Math.round(indexArray[0]));
-	}
-
-
-
-	/**
-	* Method performs f_select based on the population that the object was instantiated with
-	* @return int[] some random fact based on the eval evalue of the roulette selection
-	*/
-	public int[] select()
-	{
-		float randFloat = rand.nextFloat();  //We now have our random index.
-		for (int i = evalArray.length-1; i >=0; i--)
-		{
-
-			if (evalArray[Math.round(indexArray[i])] >= randFloat)
-			{
-				lastChoice = Math.round(indexArray[i]);
-				return generation.get(Math.round(indexArray[i]));
-			}
-
-		}
 		lastChoice = Math.round(indexArray[0]);
 		return generation.get(Math.round(indexArray[0]));
 	}
@@ -130,7 +106,7 @@ public class Selection
 		int tempValue;
 		for (int i = 0; i< facts.length; i++)
 		{
-			tempValue = tempEval(facts[i]);
+			tempValue = Driver.eval.getValue(facts[i]);
 			factEvals[i] = tempValue;
 			sum += tempValue;
 		}
@@ -139,7 +115,6 @@ public class Selection
 		{
 			factEvals[i] = factEvals[i] /sum;
 		}
-
 
 		QuickSortWithIndex sorter = new QuickSortWithIndex(factEvals);
 		//We now need to sort the now normalized factEvals
@@ -156,23 +131,4 @@ public class Selection
 		}
 		return sortedFacts;
 	}
-
-	//A temporary eval function
-	public static int tempEval(int[] assign)
-	{
-		int temp;
-		int val = 0;
-		//This is just an arbitrary method
-		for (int i = 0; i< assign.length; i++)
-		{
-			temp = assign[i];
-			if (temp%2 == 0) val += 1;
-			if (temp% 3 == 0) val += 3;
-		}
-		//This method prefers assignments that do not contain numbers divisible by two or three
-		return val;
-	}
-
-
-
 }

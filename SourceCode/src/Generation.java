@@ -21,7 +21,6 @@ public class Generation{
 		
 		if (debug) System.out.println("I am evolving!");
 
-
 		//check to see that the generation is not Empty
 		if(generation.isEmpty())
 		{
@@ -30,14 +29,12 @@ public class Generation{
 
 		//We can evolve our population
 
-
-
 		//First we choose two facts wtih F_Select
 		Random rand = new Random();
 		Selection selector = new Selection(generation, rand);
-		int[] a = selector.select();
+		int[] a = selector.select(-99);
+		//System.out.println("LAST CHOICE: " + selector.getLastIndexChoice());
 		int[] b = selector.select(selector.getLastIndexChoice());
-		
 		
 		//We now have the two facts that we can use with the or-tree, and use the alt-search Control
 		int pr_size = Driver.courses.size() + Driver.labs.size();
