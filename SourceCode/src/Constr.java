@@ -215,38 +215,39 @@ public class Constr
 	
 	
 	/**
-	* Method totals the number of incampatibilies and unwanted preferences
-	* It will then sort so that the first returned index is of the class that has the most incampatibilies and unwanted preferences
+	* Method totals the number of incompatibilities and unwanted preferences
+	* It will then sort so that the first returned index is of the class that has the most incompatibilities and unwanted preferences
 	* Note that an unwanted preference is worth 0.01% of an incompatible weight. This acts as a tie breaker when sorting.
 	* This will only cause issues if there is a class that has over 10000 unwanted preference, and so is deemed legal for now
 	* @param Parser parse, the parser used to read the file
 	* @return float[] indexes, the sorted array of class indexes. The first value is the most constrained. This can be safely cast to an int without any issues.
 	*/
-	public static float[] getTightestBoundClass(Parser parse){
-		
-		if (parse == null) throw new NullPointerException();
+	public static float[] getTightestBoundClass(){
 		
 		try{
 			float incompatibleWeight = 1;
 			float unwantedWeight = 0.0001f;
 				
-			ArrayList<ArrayList<List<String>>> not_compatible = parse.getNotCompatible();
-			ArrayList<ArrayList<List<String>>> unwanted = parse.getUnwanted();
+			ArrayList<ArrayList<List<String>>> not_compatible = Driver.not_compatible;
+			ArrayList<ArrayList<List<String>>> unwanted = Driver.unwanted;
+			
+			int num_courses = Driver.courses.size();
+			int num_labs = Driver.labs.size();
 			
 			//First we go through the array and find out which class has the most restraints numerically
-			float[] restraintCount = new float[parse.getCourses().size() + parse.getLabs().size()];
+			float[] restraintCount = new float[num_courses + num_labs];
 			
 			//The coursemap hashmap is essentially a lookup table to find out which index corresponds with what class
 			HashMap<List<String>, Integer> courseMap = new HashMap<List<String>, Integer>();
 			
 			//We start by adding in all the courses to it
-			for (int i = 0; i < parse.getCourses().size(); i++){
-				courseMap.put(parse.getCourses().get(i), i);
+			for (int i = 0; i < num_courses; i++){
+				courseMap.put(Driver.courses.get(i), i);
 			}
 			
 			//Then add all the labs
-			for (int i = parse.getCourses().size(); i <parse.getCourses().size() + parse.getLabs().size(); i++){
-				courseMap.put(parse.getLabs().get(i - parse.getCourses().size()), i);
+			for (int i = 0; i < num_labs; i++){
+				courseMap.put(Driver.labs.get(i), i);
 			}
 			
 			//We are now ready to go through all of the incompatible classes, and find the most mentioned class
