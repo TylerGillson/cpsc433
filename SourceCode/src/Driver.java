@@ -68,6 +68,9 @@ public class Driver {
 			System.exit(0);
 		}
 		
+		// Check for Tue 11:00 - 12:30 Course Slot:
+		checkForTU11();
+		
     	// Check for / deal with CPSC 313 & CPSC 413:
     	manage313413("313");
     	manage313413("413");
@@ -233,14 +236,15 @@ public class Driver {
 			// WHAT DOES THIS MEAN???
 			
 			// Add unwanted(a,s) statements for members of sections:
-			
-			//System.out.println("unwanted init: "+unwanted);
 			sections.forEach(s -> {
 				addUnwanted(s, "MO", "18:00");
 				addUnwanted(s, "TU", "17:00");
 				addUnwanted(s, "TU", "18:30");
 			});
-			//System.out.println("unwanted post: "+unwanted);
+			
+			// #%(*@&#$%)(@&$%)$@%
+			// ADD PARTIAL ASSIGNMENTS FOR 813/913 OR BREAK
+			// #@)(*^#$_(^&$$@^@$#%
 		}
 	}
 	
@@ -256,6 +260,23 @@ public class Driver {
 		new_unwanted.add(Arrays.asList(day));
 		new_unwanted.add(Arrays.asList(time));
 		unwanted.add(new_unwanted);
+	}
+	
+	/**
+	 * If the input file contains the following invalid course slot: Tue 11:00 - 12:30,
+	 * It is deleted from course_slots.
+	 */
+	public static void checkForTU11(){
+		int delete = -99;
+		Iterator<List<String>> courseSlots = course_slots.iterator(); 
+		while (courseSlots.hasNext()) {
+			List<String> cs = courseSlots.next();
+			if (cs.get(0).equals("TU") && cs.get(1).equals("11:00")){
+				delete = course_slots.indexOf(cs);
+			}
+		}
+		if (delete != -99)
+			course_slots.remove(delete);
 	}
 	
 	/**
@@ -285,6 +306,8 @@ public class Driver {
 						slot_idx = course_slots.indexOf(slot);
 					}
 				}
+				if (slot_idx == -99)
+					throw new java.lang.Error("The partial assignment for this course indicated an invalid slot!");
 			}
 			// The partial assignment refers to a lab.
 			else if (labs.indexOf(assign.get(0)) != -1) {
@@ -298,6 +321,8 @@ public class Driver {
 						slot_idx = lab_slots.indexOf(slot);
 					}
 				}
+				if (slot_idx == -99)
+					throw new java.lang.Error("The partial assignment for this lab indicated an invalid slot!");
 			}
 			// The partial assignment refers to a course/lab not in the input.
 			else

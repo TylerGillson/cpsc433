@@ -2,14 +2,31 @@ import java.util.*;
 
 /* HARD CONSTRAINTS
 1. No more than coursemax(s) courses can be assigned to slot s
+	CHECK
+	
 2. No more than labmax(s) labs can be assigned to slot s
+	CHECK
+	
 3. assign(ci) has to be unequal to assign(lik) for all k and i. (a course and its labs cannot be in the same slot)
-4. not-compatible(a,b) means: assign(a) cannot equal assign(b) (where a,b in Courses + Labs) 
+	This is handled implicitly. Courses are only ever assigned course slots and labs are only ever assigned lab slots.
+	
+4. not-compatible(a,b) means: assign(a) cannot equal assign(b) (where a,b in Courses + Labs)
+	CHECK --- Current solution highly inefficient.
+	
 5. partassign: assign(a) must equal partassign(a) for all a in Courses + Labs with partassign(a) not equal to $
+	CHECK
+	
 6. unwanted(a,s): assign(a) cannot equal s (with a in Courses + Labs and s in Slots)
+	CHECK
+	
 7. All course sections with a section number starting LEC 9 are evening classes and have to be scheduled into evening slots (18:00 or later).
+	CHECK
+	
 8. All 500-level course sections must be scheduled into different time slots.
+	???
+	
 9. No courses can be scheduled at Tuesdays 11:00-12:30.
+	CHECK
 	
 	IF CPSC 313 IN COURSES:
 10. CPSC 813 must be scheduled for Tuesdays/Thursdays 18:00-19:00
