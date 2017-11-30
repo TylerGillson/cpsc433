@@ -5,34 +5,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-/* HARD CONSTRAINTS
-1. No more than coursemax(s) courses can be assigned to slot s
-2. No more than labmax(s) labs can be assigned to slot s
-3. assign(ci) has to be unequal to assign(lik) for all k and i. (a course and its labs cannot be in the same slot)
-4. not-compatible(a,b) means: assign(a) cannot equal assign(b) (where a,b in Courses + Labs) 
-5. partassign: assign(a) must equal partassign(a) for all a in Courses + Labs with partassign(a) not equal to $
-6. unwanted(a,s): assign(a) cannot equal s (with a in Courses + Labs and s in Slots)
-7. All course sections with a section number starting LEC 9 are evening classes and have to be scheduled into evening slots (18:00 or later).
-8. All 500-level course sections must be scheduled into different time slots.
-9. No courses can be scheduled at Tuesdays 11:00-12:30.
-	
-	IF CPSC 313 IN COURSES:
-10. CPSC 813 must be scheduled for Tuesdays/Thursdays 18:00-19:00
-11. CPSC 813 cannot overlap with any labs/tutorials, or course sections of CPSC 313
-12. CPSC 813 cannot overlay with any courses that cannot overlap with CPSC 313
-	
-	IF CPSC 413 IN COURSES:
-13. CPSC 913 must be scheduled for Tuesdays/Thursdays 18:00-19:00 
-14. CPSC 913 cannot overlap with any labs/tutorials, or course sections of CPSC 413
-15. CPSC 913 cannot overlay with any courses that cannot overlap with CPSC 413
-
-16. ASSUMPTION: We can ignore the following (due to abstract slot representation):
-	-- If a course (course section) is put into a slot on Mondays, it has to be put into the corresponding time slots on Wednesdays and Fridays.
-	-- If a course (course section) is put into a slot on Tuesdays, it has to be put into the corresponding time slots on Thursdays.
-	-- If a lab/tutorial is put into a slot on Mondays, it has to be put into the corresponding time slots on Wednesdays.
-	-- If a lab/tutorial is put into a slot on Tuesdays, it has to be put into the corresponding time slots on Thursdays.
-*/
-
 public class Driver {
     public static Parser p;
     public static Generation generation;
@@ -53,8 +25,8 @@ public class Driver {
 	public static ArrayList<ArrayList<List<String>>> pair;
 	public static ArrayList<ArrayList<List<String>>> part_assign;
 	
-	
-	//random stuff
+	// Assign Checking Objects:
+	public static Constr constr;
 	public static Eval eval;
 	
 	/**
@@ -63,15 +35,15 @@ public class Driver {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String configfile;
+		String configFile;
 		String filename;
-    	// Deal with command line args:
+    	
+		// Deal with command line args:
 		try {
-			configfile = args[0];
+			configFile = args[0];
 			filename = args[1];
 
-			//bulid parser
-	    	p = new Parser(filename);
+			p = new Parser(filename);
 	    	p.build();
 	    	
 	    	generation = new Generation();
@@ -87,25 +59,27 @@ public class Driver {
 	    	pair = p.getPair();
 	    	part_assign = p.getPartAssign();
 	    	
-	    	eval = new Eval(configfile);
-
+	    	// Initialize eval:
+	    	eval = new Eval(configFile);
 		}
 		catch(Exception e) {
-			System.out.println("Invalid argument: try \t java Driver [configFile] [inputfile]");
+			System.out.println("Invalid argument: try \t java Driver [configFile] [inputFile]");
 			System.exit(0);
 		}
+		
     	// Check for / deal with CPSC 313 & CPSC 413:
-    	//System.out.println("lab_slots pre: "+lab_slots);
     	manage313413("313");
     	manage313413("413");
-    	//System.out.println("lab_slots post: "+lab_slots);
+    	
+    	// Initialize Constr AFTER dealing w/ CPSC 313/413:
+    	constr = new Constr();
     	
     	// Initialize the first generation of candidate solutions:
     	initGeneration0();
     	
     	// Run GA for specified # of generations:
     	for (int i=0; i<gen_max; i++){
-    		generation.evolve();
+    		//generation.evolve();
     	}
     
     	// Sort the final generation according to our fitness function and select the optimal solution:
@@ -117,7 +91,6 @@ public class Driver {
     	
     	// Print final output schedule:
     	printSchedule(solution);
-    	eval.getValue(solution);
 	}
     
 	public static int eval(int[] sol){
@@ -233,7 +206,7 @@ public class Driver {
 		// Begin generating list of all CPSC 313/413-related sections:
 		ArrayList<List<String>> sections = new ArrayList<List<String>>();
 		
-		// Add each CPSC 313-related course to sections:
+		// Add each CPSC 313/413-related course to sections:
 		courses.forEach(c -> {
 			if (c.get(0).equals("CPSC") && c.get(1).equals(course))
 				sections.add(c);});
@@ -248,29 +221,7 @@ public class Driver {
 				List<String> cpsc913 = Arrays.asList("CPSC", "913", "", ""); 
 				courses.add(cpsc913);
 			}
-			
-			// Add CPSC 813/913's time slot to lab_slots if it is not already there.
-			// If it is, increment its lab_max and lab_min values by 1.
-			boolean inLabSlots = false;
-			Iterator<List<String>> labSlots = lab_slots.iterator();
-			while (labSlots.hasNext()){
-				List<String> slot = labSlots.next();
-				if (slot.get(0).equals("TU") && slot.get(1).equals("18:00")){
-					slot.set(2, String.valueOf((Integer.parseInt(slot.get(2)) + 1)));
-					slot.set(3, String.valueOf((Integer.parseInt(slot.get(3)) + 1)));
-					inLabSlots = true;
-				}
-			}
-			if (inLabSlots == false){
-				List<String> cpsc813913Slot = Arrays.asList("TU", "18:00", "1", "1"); 
-				lab_slots.add(cpsc813913Slot);
-			}
-			
-			// Add each CPSC 313/413-related lab to sections:
-			labs.forEach(l -> {
-	    		if (l.get(0).equals("CPSC") && l.get(1).equals(course))
-	    			sections.add(l);});
-			
+						
 			// Deal with "courses that can't overlap with CPSC 313/413"...
 			// WHAT DOES THIS MEAN???
 			

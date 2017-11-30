@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Generation{
+	
 	private List<int[]> generation = new ArrayList<int[]>();
 	private int pop_max = 0;
 	private boolean debug = false;
@@ -72,7 +73,7 @@ public class Generation{
 	}
 	
 	public void print(){
-		System.out.println("Printing Generation:  ");
+		System.out.println("Printing Generation:");
 		for (int[] sol : this.generation){
 			System.out.println(Arrays.toString(sol));
 		}

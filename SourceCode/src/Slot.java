@@ -1,13 +1,14 @@
+import java.util.List;
 
 public class Slot
 {
-	private String name;
+	private List<String> name;
 	private boolean evening = false;
 	private int max;
 	
 	public Slot (String type, int idx)
 	{
-		name = type.equals("course") ? Driver.courses.get(idx).toString() : Driver.labs.get(idx).toString();
+		name = type.equals("course") ? Driver.courses.get(idx) : Driver.labs.get(idx);
 		max = type.equals("course") ? Integer.valueOf(Driver.course_slots.get(idx).get(2)) : Integer.valueOf(Driver.lab_slots.get(idx).get(2));
 		setEvening(type, idx); 
 	}
@@ -18,7 +19,7 @@ public class Slot
 		evening = (hr >= 18) ? true : false;
 	}
 	
-	public String getName()
+	public List<String> getName()
 	{
 		return name;
 	}

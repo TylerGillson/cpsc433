@@ -8,13 +8,13 @@ import java.util.List;
 //this code is trying to optimize for speed
 public class Eval {
 	private int pen_coursemin = 1;
-	private int pen_labmin =1;
-	private int not_paired =1;
-	private int pen_section =1;
-	private int W_minfilled =1;
-	private int W_pref =1;
-	private int W_pair =1;
-	private int W_secdiff =1;
+	private int pen_labmin = 1;
+	private int not_paired = 1;
+	private int pen_section = 1;
+	private int W_minfilled = 1;
+	private int W_pref = 1;
+	private int W_pair = 1;
+	private int W_secdiff = 1;
 	private HashMap<List<List<String>>,Integer> pref = new HashMap<List<List<String>>,Integer>();
 
 	public Eval(String configFile) {
@@ -51,12 +51,9 @@ public class Eval {
 				else if (setting[0].equals("sectionPenalty")) {
 					this.pen_section = Integer.parseInt(setting[1]); 
 				}
-				else;
-	
-					
+				else;			
 			}   
 
-			
 			// Always close files.
 			bufferedReader.close();     
 		}
@@ -74,13 +71,11 @@ public class Eval {
 			int value = Integer.parseInt(Info.get(3).get(0));
 			pref.put(key, value);
 		}
-		
 	}
 	
 	public int getValue(int[] assign) {
 		int[] cAssign = Arrays.copyOfRange(assign, 0, Driver.courses.size());
 		int[] lAssign = Arrays.copyOfRange(assign,Driver.courses.size(),assign.length);
-
 
 		int minValue = W_minfilled*E_minfilled(cAssign,lAssign);
 		int prefValue= W_pref*E_pref(cAssign,lAssign);
@@ -103,8 +98,7 @@ public class Eval {
 		for (int i = 0; i < labAssign.length;i++) {
 			LassignCount[labAssign[i]] += 1;
 		}
-
-		
+	
 		for (int i = 0; i < Driver.course_slots.size(); i ++) {
 			List<String> slotInfo= Driver.course_slots.get(i);
 			String x = slotInfo.get(3);
@@ -114,9 +108,7 @@ public class Eval {
 				result += this.pen_coursemin;
 			}
 		}
-		
-		
-		
+			
 		for (int i = 0; i< Driver.lab_slots.size(); i ++) {
 			List<String> slotInfo=(List<String>) Driver.lab_slots.get(i);
 			String x = slotInfo.get(3);
@@ -129,6 +121,7 @@ public class Eval {
 		
 		return 0-result;
 	}
+	
 	private int E_pref(int[] courseAssign, int[] labAssign) {
 		int result =0;
 		for (int i =0; i < courseAssign.length;i++) {
@@ -141,7 +134,6 @@ public class Eval {
 			time.add(Driver.course_slots.get(SlotIndex).get(1));
 			List<String> classid = (List<String>) Driver.courses.get(i);
 
-			
 			key.add(day);
 			key.add(time);
 			key.add(classid);
@@ -225,10 +217,6 @@ public class Eval {
 			
 			
 		}
-		
-		
-		
-		
 		return 0-result;
 	}
 	
@@ -250,8 +238,7 @@ public class Eval {
 				value = courseIndex.get(key);
 			
 			else;
-			List<String> slotinfo = Driver.course_slots.get(cAssign[i]);
-			
+			List<String> slotinfo = Driver.course_slots.get(cAssign[i]);	
 			List<String> slotTime = new ArrayList<>();
 			slotTime.add(slotinfo.get(0));
 			slotTime.add(slotinfo.get(1));

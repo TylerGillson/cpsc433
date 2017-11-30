@@ -11,24 +11,17 @@ public class OrTree<T>{
 	public int[] data;
 	public OrTree<T> parent;
 	public List<OrTree<T>> children;
-	public boolean pr_finish;
-	// Recursion Control Globals:
-//		public static Boolean quit = false;
-//		public static int[] sol;
-
 	
 	// Constructor for beginning with a partial solution:
 	public OrTree(int[] pr){
 		this.data = pr;
 		this.children = new LinkedList<OrTree<T>>();
-		this.pr_finish = pr_finished(pr);
 	}
 	
 	// "Empty" Constructor:
 	public OrTree(int length){
 		this.data = new int[length];
 		this.children = new LinkedList<OrTree<T>>();
-		this.pr_finish = false;
 	}
 	
 	public OrTree<T> addChild(int[] child){
@@ -52,12 +45,6 @@ public class OrTree<T>{
 		return rn.nextInt(10) + 1;
 	}
 	
-	public boolean constr(int[] candidate){
-		Random rand = new Random();
-		return rand.nextBoolean();
-		
-	}
-	
 	/**
 	 * Find all possible slots, s, applicable to the section located at pr[idx].
 	 * Then, for each slot, create a child node representing assign(section) = s.
@@ -79,11 +66,12 @@ public class OrTree<T>{
 			int[] new_candidate = this.data.clone();
 			new_candidate[section_idx] = i;
 			
+			//System.out.println(Arrays.toString(new_candidate));
+			//System.out.println(Driver.constr.evaluate(new_candidate));
+			
 			// If successor is viable, add it to the current node's children:
-			if (constr(new_candidate)) 
+			if (Driver.constr.evaluate(new_candidate) == true) 
 				this.addChild(new_candidate);
-//			
-
 		}
 	}
 	
@@ -92,58 +80,45 @@ public class OrTree<T>{
 	 * @return sol - An integer array which is a pr-solved instance.
 	 */
 	public int[] buildCandidate(){
-		// Index of element of pr that will be expanded by altern.
-		//aka the index of assign
-		int expand_idx;
-		
-		//	Array format: {num_constr,index}
-		int max_constr0 = 0;
-		int max_constr1 = 0;
-		// Determine most tightly bound section within pr:
-		for (int i=0; i<this.data.length; i++){
-			// Only consider unassigned sections
-			if (this.data[i] == -99){
-				int cur_constr = num_constr(i);
-				if (cur_constr > max_constr0){
-					max_constr0 = cur_constr;
-					max_constr1 = i;
+		// Return a solution:
+		if (pr_finished(this.data))
+			return this.data;
+		else {
+			// Index of element of pr that will be expanded by altern.
+			// AKA the index of assign
+			int expand_idx;
+			
+			//	Array format: {num_constr,index}
+			int[] max_constr = new int[2];
+			// Determine most tightly bound section within pr:
+			for (int i=0; i<this.data.length; i++){
+				// Only consider unassigned sections
+				if (this.data[i] == -99){
+					int cur_constr = num_constr(i);
+					if (cur_constr > max_constr[0]){
+						max_constr[0] = cur_constr;
+						max_constr[1] = i;
+					}
 				}
 			}
-		}
-		
-		// We expand the most tightly bound section.
-		expand_idx = max_constr1;	
-	
-		// Generate successor nodes for said section:
-		altern(expand_idx);
-		
-		
-		//expand 
-		//consider the pr is not solved and there is no children 	
-		if (this.children.size() == 0 &&  this.pr_finish == false) {
-			/*
-			 * caution, magical code 
-			 */
 			
-			this.parent.children.remove(this);
-			parent.buildCandidate();
+			// We expand the most tightly bound section.
+			expand_idx = max_constr[1];	
+		
+			// Generate successor nodes for said section:
+			altern(expand_idx);
 			
-		}
-		else {
-			//Random number generator
+			// Choose a random successor node to expand: 
 			Random rand = new Random();
-			int randIndex=rand.nextInt(this.children.size());
-			
-			//
+			int randIndex = rand.nextInt(this.children.size());
 			OrTree<T> child = this.children.get(randIndex);
+				
 			// Recursively expand successor nodes until completion:
-			if (!child.pr_finish)
-				child.buildCandidate();
-
+			if (!pr_finished(child.data))
+				return child.buildCandidate();
+			else
+				return child.data;
 		}
-
-		// Return a solution from the completed OrTree:
-		return getSolution();
 	}
 	
 	/**
@@ -166,9 +141,9 @@ public class OrTree<T>{
 			else {
 				// Assess the viability of selecting each parent's assignment:
 				child[i] = par1[i];
-				pick_par1 = constr(child);
+				pick_par1 = Driver.constr.evaluate(child);
 				child[i] = par2[i];
-				pick_par2 = constr(child);
+				pick_par2 = Driver.constr.evaluate(child);
 				
 				// If only par1 is viable, choose par1's assignment:
 				if (pick_par1 && !pick_par2)
@@ -181,7 +156,7 @@ public class OrTree<T>{
 					altern(i);
 					ArrayList<int[]> options = new ArrayList<int[]>();
 					for (OrTree<T> c : this.children){
-						if (constr(c.data))
+						if (Driver.constr.evaluate(c.data) == true)
 							options.add(c.data);
 					}
 					Random rn = new Random();
@@ -216,33 +191,7 @@ public class OrTree<T>{
 			return this.parent.getDepth() + 1;
 		
 	}
-	
-	/**
-	 * Recover a solution from a completed OrTree.
-	 * By performing a search for viable solution in the tree, from left leaf to right leaf, 
-	 * @return sol - An integer array which is a pr-solved instance.
-	 */
-	public int[] getSolution(){		
-//		while (quit == false){
-			for (OrTree<T> child : this.children){
-				// If the child is finished, return its data as the solution:
-				if (child.pr_finish){
-					return child.data;
-					// Set global flag to kill other recursive calls:
-//					quit = true;
-				
-				}
-				// Otherwise, generate a new set of recursive calls: 
-				else {
-					int[] sol= child.getSolution();
-					if (sol != null) 
-						return sol;
-				}
-			}	
-//		}
-		return null;
-	}
-	
+		
 	/**
 	 * Print an OrTree to the console.
 	 * @param is_root - Boolean to avoid duplicate print statements.
