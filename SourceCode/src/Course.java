@@ -7,6 +7,7 @@ public class Course
 	private ArrayList<List<String>> unwanted = new ArrayList<List<String>>();
 	private ArrayList<List<String>> incompatible = new ArrayList<List<String>>();
 	private int constrVal = 0;
+	private ArrayList<List<String>> labList;
 	
 	// Still need to deal with adding labs of courses to incompatible, 500 level courses, etc.
 	public Course(String type, int idx)
@@ -43,6 +44,10 @@ public class Course
 	public List<String> getName()
 	{
 		return name;
+	}
+	
+	public ArrayList<List<String>> getLabList(){
+		return labList;
 	}
 	
 	public boolean getEvening()
