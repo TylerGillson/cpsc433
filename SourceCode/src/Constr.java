@@ -58,6 +58,8 @@ public class Constr
 	private int [] currentAssign;
 	private int [] slotHas;
 	
+	private boolean debugToggle = true;
+	
 	public Constr ()
 	{
 		pr_size = Driver.courses.size() + Driver.labs.size();
@@ -93,6 +95,9 @@ public class Constr
 			Slot lab_slot = new Slot("lab", idx);
 			all_slots[idx + num_course_slots] = lab_slot;});
 		
+		//Sort courses by most tightly bound
+		Arrays.sort(all_sections, Collections.reverseOrder());
+		
 		sectionList = all_sections;
 		slotList = all_slots;
 	}
@@ -125,6 +130,10 @@ public class Constr
 					
 		//if (valid == true)
 			//System.out.println("Incompatible passed.");
+		
+		if (valid == true){
+			check500();
+		}
 		
 		return valid;
 	}
@@ -238,6 +247,34 @@ public class Constr
 		}
 	}
 	
+	//Checks if 500 level courses are in the same slot
+	//Adds slot index of 500 level courses to an ArrayList
+	//Converts ArrayList to Set and compares the lengths to see if there were duplicates in the ArrayList
+	public void check500()
+	{
+		ArrayList<Integer> indices = new ArrayList<Integer>();
+		
+		for (int i = 0; i < currentAssign.length; i++)
+		{
+			if (sectionList[i].getName().get(1).charAt(0) == '5')
+				indices.add(currentAssign[i]);
+		}
+		
+		Set<Integer> indexSet = new HashSet<Integer>(indices);
+		if (indices.size() != indexSet.size())
+			valid = false;
+	}
+	
+	//Returns an array of indices corresponding to the most tightly bound courses
+	public int[] mostTightlyBoundIndex()
+	{
+		int[] sortedIndices = new int[sectionList.length];
+		for (int i = 0; i < sectionList.length; i++)
+		{
+			sortedIndices[i] = sectionList[i].getIndex();
+		}
+		return sortedIndices;
+	}
 	
 	/**
 	* Method totals the number of incompatibilities and unwanted preferences
@@ -400,5 +437,57 @@ public class Constr
 			return false;
 			
 		return true;
+	}
+	
+	private void debug(String val){
+		if(debugToggle)System.out.println(val);
+	}
+	
+	public boolean checkCourseLabConflicts(){
+		
+		boolean safe =true;
+		ArrayList<List<String>> mainList = Driver.courses;
+		for(int i =0; i < Driver.labs.size(); i++){
+			mainList.add(Driver.labs.get(i));
+		}
+		
+		ArrayList<List<String>> labList;
+		debug("The contents of sectionList is: ");
+		for(int i = 0; i < sectionList.length; i++){
+				debug(sectionList[i].toString());
+				labList  = sectionList[i].getLabList();
+				for(int j = 0; j < labList.size(); j++){
+					safe = checkCourseTimeConflict(mainList.indexOf(labList.get(j)), mainList.indexOf(sectionList[i].getName()));
+					if(!safe) return false;
+				}
+				safe = checkLabLabconflict(labList, mainList);
+				if (!safe) return false;
+		}
+		
+		
+		
+				
+		throw new NullPointerException();
+		//return safe;
+	}
+	
+	private boolean checkLabLabconflict(ArrayList<List<String>> labList, ArrayList<List<String>> mainList){
+		if(labList.size() <2)
+			return true;
+		
+		if(labList.size() == 2)
+		{
+			return checkCourseTimeConflict(mainList.indexOf(labList.get(0)), mainList.indexOf(labList.get(1)));
+		}
+
+		//We know that there is at least 3 labs, or more
+		//We check that none of these conflic with the first lab in the list
+		boolean safe = true;
+		for (int i = 1; i < labList.size(); i++){
+			safe = checkCourseTimeConflict(mainList.indexOf(labList.get(0)), mainList.indexOf(labList.get(i)));
+			if(!safe) return false;
+		}
+		labList.remove(0); //Remove the first element to reduce size
+		return checkLabLabconflict(labList, mainList);
 	}
 }
