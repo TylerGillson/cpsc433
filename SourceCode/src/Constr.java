@@ -1,4 +1,5 @@
 import java.util.*;
+import java.time.*;
 
 /* HARD CONSTRAINTS
 1. No more than coursemax(s) courses can be assigned to slot s
@@ -221,29 +222,109 @@ public class Constr
 	//If a course appears in both lists then it isn't valid
 	public void incompatible()
 	{
-		for (int i = 0; i < slotList.length; i++)
-		{
-			ArrayList<List<String>> currentIncompatible = new ArrayList<List<String>>();
-			ArrayList<Course> currentCourses = new ArrayList<Course>();
+		
+		//get all pair of incompatible
+		for (int i = 0; i<Driver.not_compatible.size(); i++) {
+			ArrayList<List<String>> badPair = Driver.not_compatible.get(i);
 			
-			for (int j = 0; j < currentAssign.length; j++)
-			{
-				if (currentAssign[j] == i)
-				{
-					currentIncompatible.addAll(sectionList[j].getIncompatible());
-					currentCourses.add(sectionList[j]);
+			//get the assign of left 
+			List<String> left = badPair.get(0);
+			int leftIndex;
+			if (left.contains("TUT") || left.contains("LAB")) 
+				leftIndex = Driver.labs.indexOf(left)+Driver.courses.size();
+			else
+				leftIndex = Driver.courses.indexOf(left);
+			int leftAssign = currentAssign[leftIndex];
+			//if unassign go next
+			if (leftAssign == -99 )
+				continue;			
+			//if they are assigned,get their time
+			List<String> leftTime;
+			String leftType = "LEC";
+			if (left.contains("TUT") || left.contains("LAB")) {
+				leftTime = Driver.lab_slots.get(leftAssign);
+				leftType ="TUT";
+			}
+			else
+				leftTime = Driver.course_slots.get(leftAssign);
+			
+			
+			
+
+			//get the assign of right
+			List<String> right= badPair.get(1);
+			int rightIndex;
+			if (right.contains("TUT") || right.contains("LAB")) 
+				rightIndex = Driver.labs.indexOf(right)+Driver.courses.size();
+			else
+				rightIndex = Driver.courses.indexOf(right);
+			int rightAssign = currentAssign[rightIndex];
+			//if unassign go next 
+			if (rightAssign == -99 )
+				continue;	
+			//if they are assigned,get their time
+			List<String> rightTime;
+			String rightType = "LEC";
+			if (right.contains("TUT") || right.contains("LAB")) {
+				rightTime = Driver.lab_slots.get(rightAssign);
+				rightType = "TUT";
+			}
+			else
+				rightTime = Driver.course_slots.get(rightAssign);
+			
+			//compare the 2 times
+			if(leftTime.get(0) == "MO" && rightTime.get(0) == "MO") {
+				//if both on Monday and start at same time
+				if (leftTime.get(1) == rightTime.get(1)) {
+					valid = false;
+					return;
 				}
 			}
-			
-			for (int m = 0; m < currentIncompatible.size(); m++)
-			{
-				for (int n = 0; n < currentCourses.size(); n++)
-				{
-					if (currentIncompatible.get(m).equals(currentCourses.get(n)))
+			//if one is on Tuesday other is on Monday
+			else if (leftTime.get(0) == "MO" && rightTime.get(0) == "TU"){
+				continue;
+			}
+			else if (leftTime.get(0) == "TU" && rightTime.get(0) == "MO"){
+				continue;
+			}
+			//if both on Tuesday
+			else if (leftTime.get(0) == "TU" && rightTime.get(0) == "TU"){
+				if (leftType == rightType) {
+					if (leftTime.get(1) == rightTime.get(1)) {
 						valid = false;
+						return;
+					}
 				}
-			}			
+				else {
+					//check for overlapping time LEC slot is 1h30m long
+					if (leftType == "LEC") {
+						String leftStart = leftTime.get(1);
+						
+						//this is not expressed in time but in int, 
+						LocalTime leftStart=  
+						int leftEnd = Integer.parseInt((leftStart.replace(":",""))) + 130;
+						
+						
+						
+						//check if right starts within the range of left time slot
+					
+					}
+					else {
+						
+						
+					}
+					
+					
+				}
+					
+				
+			}
+			
+			//the Friday of labs
 		}
+		
+		
+		valid = true;
 	}
 	
 	//Checks if 500 level courses are in the same slot
