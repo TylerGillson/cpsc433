@@ -37,27 +37,13 @@ public class OrTree<T>{
 	}
 	
 	/**
-	 * Determine how tightly bound a particular section is. (within a pr instance).
-	 * @param section_idx - An integer index into a pr instance. Corresponds to a course/lab section.
-	 * @return
-	 */
-	public int num_constr(int section_idx){
-		Random rn = new Random();
-		return rn.nextInt(10) + 1;
-	}
-	
-	/**
 	 * Find all possible slots, s, applicable to the section located at pr[idx].
 	 * Then, for each slot, create a child node representing assign(section) = s.
 	 * @param idx - An integer index into a pr instance. Corresponds to a course/lab section.
 	 */
 	public void altern(int section_idx){
 		// Determine is the section is a course or a lab:
-		boolean isCourse;
-		if (section_idx < Driver.courses.size())
-			isCourse = true;
-		else
-			isCourse = false;
+		boolean isCourse = (section_idx < Driver.courses.size()) ? true : false;
 		
 		// Determine possible slot index values:
 		int slot_indices = isCourse ? Driver.course_slots.size() : Driver.lab_slots.size();
@@ -66,9 +52,6 @@ public class OrTree<T>{
 		for (int i=0; i<slot_indices; i++){
 			int[] new_candidate = this.data.clone();
 			new_candidate[section_idx] = i;
-			
-			//System.out.println("CANDIDATE: " + Arrays.toString(new_candidate));
-			//System.out.println(Driver.constr.evaluate(new_candidate));
 			
 			// If successor is viable, add it to the current node's children:
 			if (Driver.constr.evaluate(new_candidate) == true) 
@@ -80,32 +63,21 @@ public class OrTree<T>{
 	 * Perform an or-tree-based search to generate a candidate solution.
 	 * @return sol - An integer array which is a pr-solved instance.
 	 */
-	public int[] buildCandidate(){
+	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound){
+		
 		// Return a solution:
 		if (pr_finished(this.data))
 			return this.data;
 		else {
-			// Index of element of pr that will be expanded by altern.
-			// AKA the index of assign
-			int expand_idx;
+			// Determine index of element of pr that will be expanded by altern...
+			// We expand the most tightly bound section.
+			int expand_idx = mostTightlyBound.remove(0);	
 			
-			//	Array format: {num_constr,index}
-			int[] max_constr = new int[2];
-			// Determine most tightly bound section within pr:
-			for (int i=0; i<this.data.length; i++){
-				// Only consider unassigned sections
-				if (this.data[i] == -99){
-					int cur_constr = num_constr(i);
-					if (cur_constr > max_constr[0]){
-						max_constr[0] = cur_constr;
-						max_constr[1] = i;
-					}
-				}
+			// Avoid over-writing values designed by partial assignments:
+			if (this.data[expand_idx] != -99){
+				expand_idx = mostTightlyBound.remove(0);
 			}
 			
-			// We expand the most tightly bound section.
-			expand_idx = max_constr[1];	
-		
 			// Generate successor nodes for said section:
 			altern(expand_idx);
 			
@@ -116,7 +88,7 @@ public class OrTree<T>{
 				
 			// Recursively expand successor nodes until completion:
 			if (!pr_finished(child.data))
-				return child.buildCandidate();
+				return child.buildCandidate(mostTightlyBound);
 			else
 				return child.data;
 		}
@@ -181,18 +153,19 @@ public class OrTree<T>{
 					}
 					
 					// Restart if altern failed to produce a viable option:
-					if (options.size() == 0){
-						breedCandidates(par1, par2);
-						return null;
-					}	
+					if (options.size() == 0)
+						System.out.println("SKIP:     " + Arrays.toString(child));
 					
-					Random rn = new Random();
-					int select = rn.nextInt(options.size());
-					child = options.get(select);
-					System.out.println("ALTERN:   " + Arrays.toString(child));
+					// Otherwise, make the assignment and continue iterating:
+					else {
+						Random rn = new Random();
+						int select = rn.nextInt(options.size());
+						child = options.get(select);
+						System.out.println("ALTERN:   " + Arrays.toString(child));
+					}
 				}
 			}
-		}
+		} // end for
 		
 		// Return the new, hybridized pr-instance:
 		System.out.println("CHILD:    " + Arrays.toString(child) + "\n");

@@ -7,18 +7,14 @@ public class Course
 	private boolean evening = false;
 	private ArrayList<List<String>> unwanted = new ArrayList<List<String>>();
 	private ArrayList<List<String>> incompatible = new ArrayList<List<String>>();
-	private int constrVal = 0;
-	private ArrayList<List<String>> labList;
+	private ArrayList<List<String>> labList = new ArrayList<List<String>>();
 	private int index;
+	private int constrVal = 0;
 	
-	// Still need to deal with adding labs of courses to incompatible, 500 level courses, etc.
 	public Course(String type, int idx)
 	{
-		//Set original index, indices of courses come first 
-		//then indices of labs pick up from where the course indices ended
-		index = type.equals("course") ? idx : (idx + Driver.courses.size());
-		
-		// Set name:
+		// Set name and index:
+		index = type.equals("course") ? idx : idx + Driver.courses.size();
 		name = type.equals("course") ? Driver.courses.get(idx) : Driver.labs.get(idx);
 		
 		// Set evening:
@@ -43,15 +39,15 @@ public class Course
 				unwanted.add(Driver.unwanted.get(i).get(1));	
 		}
 		
-		// Calculate constrVal:
-		constrVal = unwanted.size() + incompatible.size() + + (evening ? EVE_VAL : 0) + labList.size();
-		
-		//build lab list
+		// Build lab list:
 		for (int i = 0; i < Driver.labs.size(); i++) {
-			List<String> labName =Driver.labs.get(i);
+			List<String> labName = Driver.labs.get(i);
 			if (labName.containsAll(name))
 				labList.add(labName);
 		}
+		
+		// Calculate constrVal:
+		constrVal = unwanted.size() + incompatible.size() + labList.size() + (evening ? EVE_VAL : 0);
 	}
 	
 	public int getIndex()

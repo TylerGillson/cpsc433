@@ -58,7 +58,7 @@ public class Constr
 	private int [] currentAssign;
 	private int [] slotHas;
 	
-	private boolean debugToggle = true;
+	private boolean debugToggle = false;
 	
 	public Constr ()
 	{
@@ -95,9 +95,6 @@ public class Constr
 			Slot lab_slot = new Slot("lab", idx);
 			all_slots[idx + num_course_slots] = lab_slot;});
 		
-		//Sort courses by most tightly bound
-		Arrays.sort(all_sections, Collections.reverseOrder());
-		
 		sectionList = all_sections;
 		slotList = all_slots;
 	}
@@ -108,33 +105,36 @@ public class Constr
 		valid = true;
 		slotHas = new int[all_slots_size];
 		
-		//System.out.println("TOP: "+Arrays.toString(currentAssign));
-		
 		if (valid == true)
 			evening();
 		
 		if (valid == true){
-			//System.out.println("Evening passed.");
+			if (debugToggle) System.out.println("Evening passed.");
 			max();
 		}
 		
 		if (valid == true){
-			//System.out.println("Max passed.");
+			if (debugToggle) System.out.println("Max passed.");
 			unwanted();
 		}
 			
 		if (valid == true){
-			//System.out.println("Unwanted passed.");
+			if (debugToggle) System.out.println("Unwanted passed.");
 			incompatible();
 		}
 					
-		//if (valid == true)
-			//System.out.println("Incompatible passed.");
-		
 		if (valid == true){
+			if (debugToggle) System.out.println("Incompatible passed.");
 			check500();
 		}
 		
+		if (valid == true){
+			if (debugToggle) System.out.println("Check 500-level passed.");
+			
+			// DAVID's method:
+			
+			//checkCourseLabOverlap();
+		}
 		return valid;
 	}
 	
@@ -182,20 +182,19 @@ public class Constr
 			}
 				
 		}
-		
-		//System.out.println(Arrays.toString(slotList));
+		if (debugToggle) System.out.println(Arrays.toString(slotList));
 		
 		for (int i = 0; i < slotList.length; i++)
 		{
-			//System.out.println(slotList[i].getMax() + " " + slotHas[i]);
 			if (slotList[i].getMax() < slotHas[i]){
-				//System.out.println(Arrays.toString(slotHas));
-				//System.out.println("FAILING MAX, i=" + i);
+				if (debugToggle) System.out.println(Arrays.toString(slotHas));
+				if (debugToggle) System.out.println("FAILING MAX, i=" + i);
+				
 				valid = false;
 				break;
 			}
 		}
-		//System.out.println(Arrays.toString(slotHas));
+		if (debugToggle) System.out.println(Arrays.toString(slotHas));
 	}	
 	
 	//For each course gets the list of unwanted slots and checks through all of them 
@@ -253,11 +252,9 @@ public class Constr
 	public void check500()
 	{
 		ArrayList<Integer> indices = new ArrayList<Integer>();
-		
-		for (int i = 0; i < currentAssign.length; i++)
-		{
+		for (int i = 0; i < currentAssign.length; i++) {
 			if (sectionList[i].getName().get(1).charAt(0) == '5')
-				indices.add(currentAssign[i]);
+				indices.add(i);
 		}
 		
 		Set<Integer> indexSet = new HashSet<Integer>(indices);
@@ -266,13 +263,33 @@ public class Constr
 	}
 	
 	//Returns an array of indices corresponding to the most tightly bound courses
-	public int[] mostTightlyBoundIndex()
+	public int[] getMostTightlyBoundIndices()
 	{
+		// Convert sectionList from an array of courses into a list of courses:
+		List<Course> sortedCourses = new ArrayList<Course>();
+		for (int i=0; i < sectionList.length; i++)
+			sortedCourses.add(sectionList[i]);
+		
+		// Sort the resulting list according to number of constraints:
+		Collections.sort(sortedCourses, new Comparator<Course>() {
+	        public int compare(Course c1, Course c2){
+	        	int constrVal1 = c1.numOfConstraints();
+	        	int constrVal2 = c2.numOfConstraints();
+	        	
+	        	if (constrVal1 == constrVal2)
+	            	return 0;
+	            else if (constrVal1 < constrVal2)
+	            	return 1;
+	            else
+	            	return -1;
+	        }
+	    });
+		
+		// Generate an array containing the sorted indices:
 		int[] sortedIndices = new int[sectionList.length];
-		for (int i = 0; i < sectionList.length; i++)
-		{
-			sortedIndices[i] = sectionList[i].getIndex();
-		}
+		for (int i=0; i < sortedCourses.size(); i++)
+			sortedIndices[i] = sortedCourses.get(i).getIndex();
+		
 		return sortedIndices;
 	}
 	
@@ -376,36 +393,24 @@ public class Constr
 			classDuration = 115f; // 1 hour 15 classes
 		
 		//We now need to compute the end start time as an integer for each class
-		
 		float time1start;
-		
 		char digit1 = time1.get(1).charAt(0);
 		char digit2 = time1.get(1).charAt(1);
 		
 		if (digit2 == ':')
-		{
 			time1start = (digit1 - 48)* 100;
-		}
-		else{
-			
+		else
 			time1start = (digit1 -48)*1000 + (digit2 -48)*100;
-			
-		}
 		
 		//Do the same for the other time
 		float time2start;
-		
 		digit1 = time2.get(1).charAt(0);
 		digit2 = time2.get(1).charAt(1);
 		
 		if (digit2 == ':')
-		{
 			time2start = (digit1 - 48)* 100;
-		}
-		else{
-			
+		else
 			time2start = (digit1 -48)*1000 + (digit2 -48)*100;
-		}
 		
 		//Use this to find the end times
 		float time1end = time1start + classDuration;
@@ -440,12 +445,12 @@ public class Constr
 	}
 	
 	private void debug(String val){
-		if(debugToggle)System.out.println(val);
+		if(debugToggle) System.out.println(val);
 	}
 	
 	public boolean checkCourseLabConflicts(){
 		
-		boolean safe =true;
+		boolean safe = true;
 		ArrayList<List<String>> mainList = Driver.courses;
 		for(int i =0; i < Driver.labs.size(); i++){
 			mainList.add(Driver.labs.get(i));
@@ -453,35 +458,29 @@ public class Constr
 		
 		ArrayList<List<String>> labList;
 		debug("The contents of sectionList is: ");
-		for(int i = 0; i < sectionList.length; i++){
+		for (int i = 0; i < sectionList.length; i++){
 				debug(sectionList[i].toString());
 				labList  = sectionList[i].getLabList();
-				for(int j = 0; j < labList.size(); j++){
+				for (int j = 0; j < labList.size(); j++){
 					safe = checkCourseTimeConflict(mainList.indexOf(labList.get(j)), mainList.indexOf(sectionList[i].getName()));
 					if(!safe) return false;
 				}
 				safe = checkLabLabconflict(labList, mainList);
 				if (!safe) return false;
-		}
-		
-		
-		
-				
+		}			
 		throw new NullPointerException();
 		//return safe;
 	}
 	
 	private boolean checkLabLabconflict(ArrayList<List<String>> labList, ArrayList<List<String>> mainList){
-		if(labList.size() <2)
+		if (labList.size() < 2)
 			return true;
 		
-		if(labList.size() == 2)
-		{
+		if (labList.size() == 2)
 			return checkCourseTimeConflict(mainList.indexOf(labList.get(0)), mainList.indexOf(labList.get(1)));
-		}
 
 		//We know that there is at least 3 labs, or more
-		//We check that none of these conflic with the first lab in the list
+		//We check that none of these conflict with the first lab in the list
 		boolean safe = true;
 		for (int i = 1; i < labList.size(); i++){
 			safe = checkCourseTimeConflict(mainList.indexOf(labList.get(0)), mainList.indexOf(labList.get(i)));

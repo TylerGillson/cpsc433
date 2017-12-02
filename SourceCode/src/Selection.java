@@ -6,10 +6,11 @@ public class Selection
 {
 	public static boolean debug = false;
 	private List<int[]> generation;
-	private float[] evalArray;
+	public float[] evalArray;
 	private float[] indexArray;
 	private Random rand;
-	private int lastChoice;
+	private int lastChoice = -99;
+	private int[] selection;
 
 	/**
 	* Constructor takes in a population (the array of facts), and a Random object.
@@ -25,9 +26,7 @@ public class Selection
 
 		//Set up the array contents
 		for (int i = 0; i<generationSize; i++)
-		{
 			indexArray[i] = i;
-		}
 		
 		int sum = 0;
 		int tempValue;
@@ -39,19 +38,19 @@ public class Selection
 		}
 		
 		//Next we need to normalize each of the eval weights of the facts
+		
+		// Avoid division by 0 edge case:
+		if (sum == 0)
+			sum += 1;
+		
 		for (int i = 0; i < generationSize; i++)
-		{
 			evalArray[i] = evalArray[i] / sum;
-		}
 
 		QuickSortWithIndex sorter = new QuickSortWithIndex(evalArray);
 		//We now need to sort the now normalized factEvals
 		float[][] sorted = sorter.sort();
 		evalArray = sorted[0];
 		indexArray=  sorted[1];
-		
-		//System.out.println(Arrays.toString(evalArray));
-		//System.out.println(Arrays.toString(indexArray));
 	}
 
 	public int getLastIndexChoice()
@@ -59,34 +58,42 @@ public class Selection
 		return lastChoice;
 	}
 	
+	public int[] getSelection(){
+		return selection;
+	}
+	
 	/**
 	* Method performs f_select based on the population that the object was instantiated with
 	* @param int ignoreFactIndex, the fact that is to not be used.
 	* @return int[] some random fact based on the eval value of the roulette selection
 	*/
-	public int[] select(int ignoreFactIndex)
+	public void select(int ignoreFactIndex)
 	{
-		//float randFloat = rand. nextFloat();  //We now have our random index.
-		
 		// Generate a random float within the range of existing eval values:
-		float min = evalArray[0];
-		float max = evalArray[evalArray.length-1];
+		float min = 99;
+		float max = -99;
+		for (int i=0; i<evalArray.length; i++){
+			if (i == lastChoice)
+				continue;
+			if (evalArray[i] < min)
+				min = evalArray[i];
+			if (evalArray[i] > max)
+				max = evalArray[i];
+		}
 		float randFloat = min + rand.nextFloat() * (max - min);
 		
-		for (int i = evalArray.length-1; i >=0; i--)
-		{
-			if ( i != ignoreFactIndex)
-			{
-				if (evalArray[Math.round(indexArray[i])] >= randFloat)
-				{
-					lastChoice = Math.round(indexArray[i]);
-					return generation.get(Math.round(indexArray[i]));
-				}
+		// Perform roulette selection:
+		for (int i = evalArray.length-1; i >= 0; i--) {
+			
+			if (i == ignoreFactIndex)
+				continue;
+			if (evalArray[i] >= randFloat) {	
+				//System.out.println("lastChoice = " + (int) indexArray[i] + " " + evalArray[i]);
+				lastChoice = i;
+				selection = generation.get(i);
+				break;
 			}
 		}
-
-		lastChoice = Math.round(indexArray[0]);
-		return generation.get(Math.round(indexArray[0]));
 	}
 
 	public static int[][] sortFromEvals(int[][] facts)

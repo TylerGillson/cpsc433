@@ -98,17 +98,13 @@ public class Driver {
     	System.out.println("Final Solution:" + "\n" + Arrays.toString(solution) + "\n");
     	printSchedule(solution);
 	}
-    
-	public static int eval(int[] sol){
-		return eval.getValue(sol);
-	}
-	
+    	
 	/**
 	 * "Output Converter" to print a textual schedule based on a pr instance.
 	 * @param sol - The completed pr instance to be converted.
 	 */
 	public static void printSchedule(int[] sol){
-		String output = "Eval-value: " + String.valueOf(eval(sol)) + "\n";
+		String output = "Eval-value: " + String.valueOf(eval.getValue(sol)) + "\n";
 		String line;
 		String day;
 		String time;
@@ -178,10 +174,20 @@ public class Driver {
         	OrTree<int[]> t = new OrTree<int[]>(oTree.getData());
         	
         	// Perform an or-tree-based search to build a solution candidate:
-        	candidate = t.buildCandidate();
+        	ArrayList<Integer> mostTightlyBound = getMTBCopy();
+        	candidate = t.buildCandidate(mostTightlyBound);
+        	
         	System.out.println("CANDIDATE " + i + ": " + Arrays.toString(candidate));
         	generation.add(candidate);
     	}
+	}
+	
+	public static ArrayList<Integer> getMTBCopy(){
+		int[] mTB = constr.getMostTightlyBoundIndices().clone();
+		ArrayList<Integer> mostTightlyBound = new ArrayList<Integer>(); 
+		for (int idx : mTB)
+			mostTightlyBound.add(idx);
+		return mostTightlyBound;
 	}
 	
 	/**
@@ -193,9 +199,12 @@ public class Driver {
 		List<int[]> lastGen = generation.getGeneration();
 		Collections.sort(lastGen, new Comparator<int[]>() {
 	        public int compare(int[] sol1, int[] sol2){
-	            if (eval(sol1) == eval(sol2))
+	        	int e1 = eval.getValue(sol1);
+	        	int e2 = eval.getValue(sol2);
+	        	
+	        	if (e1 == e2)
 	            	return 0;
-	            else if (eval(sol1) > eval(sol2))
+	            else if (e1 > e2)
 	            	return 1;
 	            else
 	            	return -1;
@@ -232,9 +241,6 @@ public class Driver {
 				courses.add(cpsc913);
 			}
 						
-			// Deal with "courses that can't overlap with CPSC 313/413"...
-			// WHAT DOES THIS MEAN???
-			
 			// Add unwanted(a,s) statements for members of sections:
 			sections.forEach(s -> {
 				addUnwanted(s, "MO", "18:00");
@@ -271,9 +277,8 @@ public class Driver {
 		Iterator<List<String>> courseSlots = course_slots.iterator(); 
 		while (courseSlots.hasNext()) {
 			List<String> cs = courseSlots.next();
-			if (cs.get(0).equals("TU") && cs.get(1).equals("11:00")){
+			if (cs.get(0).equals("TU") && cs.get(1).equals("11:00"))
 				delete = course_slots.indexOf(cs);
-			}
 		}
 		if (delete != -99)
 			course_slots.remove(delete);

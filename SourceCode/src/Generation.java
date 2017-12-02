@@ -21,33 +21,29 @@ public class Generation{
 		
 		if (debug) System.out.println("I am evolving!");
 
-		//check to see that the generation is not Empty
-		if(generation.isEmpty())
-		{
+		// check to see that the generation is not Empty
+		if (generation.isEmpty())
 			throw new IllegalStateException();
-		}
 
 		//We can evolve our population
 
-		//First we choose two facts wtih F_Select
+		//First we choose two facts with F_Select:
 		Random rand = new Random();
 		Selection selector = new Selection(generation, rand);
-		int[] a = selector.select(-99);
-		//System.out.println("LAST CHOICE: " + selector.getLastIndexChoice());
-		int[] b = selector.select(selector.getLastIndexChoice());
+		
+		selector.select(-99);
+		int[] a = selector.getSelection();
+		
+		selector.select(selector.getLastIndexChoice());
+		int[] b = selector.getSelection();
 		
 		//We now have the two facts that we can use with the or-tree, and use the alt-search Control
 		int pr_size = Driver.courses.size() + Driver.labs.size();
-		int[] child = new int[pr_size];
+		OrTree<int[]> tree = new OrTree<int[]>(pr_size);
 		
-		while (true){
-			OrTree<int[]> tree = new OrTree<int[]>(pr_size);
-			child = tree.breedCandidates(a, b);
-			
-			if (child != null)
-				break;
-		}
-			
+		int[] child = new int[pr_size];
+		child = tree.breedCandidates(a, b);
+				
 		generation.add(child);
 		if (generation.size() <= pop_max){
 			if (debug) {
@@ -67,9 +63,7 @@ public class Generation{
 
 			int[][] sortedFacts = Selection.sortFromEvals((int[][])generation.toArray(new int[generation.size()][generation.get(0).length]));
 			generation.remove(sortedFacts[sortedFacts.length -1]);
-		}
-
-		
+		}		
 	}
 	
 	public List<int[]> getGeneration(){
