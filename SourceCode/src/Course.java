@@ -39,6 +39,13 @@ public class Course
 		
 		// Calculate constrVal:
 		constrVal = unwanted.size() + incompatible.size();
+		
+		//build lab list
+		for (int i = 0; i < Driver.labs.size(); i++) {
+			List<String> labName =Driver.labs.get(i);
+			if (labName.containsAll(name))
+				labList.add(labName);
+		}
 	}
 	
 	public List<String> getName()
