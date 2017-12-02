@@ -1,4 +1,5 @@
 import java.util.*;
+import java.time.*;
 
 /* HARD CONSTRAINTS
 1. No more than coursemax(s) courses can be assigned to slot s
@@ -301,6 +302,7 @@ public class Constr
 						String leftStart = leftTime.get(1);
 						
 						//this is not expressed in time but in int, 
+						LocalTime leftStart=  
 						int leftEnd = Integer.parseInt((leftStart.replace(":",""))) + 130;
 						
 						
