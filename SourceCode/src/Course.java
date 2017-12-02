@@ -2,16 +2,22 @@ import java.util.*;
 
 public class Course
 {
+	private final int EVE_VAL = 100;
 	private List<String> name;
 	private boolean evening = false;
 	private ArrayList<List<String>> unwanted = new ArrayList<List<String>>();
 	private ArrayList<List<String>> incompatible = new ArrayList<List<String>>();
 	private int constrVal = 0;
 	private ArrayList<List<String>> labList;
+	private int index;
 	
 	// Still need to deal with adding labs of courses to incompatible, 500 level courses, etc.
 	public Course(String type, int idx)
 	{
+		//Set original index, indices of courses come first 
+		//then indices of labs pick up from where the course indices ended
+		index = type.equals("course") ? idx : (idx + Driver.courses.size());
+		
 		// Set name:
 		name = type.equals("course") ? Driver.courses.get(idx) : Driver.labs.get(idx);
 		
@@ -38,7 +44,7 @@ public class Course
 		}
 		
 		// Calculate constrVal:
-		constrVal = unwanted.size() + incompatible.size();
+		constrVal = unwanted.size() + incompatible.size() + + (evening ? EVE_VAL : 0) + labList.size();
 		
 		//build lab list
 		for (int i = 0; i < Driver.labs.size(); i++) {
@@ -46,6 +52,11 @@ public class Course
 			if (labName.containsAll(name))
 				labList.add(labName);
 		}
+	}
+	
+	public int getIndex()
+	{
+		return index;
 	}
 	
 	public List<String> getName()

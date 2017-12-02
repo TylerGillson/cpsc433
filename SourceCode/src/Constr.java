@@ -95,6 +95,9 @@ public class Constr
 			Slot lab_slot = new Slot("lab", idx);
 			all_slots[idx + num_course_slots] = lab_slot;});
 		
+		//Sort courses by most tightly bound
+		Arrays.sort(all_sections, Collections.reverseOrder());
+		
 		sectionList = all_sections;
 		slotList = all_slots;
 	}
@@ -127,6 +130,10 @@ public class Constr
 					
 		//if (valid == true)
 			//System.out.println("Incompatible passed.");
+		
+		if (valid == true){
+			check500();
+		}
 		
 		return valid;
 	}
@@ -240,6 +247,34 @@ public class Constr
 		}
 	}
 	
+	//Checks if 500 level courses are in the same slot
+	//Adds slot index of 500 level courses to an ArrayList
+	//Converts ArrayList to Set and compares the lengths to see if there were duplicates in the ArrayList
+	public void check500()
+	{
+		ArrayList<Integer> indices = new ArrayList<Integer>();
+		
+		for (int i = 0; i < currentAssign.length; i++)
+		{
+			if (sectionList[i].getName().get(1).charAt(0) == '5')
+				indices.add(currentAssign[i]);
+		}
+		
+		Set<Integer> indexSet = new HashSet<Integer>(indices);
+		if (indices.size() != indexSet.size())
+			valid = false;
+	}
+	
+	//Returns an array of indices corresponding to the most tightly bound courses
+	public int[] mostTightlyBoundIndex()
+	{
+		int[] sortedIndices = new int[sectionList.length];
+		for (int i = 0; i < sectionList.length; i++)
+		{
+			sortedIndices[i] = sectionList[i].getIndex();
+		}
+		return sortedIndices;
+	}
 	
 	/**
 	* Method totals the number of incompatibilities and unwanted preferences
