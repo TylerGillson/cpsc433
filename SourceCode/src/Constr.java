@@ -132,9 +132,21 @@ public class Constr
 		if (valid == true){
 			if (debugToggle) System.out.println("Check 500-level passed.");
 			
-			// DAVID's method:
-			
+		if (valid == true){
+			if (debugToggle) System.out.println("Check 500-level passed.");
+			checkCourseLabConflicts();
+			if(!valid) {
+				Driver.printSchedule(currentAssign);	
+				/*if(debugToggle) {
+					Scanner sc = new Scanner(System.in);
+					debug("Check to see if conflict ok?");
+					sc.next();
+				*/
+			}	
 			//checkCourseLabOverlap();
+		}
+		if(valid == true)
+			if(debugToggle) System.out.println("Check course-lab conflict passed");
 		}
 		return valid;
 	}
@@ -146,6 +158,10 @@ public class Constr
 	*/
 	private List<String> getTimeSlot(int index)
 	{
+	
+		
+		
+		
 		int firstLab = Driver.courses.size();
 		
 		if (index < firstLab)
@@ -265,16 +281,31 @@ public class Constr
 		return sortedIndices;
 	}
 	
-	/**
+/**
 	* Method checks to see if two classes have any time overlap using the index of an a slot in currentAssign
 	* @param assignIndex1, assignIndex2 are the indexes of the classes in currentAssign
 	* @return true if there is no conflict, false if there is a time conflict
 	*/
 	public boolean checkCourseTimeConflict(int assignIndex1, int assignIndex2)
 	{	
+		
+	
+		debug("______________________________________");
+		debug("In checkCourseTimeConflict: ");
+		debug("Index1 = " + assignIndex1 + " which is " + currentAssign[assignIndex1]);
+		debug("Index2 = " + assignIndex2 + " which is " + currentAssign[assignIndex2]);
+		if(assignIndex1 == assignIndex2) throw new IllegalArgumentException("Indexes cannot be equal!");
+		
+		if((currentAssign[assignIndex1] == -99) ||(currentAssign[assignIndex2] == -99))
+			return true;
+	
 		if (currentAssign == null) throw new NullPointerException();
+		
 		List<String> time1 = getTimeSlot(assignIndex1);
 		List<String> time2 = getTimeSlot(assignIndex2);
+		
+		debug("Time1 is: " + time1);
+		debug("Time2 is: " + time2);
 		
 		//Check to see if they are on the same day
 		if(time1.get(0).compareTo(time2.get(0)) != 0){
@@ -344,28 +375,53 @@ public class Constr
 		if(debugToggle) System.out.println(val);
 	}
 	
-	public boolean checkCourseLabConflicts(){
+	public void checkCourseLabConflicts(){
 		
 		boolean safe = true;
-		ArrayList<List<String>> mainList = Driver.courses;
+		ArrayList<List<String>> mainList = (ArrayList<List<String>>)Driver.courses.clone();
+		
+		
 		for(int i =0; i < Driver.labs.size(); i++){
 			mainList.add(Driver.labs.get(i));
 		}
 		
 		ArrayList<List<String>> labList;
 		debug("The contents of sectionList is: ");
-		for (int i = 0; i < sectionList.length; i++){
-				debug(sectionList[i].toString());
+		for(int i = 0; i <sectionList.length; i++){
+			debug(i + " = " + sectionList[i].getName());
+			
+		}
+		for (int i = 0; i < sectionList.length - Driver.labs.size(); i++){
+			debug("Checking course: " + sectionList[i].getName());
+			
+				
 				labList  = sectionList[i].getLabList();
+				debug("With labs: ");
+				if(labList == null) debug("Lab list is null.");
+				for(int k = 0; k < labList.size(); k++){
+					if(labList.get(k) == null) debug("Lab = null");
+					debug("Lab " + k + ": " + labList.get(k));
+				}
 				for (int j = 0; j < labList.size(); j++){
-					safe = checkCourseTimeConflict(mainList.indexOf(labList.get(j)), mainList.indexOf(sectionList[i].getName()));
-					if(!safe) return false;
+					debug("    Checking lab: " + labList.get(j));
+					
+					safe = checkCourseTimeConflict(mainList.indexOf(sectionList[i].getName()),mainList.indexOf(labList.get(j)));
+					if(!safe){
+						valid = false;
+						debug("Failed due to : " + sectionList[i].getName() + ", " + labList.get(j) );
+						
+						return;
+					}						
 				}
 				safe = checkLabLabconflict(labList, mainList);
-				if (!safe) return false;
+				if(!safe){
+					valid = false;
+					debug("Failed due to lab v lab conflict");
+					return;
+				}
 		}			
-		throw new NullPointerException();
-		//return safe;
+		
+		return;
 	}
 	
 	private boolean checkLabLabconflict(ArrayList<List<String>> labList, ArrayList<List<String>> mainList){
