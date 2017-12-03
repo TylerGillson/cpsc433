@@ -74,5 +74,6 @@ public class Generation{
 		System.out.println("Final Generation:");
 		for (int[] sol : this.generation)
 			System.out.println(Arrays.toString(sol));
+		System.out.print("\n");
 	}
 }

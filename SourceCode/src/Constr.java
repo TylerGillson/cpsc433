@@ -24,7 +24,7 @@ import java.time.*;
 	CHECK
 	
 8. All 500-level course sections must be scheduled into different time slots.
-	???
+	CHECK
 	
 9. No courses can be scheduled at Tuesdays 11:00-12:30.
 	CHECK

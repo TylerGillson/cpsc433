@@ -107,9 +107,8 @@ public class Eval {
 			String x = slotInfo.get(3);
 			int minValue = Integer.parseInt(x);
 
-			if (CassignCount[i] < minValue) {
+			if (CassignCount[i] < minValue)
 				result += this.pen_coursemin;
-			}
 		}
 			
 		for (int i = 0; i< Driver.lab_slots.size(); i ++) {
@@ -117,23 +116,22 @@ public class Eval {
 			String x = slotInfo.get(3);
 			int minValue = Integer.parseInt(x);
 			
-			if (LassignCount[i] < minValue) {
+			if (LassignCount[i] < minValue)
 				result += this.pen_labmin;
-			}
 		}
 		
-		return 0-result;
+		return result;
 	}
 	
 	private int E_pref(int[] courseAssign, int[] labAssign) {
-		int result =0;
-		for (int i =0; i < courseAssign.length;i++) {
+		int result = 0;
+		for (int i = 0; i < courseAssign.length; i++) {
 			List<List<String>> key = new ArrayList<List<String>>();
 			//get the daytime base on slot index
 			int SlotIndex = courseAssign[i];
 			
 			if (SlotIndex == -99)
-				break;
+				continue;
 			
 			List<String> day =new ArrayList<String>(1);
 			day.add(Driver.course_slots.get(SlotIndex).get(0));
@@ -148,7 +146,6 @@ public class Eval {
 			//find if key exist, if it does result increase by its pref value
 			if (pref.containsKey(key)) 
 				result += pref.get(key);
-			
 		}
 		
 		for (int i=0; i < labAssign.length; i++) {
@@ -157,7 +154,7 @@ public class Eval {
 			int SlotIndex = labAssign[i];
 			
 			if (SlotIndex == -99)
-				break;
+				continue;
 			
 			List<String> day = new ArrayList<String>(1);
 			day.add(Driver.lab_slots.get(SlotIndex).get(0));
@@ -170,18 +167,16 @@ public class Eval {
 			key.add(classid);
 
 			//find if key exist, if it does result increase by its pref value
-			if (pref.containsKey(key)) {
+			if (pref.containsKey(key))
 				result += pref.get(key);
-			}
 		}
-		
 		return result;
 	}
 	
 	private int E_pair(int[] courseAssign, int[] labAssign) {
-		int result =0;
+		int result = 0;
 		//method 3: convert the pair input into slots assigned to theses classes, then check for matching
-		for (int i = 0; i < Driver.pair.size();i++) {
+		for (int i = 0; i < Driver.pair.size(); i++) {
 			List<List<String>> pairX = Driver.pair.get(i);
 			List<String> pairX1 = pairX.get(0);
 			List<String> pairX2 = pairX.get(1);
@@ -194,7 +189,7 @@ public class Eval {
 				int slotIndex = labAssign[indexX1];
 				
 				if (slotIndex == -99)
-					break;
+					continue;
 				
 				List<String> x =Driver.lab_slots.get(slotIndex);
 				X1Time.add(x.get(0));
@@ -205,7 +200,7 @@ public class Eval {
 				int slotIndex = courseAssign[indexX1];
 				
 				if (slotIndex == -99)
-					break;
+					continue;
 				
 				List<String> x =Driver.course_slots.get(slotIndex);
 				X1Time.add(x.get(0));
@@ -220,7 +215,7 @@ public class Eval {
 				int slotIndex = labAssign[indexX2];
 				
 				if (slotIndex == -99)
-					break;
+					continue;
 				
 				List<String> x =Driver.lab_slots.get(slotIndex);
 				X2Time.add(x.get(0));
@@ -231,28 +226,27 @@ public class Eval {
 				int slotIndex = courseAssign[indexX2];
 				
 				if (slotIndex == -99)
-					break;
+					continue;
 				
 				List<String> x =Driver.course_slots.get(slotIndex);
 				X2Time.add(x.get(0));
 				X2Time.add(x.get(1));
 			}
 			
-			if (X1Time.get(0).equals(X2Time.get(0)) && X1Time.get(1).equals(X2Time.get(1)) ) {
+			if (X1Time.get(0).equals(X2Time.get(0)) && X1Time.get(1).equals(X2Time.get(1)))
 				result += this.not_paired;
-			}
 		}
-		return 0-result;
+		return result;
 	}
 	
 	private int E_secdiff(int[] cAssign, int[]lAssign) {
-		int result =0;
+		int result = 0;
 		//setup record to reduce the runtime to O(kn)
 		HashMap<List<String>,List<List<String>>> courseIndex = new HashMap<List<String>,List<List<String>>>();
 
 		//setting up record of course-index for secdiff, to avoid nested loop 
 		for (int i = 0 ; i < Driver.courses.size(); i++) {
-			List<String> key  = new ArrayList<>();
+			List<String> key = new ArrayList<>();
 			
 			//get the name of course
 			List<String> coursename = Driver.courses.get(i);
@@ -264,10 +258,8 @@ public class Eval {
 			if (courseIndex.containsKey(key))
 				value = courseIndex.get(key);
 			
-			else;
-			
 			if (cAssign[i] == -99)
-				break;
+				continue;
 			
 			List<String> slotinfo = Driver.course_slots.get(cAssign[i]);	
 			List<String> slotTime = new ArrayList<>();
@@ -283,27 +275,23 @@ public class Eval {
 			List<List<String>> value = courseIndex.get(key);
 			if (value.size() > 1) {	
 				HashMap<List<String>,Integer> Slot_AssignValue = new HashMap<>();
-				for (List<String> e: value) {
-					if (Slot_AssignValue.containsKey(e) == false) {
+				
+				for (List<String> e : value) {
+					if (Slot_AssignValue.containsKey(e) == false)
 						Slot_AssignValue.put(e, 1);
-					}
 					else {
 						int counts = Slot_AssignValue.get(e);
 						counts++;
 						Slot_AssignValue.put(e, counts);
-					}
-					
+					}		
 				}
 				
-				for (List<String> k: Slot_AssignValue.keySet()) {
-					
-					if ( Slot_AssignValue.get(k)> 1) {
+				for (List<String> k : Slot_AssignValue.keySet()) {
+					if (Slot_AssignValue.get(k) > 1)
 						result += (Slot_AssignValue.get(k)-1) * this.pen_section;
-					}
-					
 				}
 			}
 		}
-		return 0-result;
+		return result;
 	}
 }

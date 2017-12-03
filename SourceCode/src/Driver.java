@@ -10,9 +10,9 @@ public class Driver {
     public static Generation generation;
 	
     // Search constraints:
-    public static int pop_init = 10;
-	public static int pop_max  = 25;
-	public static int gen_max  = 50;
+    public static int pop_init = 50;
+	public static int pop_max  = 60;
+	public static int gen_max  = 200;
 	
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
@@ -80,19 +80,16 @@ public class Driver {
     	
     	// Initialize the first generation of candidate solutions:
     	initGeneration0();
-    	System.out.println();
     	
     	// Run GA for specified # of generations:
-    	for (int i=0; i<gen_max; i++){
+    	for (int i=0; i<gen_max; i++)
     		generation.evolve();
-    	}
     
     	// Sort the final generation according to our fitness function and select the optimal solution:
     	int[] solution = sortLastGen();
     	    	
     	// Print final generation:
     	generation.print();
-    	System.out.print("\n");
     	
     	// Print final solution + output schedule:
     	System.out.println("Final Solution:" + "\n" + Arrays.toString(solution) + "\n");
@@ -165,9 +162,8 @@ public class Driver {
 			build_pr(pr_size);
 			oTree = new OrTree<int[]>(pr);
 		}
-		else {
+		else
 			oTree = new OrTree<int[]>(pr_size);
-		}
 		
 		// Build the first generation of candidate solutions:
     	for (int i=0; i<pop_init; i++) {	
@@ -181,6 +177,7 @@ public class Driver {
         	System.out.println("CANDIDATE " + i + ": " + Arrays.toString(candidate));
         	generation.add(candidate);
     	}
+    	System.out.println();
 	}
 	
 	public static ArrayList<Integer> getMTBCopy(){
@@ -230,10 +227,14 @@ public class Driver {
 	
 	/**
 	 * Check for & deal with CPSC 313 / CPSC 413 as follows:
-	 * 1. Add CPSC 813/913 to courses.
-	 * 2. Add "TU, 18:00, 2, 1" to lab slots.
-	 * 3. Generate list of all CPSC 313 labs & course sections & courses that cannot overlap w/ them.
-	 * 4. Add unwanted(a,s) to unwanted for all a in above list, for: "MON, 18:00", "TU 17:00", and "TU 18:30".
+	 *
+	 * If CPSC 313/413 was included in the input,
+	 * 
+	 * 1. Check that a TU, 18:00 lab slot exists and fail if one does not.
+	 * 2. Add a partial assignment for CPSC 813/913 indicating that it must be scheduled for TU, 18:00.
+	 * 3. Add CPSC 813/913 to labs.
+	 * 4. Generate a list of all CPSC 313/413 labs & course sections.
+	 * 5. Add unwanted(a,s) to unwanted for all a in above list, for: "MON, 18:00", "TU 17:00", and "TU 18:30".
 	 */
 	public static void manage313413(String course){
 		// Begin generating list of all CPSC 313/413-related sections:
@@ -256,9 +257,11 @@ public class Driver {
 			String num = (course.equals("313")) ? "813" : "913";
 			List<String> cL = Arrays.asList("CPSC", num, "", "");
 			lab_part_assign.add(cL);
+			
 			cL = new ArrayList<String>();
 			cL.add("TU");
 			lab_part_assign.add(cL);
+			
 			cL = new ArrayList<String>();
 			cL.add("18:00");
 			lab_part_assign.add(cL);
@@ -283,7 +286,7 @@ public class Driver {
 	}
 	
 	/**
-	 * An a new entry to the 'unwanted' data structure.
+	 * Add a new entry to the 'unwanted' data structure.
 	 * @param section
 	 * @param day
 	 * @param time
@@ -337,9 +340,8 @@ public class Driver {
 				Iterator<List<String>> slots = course_slots.iterator();
 				while (slots.hasNext()){
 					List<String> slot = slots.next();
-					if (slot.get(0).equals(assign.get(1).get(0)) && slot.get(1).equals(assign.get(2).get(0))){
+					if (slot.get(0).equals(assign.get(1).get(0)) && slot.get(1).equals(assign.get(2).get(0)))
 						slot_idx = course_slots.indexOf(slot);
-					}
 				}
 				if (slot_idx == -99)
 					throw new java.lang.Error("The partial assignment for this course indicated an invalid slot!");
@@ -352,17 +354,15 @@ public class Driver {
 				Iterator<List<String>> slots = lab_slots.iterator();
 				while (slots.hasNext()){
 					List<String> slot = slots.next();
-					if (slot.get(0).equals(assign.get(1).get(0)) && slot.get(1).equals(assign.get(2).get(0))){
+					if (slot.get(0).equals(assign.get(1).get(0)) && slot.get(1).equals(assign.get(2).get(0)))
 						slot_idx = lab_slots.indexOf(slot);
-					}
 				}
 				if (slot_idx == -99)
 					throw new java.lang.Error("The partial assignment for this lab indicated an invalid slot!");
 			}
 			// The partial assignment refers to a course/lab not in the input.
-			else {
+			else
 				throw new java.lang.Error("This course/lab was not in the input!");
-			}
 				
 			// Update pr to ensure that the course/lab is assigned the specified time slot:
 			pr[pr_idx] = slot_idx;
