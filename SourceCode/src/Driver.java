@@ -120,8 +120,14 @@ public class Driver {
 					section = section + section_elem.get(j) + " ";
 				}
 				section = section.trim();
-				day = course_slots.get(slot_idx).get(0);
-				time = course_slots.get(slot_idx).get(1);
+				if(slot_idx == -99) {
+					day = "Unnasigned";
+					time = "";
+				}else{
+					day = course_slots.get(slot_idx).get(0);
+					time = course_slots.get(slot_idx).get(1);
+				}
+				
 			}
 			// The i-th sol-entry is a lab:
 			else {
@@ -130,8 +136,13 @@ public class Driver {
 					section = section + section_elem.get(j) + " ";
 				}
 				section = section.trim();
-				day = lab_slots.get(slot_idx).get(0);
-				time = lab_slots.get(slot_idx).get(1);
+				if(slot_idx == -99) {
+					day = "Unnasigned";
+					time = "";
+				}else{
+					day = lab_slots.get(slot_idx).get(0);
+					time = lab_slots.get(slot_idx).get(1);
+				}
 			}
 			// Compute white space and construct a line:
 			String tabs = (section_elem.size() == 4) ? "\t\t\t" : "\t\t";
