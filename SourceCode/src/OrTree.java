@@ -42,6 +42,11 @@ public class OrTree<T>{
 	 * @param idx - An integer index into a pr instance. Corresponds to a course/lab section.
 	 */
 	public void altern(int section_idx){
+		
+		// Avoid over-writing partial assignments:
+		if (Driver.pr[section_idx] != -99)
+			return;
+		
 		// Determine is the section is a course or a lab:
 		boolean isCourse = (section_idx < Driver.courses.size()) ? true : false;
 		
@@ -82,15 +87,20 @@ public class OrTree<T>{
 			altern(expand_idx);
 			
 			// Choose a random successor node to expand: 
-			Random rand = new Random();
-			int randIndex = rand.nextInt(this.children.size());
-			OrTree<T> child = this.children.get(randIndex);
+			if (this.children.size() > 0) {
+				Random rand = new Random();
+				int randIndex = rand.nextInt(this.children.size());
+				OrTree<T> child = this.children.get(randIndex);
 				
-			// Recursively expand successor nodes until completion:
-			if (!pr_finished(child.data))
-				return child.buildCandidate(mostTightlyBound);
+				// Recursively expand successor nodes until completion:
+				if (!pr_finished(child.data))
+					return child.buildCandidate(mostTightlyBound);
+				else
+					return child.data;
+			} 
+			// Skip over partial assignment indices:
 			else
-				return child.data;
+				return this.buildCandidate(mostTightlyBound);
 		}
 	}
 	

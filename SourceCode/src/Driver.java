@@ -72,7 +72,7 @@ public class Driver {
 		checkForTU11();
 		
     	// Check for / deal with CPSC 313 & CPSC 413:
-    	manage313413("313");
+    	manage313413("313");	
     	manage313413("413");
     	
     	// Initialize Constr AFTER dealing w/ CPSC 313/413:
@@ -110,7 +110,8 @@ public class Driver {
 		String time;
 		
 		// Iterate through sol's entries and re-construct section, day, and time info:
-		for (int i=0; i<sol.length-1; i++){
+		for (int i=0; i<sol.length; i++){
+
 			int slot_idx = sol[i];
 			String section = "";
 			List<String> section_elem;
@@ -214,6 +215,19 @@ public class Driver {
 		return sol;
 	}
 	
+	public static void checkTU18Exists(){
+		boolean tu18Exists = false;
+		for (int i=0; i < lab_slots.size(); i++){
+			List<String> ls = lab_slots.get(i);
+			if (ls.get(0).equals("TU") && ls.get(1).equals("18:00")){
+				tu18Exists = true;
+				return;
+			}
+		}
+		if (!tu18Exists)
+			throw new java.lang.Error("CPSC 313/413 was included in Courses, but the correct Lab Slot does not exist!");
+	}		
+	
 	/**
 	 * Check for & deal with CPSC 313 / CPSC 413 as follows:
 	 * 1. Add CPSC 813/913 to courses.
@@ -232,13 +246,31 @@ public class Driver {
 		
 		// If there are CPSC-related courses:
 		if (!sections.isEmpty()){
-			// Add CPSC 813/913 to courses:
+			
+			// Do this only once:
+			if (course.equals("313"))
+				checkTU18Exists();
+			
+			// Add a partial assignment for CPSC 813/913:
+			ArrayList<List<String>> lab_part_assign = new ArrayList<List<String>>();
+			String num = (course.equals("313")) ? "813" : "913";
+			List<String> cL = Arrays.asList("CPSC", num, "", "");
+			lab_part_assign.add(cL);
+			cL = new ArrayList<String>();
+			cL.add("TU");
+			lab_part_assign.add(cL);
+			cL = new ArrayList<String>();
+			cL.add("18:00");
+			lab_part_assign.add(cL);
+			part_assign.add(lab_part_assign);
+			
+			// Add CPSC 813/913 to labs:
 			if (course.equals("313")){
 				List<String> cpsc813 = Arrays.asList("CPSC", "813", "", ""); 
-				courses.add(cpsc813);
+				labs.add(cpsc813);
 			} else if (course.equals("413")){
 				List<String> cpsc913 = Arrays.asList("CPSC", "913", "", ""); 
-				courses.add(cpsc913);
+				labs.add(cpsc913);
 			}
 						
 			// Add unwanted(a,s) statements for members of sections:
@@ -247,10 +279,6 @@ public class Driver {
 				addUnwanted(s, "TU", "17:00");
 				addUnwanted(s, "TU", "18:30");
 			});
-			
-			// #%(*@&#$%)(@&$%)$@%
-			// ADD PARTIAL ASSIGNMENTS FOR 813/913 OR BREAK
-			// #@)(*^#$_(^&$$@^@$#%
 		}
 	}
 	
@@ -293,14 +321,16 @@ public class Driver {
 		// Iterate over each partial assignment that was in the input file:
 		Iterator<ArrayList<List<String>>> partAssigns = part_assign.iterator(); 
 		while (partAssigns.hasNext()) {
+			
 			ArrayList<List<String>> assign = partAssigns.next();
-			    			
+			
 			int pr_idx = -99;
 			int slot_idx = -99;
 			int course_idx = courses.indexOf(assign.get(0));
 			
 			// The partial assignment refers to a course.
 			if (course_idx != -1) {
+				
 				pr_idx = course_idx;
 				
 				// Iterate through course slots to find the index of the correct time slot:
@@ -330,9 +360,10 @@ public class Driver {
 					throw new java.lang.Error("The partial assignment for this lab indicated an invalid slot!");
 			}
 			// The partial assignment refers to a course/lab not in the input.
-			else
+			else {
 				throw new java.lang.Error("This course/lab was not in the input!");
-			
+			}
+				
 			// Update pr to ensure that the course/lab is assigned the specified time slot:
 			pr[pr_idx] = slot_idx;
 		}
