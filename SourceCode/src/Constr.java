@@ -1,5 +1,6 @@
 import java.util.*;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 /* HARD CONSTRAINTS
 1. No more than coursemax(s) courses can be assigned to slot s
@@ -132,10 +133,6 @@ public class Constr
 		if (valid == true){
 			if (debugToggle) System.out.println("Check 500-level passed.");
 			checkCourseLabConflicts();
-			
-			if (!valid)
-				Driver.printSchedule(currentAssign);
-			//checkCourseLabOverlap();
 		}
 			
 		if (valid == true)
@@ -270,8 +267,176 @@ public class Constr
 		return sortedIndices;
 	}
 	
-    /**
-	* Method checks to see if two classes have any time overlap using the index of a slot in currentAssign
+	/**
+	 * use to check if the class assigned is incompatible
+	 */
+	/*
+	public void incompatible() {
+		
+		//get all pair of incompatible
+		for (int i = 0; i<Driver.not_compatible.size(); i++) {
+			ArrayList<List<String>> badPair = Driver.not_compatible.get(i);
+			
+			//get the assign of left 
+			List<String> left = badPair.get(0);
+			int leftIndex;
+			if (left.contains("TUT") || left.contains("LAB")) 
+				leftIndex = Driver.labs.indexOf(left)+Driver.courses.size();
+			else
+				leftIndex = Driver.courses.indexOf(left);
+			
+			//get the assign of right
+			List<String> right= badPair.get(1);
+			int rightIndex;
+			if (right.contains("TUT") || right.contains("LAB")) 
+				rightIndex = Driver.labs.indexOf(right)+Driver.courses.size();
+			else
+				rightIndex = Driver.courses.indexOf(right);
+			
+			//use check if they have time conflict
+			if (checkCourseTimeConflict(leftIndex,rightIndex) == false) {
+				valid = false;
+				return;
+			}
+			
+		}
+		
+		
+		
+		
+	}
+	*/
+	public void incompatible()
+	{
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("H:mm");
+
+		//get all pair of incompatible
+		for (int i = 0; i<Driver.not_compatible.size(); i++) {
+			ArrayList<List<String>> badPair = Driver.not_compatible.get(i);
+			
+			//get the assign of left 
+			List<String> left = badPair.get(0);
+			int leftIndex;
+			if (left.contains("TUT") || left.contains("LAB")) 
+				leftIndex = Driver.labs.indexOf(left)+Driver.courses.size();
+			else
+				leftIndex = Driver.courses.indexOf(left);
+			int leftAssign = currentAssign[leftIndex];
+			//if unassign go next
+			if (leftAssign == -99 )
+				continue;			
+			//if they are assigned,get their time
+			List<String> leftTime;
+			String leftType = "LEC";
+			if (left.contains("TUT") || left.contains("LAB")) {
+				leftTime = Driver.lab_slots.get(leftAssign);
+				leftType ="TUT";
+			}
+			else
+				leftTime = Driver.course_slots.get(leftAssign);
+			
+			//get the assign of right
+			List<String> right= badPair.get(1);
+			int rightIndex;
+			if (right.contains("TUT") || right.contains("LAB")) 
+				rightIndex = Driver.labs.indexOf(right)+Driver.courses.size();
+			else
+				rightIndex = Driver.courses.indexOf(right);
+			int rightAssign = currentAssign[rightIndex];
+			//if unassign go next 
+			if (rightAssign == -99 )
+				continue;	
+			//if they are assigned,get their time
+			List<String> rightTime;
+			String rightType = "LEC";
+			if (right.contains("TUT") || right.contains("LAB")) {
+				rightTime = Driver.lab_slots.get(rightAssign);
+				rightType = "TUT";
+			}
+			else
+				rightTime = Driver.course_slots.get(rightAssign);
+			
+			//compare the 2 times
+			if(leftTime.get(0).equals("MO") && rightTime.get(0).equals("MO")) {
+				//if both on Monday and start at same time
+				if (leftTime.get(1).equals(rightTime.get(1))) {
+					valid = false;
+					return;
+				}
+			}
+			//if one is on Tuesday other is on Monday
+			else if (leftTime.get(0).equals("MO") && rightTime.get(0).equals("TU")){
+				continue;
+			}
+			else if (leftTime.get(0).equals( "TU") && rightTime.get(0).equals("MO")){
+				continue;
+			}
+			//if both on Tuesday
+			else if (leftTime.get(0).equals("TU") && rightTime.get(0).equals("TU")){
+				if (leftType.equals(rightType)) {
+					if (leftTime.get(1).equals(rightTime.get(1))) {
+						valid = false;
+						return;
+					}
+				}
+				else {
+					//check for overlapping time LEC slot is 1h30m long
+					if (leftType.equals("LEC")) {
+						//get left start and end
+						LocalTime leftStartTime=  LocalTime.parse(leftTime.get(1),dateTimeFormatter);
+						LocalTime leftEndTime = leftStartTime.plusMinutes(90);
+						
+						//check if right starts within the range of left time slot
+						LocalTime rightStartTime=  LocalTime.parse(rightTime.get(1),dateTimeFormatter);
+						if (rightStartTime.isAfter(leftStartTime) && rightStartTime.isBefore(leftEndTime)) {
+							valid = false;
+							return;
+						}
+						
+					}
+					else {
+						//get right start and end
+						LocalTime rightStartTime=  LocalTime.parse(rightTime.get(1),dateTimeFormatter);
+						LocalTime rightEndTime = rightStartTime.plusMinutes(90);
+						//check if right starts within the range of left time slot
+						LocalTime leftStartTime =  LocalTime.parse(leftTime.get(1),dateTimeFormatter);
+						if (leftStartTime.isAfter(rightStartTime) && leftStartTime.isBefore(rightEndTime)) {
+							valid = false;
+							return;
+						}
+					}		
+				}
+			}
+
+			//if left are Fridays labs
+			else if(leftTime.get(0).equals("FR")) {
+				//if both are friday lab and start at same time
+				if (rightTime.get(0).equals("FR") && rightTime.get(1).equals(leftTime.get(1))) {
+					valid = false;
+					return;
+				}
+				//else, right is a non friday but a lec on mo
+				else if(rightType.equals("LEC") && rightTime.get(0).equals("MO")) {
+					LocalTime leftStartTime=  LocalTime.parse(leftTime.get(1),dateTimeFormatter);
+					LocalTime leftEndTime = leftStartTime.plusMinutes(120);	
+					LocalTime rightStartTime=  LocalTime.parse(rightTime.get(1),dateTimeFormatter);
+					if (rightStartTime.isAfter(leftStartTime) && rightStartTime.isBefore(leftEndTime)) {
+						valid = false;
+						return;
+					}
+					
+				}
+			
+		
+			}	
+			
+		}
+		valid= true;
+	}
+				
+	
+	/**
+	* Method checks to see if two classes have any time overlap using the index of an a slot in currentAssign
 	* @param assignIndex1, assignIndex2 are the indexes of the classes in currentAssign
 	* @return true if there is no conflict, false if there is a time conflict
 	*/
@@ -365,7 +530,7 @@ public class Constr
 	public void checkCourseLabConflicts(){
 		
 		boolean safe = true;
-		ArrayList<List<String>> mainList = (ArrayList<List<String>>)Driver.courses.clone();
+		ArrayList<List<String>> mainList = (ArrayList<List<String>>) Driver.courses.clone();
 		
 		
 		for(int i =0; i < Driver.labs.size(); i++){
