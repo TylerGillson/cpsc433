@@ -17,6 +17,26 @@ public class Generation{
 		this.generation.add(candidate);
 	}
 	
+	public void cull(){
+		List<int[]> unique = new ArrayList<int[]>();
+		boolean add = true;
+		
+		for (int[] member : this.generation) {
+			
+			for (int[] uMem : unique) {
+				add = false;
+				if (!Arrays.equals(member, uMem))
+					add = true;
+			}
+			
+			if (add)
+				unique.add(member);
+		}
+		
+		this.generation.clear();
+		this.generation = unique;
+	}
+	
 	public void evolve(){
 		
 		if (debug) System.out.println("I am evolving!");

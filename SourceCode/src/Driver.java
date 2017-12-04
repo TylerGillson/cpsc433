@@ -10,9 +10,9 @@ public class Driver {
     public static Generation generation;
 	
     // Search constraints:
-    public static int pop_init = 50;
-	public static int pop_max  = 60;
-	public static int gen_max  = 200;
+    public static int pop_init = 15;
+	public static int pop_max  = 30;
+	public static int gen_max  = 100;
 	
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
@@ -82,9 +82,10 @@ public class Driver {
     	initGeneration0();
     	
     	// Run GA for specified # of generations:
-    	for (int i=0; i<gen_max; i++)
+    	for (int i=0; i<gen_max; i++){
     		generation.evolve();
-    
+    		generation.cull();
+    	}
     	// Sort the final generation according to our fitness function and select the optimal solution:
     	int[] solution = sortLastGen();
     	    	
