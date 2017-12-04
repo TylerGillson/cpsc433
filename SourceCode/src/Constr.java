@@ -284,47 +284,8 @@ public class Constr
 	/**
 	 * use to check if the class assigned is incompatible
 	 */
-	/*
-	public void incompatible() {
-		
-		//get all pair of incompatible
-		for (int i = 0; i<Driver.not_compatible.size(); i++) {
-			ArrayList<List<String>> badPair = Driver.not_compatible.get(i);
-			
-			//get the assign of left 
-			List<String> left = badPair.get(0);
-			int leftIndex;
-			if (left.contains("TUT") || left.contains("LAB")) 
-				leftIndex = Driver.labs.indexOf(left)+Driver.courses.size();
-			else
-				leftIndex = Driver.courses.indexOf(left);
-			
-			//get the assign of right
-			List<String> right= badPair.get(1);
-			int rightIndex;
-			if (right.contains("TUT") || right.contains("LAB")) 
-				rightIndex = Driver.labs.indexOf(right)+Driver.courses.size();
-			else
-				rightIndex = Driver.courses.indexOf(right);
-			
-			//use check if they have time conflict
-			if (checkCourseTimeConflict(leftIndex,rightIndex) == false) {
-				valid = false;
-				return;
-			}
-			
-		}
-		
-		
-		
-		
-	}
-	*/
 	public void incompatible()
 	{
-		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("H:mm");
-
-		
 		//get all pair of incompatible
 		for (int i = 0; i<Driver.not_compatible.size(); i++) {
 			ArrayList<List<String>> badPair = Driver.not_compatible.get(i);
@@ -339,20 +300,9 @@ public class Constr
 			int leftAssign = currentAssign[leftIndex];
 			//if unassign go next
 			if (leftAssign == -99 )
-				continue;			
-			//if they are assigned,get their time
-			List<String> leftTime;
-			String leftType = "LEC";
-			if (left.contains("TUT") || left.contains("LAB")) {
-				leftTime = Driver.lab_slots.get(leftAssign);
-				leftType ="TUT";
-			}
-			else
-				leftTime = Driver.course_slots.get(leftAssign);
+				continue;		
 			
 			
-			
-
 			//get the assign of right
 			List<String> right= badPair.get(1);
 			int rightIndex;
@@ -364,95 +314,112 @@ public class Constr
 			//if unassign go next 
 			if (rightAssign == -99 )
 				continue;	
-			//if they are assigned,get their time
-			List<String> rightTime;
-			String rightType = "LEC";
-			if (right.contains("TUT") || right.contains("LAB")) {
-				rightTime = Driver.lab_slots.get(rightAssign);
-				rightType = "TUT";
-			}
-			else
-				rightTime = Driver.course_slots.get(rightAssign);
 			
-			//compare the 2 times
-			if(leftTime.get(0).equals("MO") && rightTime.get(0).equals("MO")) {
-				//if both on Monday and start at same time
-				if (leftTime.get(1).equals(rightTime.get(1))) {
-					valid = false;
-					return;
-				}
-			}
-			//if one is on Tuesday other is on Monday
-			else if (leftTime.get(0).equals("MO") && rightTime.get(0).equals("TU")){
-				continue;
-			}
-			else if (leftTime.get(0).equals( "TU") && rightTime.get(0).equals("MO")){
-				continue;
-			}
-			//if both on Tuesday
-			else if (leftTime.get(0).equals("TU") && rightTime.get(0).equals("TU")){
-				if (leftType.equals(rightType)) {
-					if (leftTime.get(1).equals(rightTime.get(1))) {
-						valid = false;
-						return;
-					}
-				}
-				else {
-					//check for overlapping time LEC slot is 1h30m long
-					if (leftType.equals("LEC")) {
-						//get left start and end
-						LocalTime leftStartTime=  LocalTime.parse(leftTime.get(1),dateTimeFormatter);
-						LocalTime leftEndTime = leftStartTime.plusMinutes(90);
-						
-						//check if right starts within the range of left time slot
-						LocalTime rightStartTime=  LocalTime.parse(rightTime.get(1),dateTimeFormatter);
-						if (rightStartTime.isAfter(leftStartTime) && rightStartTime.isBefore(leftEndTime)) {
-							valid = false;
-							return;
-						}
-						
-					}
-					else {
-						//get right start and end
-						LocalTime rightStartTime=  LocalTime.parse(rightTime.get(1),dateTimeFormatter);
-						LocalTime rightEndTime = rightStartTime.plusMinutes(90);
-						//check if right starts within the range of left time slot
-						LocalTime leftStartTime =  LocalTime.parse(leftTime.get(1),dateTimeFormatter);
-						if (leftStartTime.isAfter(rightStartTime) && leftStartTime.isBefore(rightEndTime)) {
-							valid = false;
-							return;
-						}
-					}		
-				}
-			}
+			
+			
+			//if they are assigned,get their type
+			String leftType = "LEC";
+			if (left.contains("TUT") || left.contains("LAB")) 
+				leftType ="TUT";
 
-			//if left are Fridays labs
-			else if(leftTime.get(0).equals("FR")) {
-				//if both are friday lab and start at same time
-				if (rightTime.get(0).equals("FR") && rightTime.get(1).equals(leftTime.get(1))) {
-					valid = false;
-					return;
-				}
-				//else, right is a non friday but a lec on mo
-				else if(rightType.equals("LEC") && rightTime.get(0).equals("MO")) {
-					LocalTime leftStartTime=  LocalTime.parse(leftTime.get(1),dateTimeFormatter);
-					LocalTime leftEndTime = leftStartTime.plusMinutes(120);	
-					LocalTime rightStartTime=  LocalTime.parse(rightTime.get(1),dateTimeFormatter);
-					if (rightStartTime.isAfter(leftStartTime) && rightStartTime.isBefore(leftEndTime)) {
-						valid = false;
-						return;
-					}
-					
-				}
-			
+			//if they are assigned,get their type
+			String rightType = "LEC";
+			if (right.contains("TUT") || right.contains("LAB")) 
+				rightType = "TUT";
 		
-			}	
+			//if LEC/LEC
+			if (leftType.equals("LEC") && rightType.equals("LEC"))
+				valid = LLCheck(leftAssign,rightAssign);
+			//if TUT/TUT
+			else if (leftType.equals("TUT") && rightType.equals("TUT"))
+				valid = TTCheck(leftAssign,rightAssign);
+			else {
+				if (leftType.equals("LEC"))
+					valid = LTCheck(leftAssign,rightAssign);
+				else 
+					valid = LTCheck(rightAssign,leftAssign);
+			}
+			if (valid == false)
+				return;
 			
 		}
-		valid= true;
+			
+
+		valid = true;
 	}
 				
+	private boolean LLCheck(int lec1TimeSlot, int lec2TimeSlot) {
+		List<String> ts1Info = Driver.course_slots.get(lec1TimeSlot); 
+		List<String> ts2Info = Driver.course_slots.get(lec2TimeSlot); 
+		//if same day same time return false
+		if (ts1Info.get(0).equals(ts2Info.get(0)) && ts1Info.get(1).equals(ts2Info.get(1)))
+			return false;		
+		return true;
+	}
 	
+	private boolean TTCheck(int tut1TimeSlot, int tut2TimeSlot) {
+		List<String> ts1Info = Driver.lab_slots.get(tut1TimeSlot); 
+		List<String> ts2Info = Driver.lab_slots.get(tut2TimeSlot); 
+		//if same day same time return false
+		if (ts1Info.get(0).equals(ts2Info.get(0)) && ts1Info.get(1).equals(ts2Info.get(1)))
+			return false;		
+		return true;
+	}
+	
+	private boolean LTCheck(int lecTimeSlot, int tutTimeSlot) {
+		//get the time slot info 
+		List<String> ts1Info = Driver.course_slots.get(lecTimeSlot); 
+		List<String> ts2Info = Driver.lab_slots.get(tutTimeSlot); 
+		//init lec day time and tut day time
+		String lecDay = ts1Info.get(0);
+		String tutDay = ts2Info.get(0);
+		
+		String lecTime = ts1Info.get(1);
+		String tutTime = ts2Info.get(1);
+		
+		//init some useful items
+		DateTimeFormatter DTF = DateTimeFormatter.ofPattern("H:mm");
+		
+		
+		//both on monday compare time
+		if (lecDay.equals("MO") && tutDay.equals("MO")) {
+			if (lecTime.equals(tutTime)) 
+				return false;
+			
+		}
+
+		//both on tuesday compare overlaps
+		else if (lecDay.equals("TU") && tutDay.equals("TU")) {
+			LocalTime lecStartTime=  LocalTime.parse(lecTime, DTF);
+			LocalTime lecEndTime = lecStartTime.plusMinutes(90);
+			
+			LocalTime tutStartTime = LocalTime.parse(tutTime,DTF);
+			LocalTime tutEndTime = tutStartTime.plusMinutes(60);
+			//if lec start in duration of tut
+			if (lecStartTime.isAfter(tutStartTime) && lecStartTime.isBefore(tutEndTime))
+				return false;
+			//if tut start in duration of lec
+			else if(tutStartTime.isAfter(lecStartTime) && tutStartTime.isBefore(lecEndTime))
+				return false;
+		}
+		//if lab is FR and lec is on monday
+		else if (lecDay.equals("MO") && tutDay.equals("FR")) {
+			LocalTime lecStartTime=  LocalTime.parse(lecTime, DTF);
+			LocalTime lecEndTime = lecStartTime.plusMinutes(60);
+			
+			LocalTime tutStartTime = LocalTime.parse(tutTime,DTF);
+			LocalTime tutEndTime = tutStartTime.plusMinutes(120);
+			//if lec start in duration of tut
+			if (lecStartTime.isAfter(tutStartTime) && lecStartTime.isBefore(tutEndTime))
+				return false;
+			//if tut start in duration of lec
+			else if(tutStartTime.isAfter(lecStartTime) && tutStartTime.isBefore(lecEndTime))
+				return false;
+		}
+		
+		//on diff days
+		return true;
+	}
 	/**
 	* Method checks to see if two classes have any time overlap using the index of an a slot in currentAssign
 	* @param assignIndex1, assignIndex2 are the indexes of the classes in currentAssign
