@@ -128,26 +128,19 @@ public class Constr
 			if (debugToggle) System.out.println("Incompatible passed.");
 			check500();
 		}
-		
-		if (valid == true){
-			if (debugToggle) System.out.println("Check 500-level passed.");
 			
 		if (valid == true){
 			if (debugToggle) System.out.println("Check 500-level passed.");
 			checkCourseLabConflicts();
-			if(!valid) {
-				Driver.printSchedule(currentAssign);	
-				/*if(debugToggle) {
-					Scanner sc = new Scanner(System.in);
-					debug("Check to see if conflict ok?");
-					sc.next();
-				*/
-			}	
+			
+			if (!valid)
+				Driver.printSchedule(currentAssign);
 			//checkCourseLabOverlap();
 		}
-		if(valid == true)
-			if(debugToggle) System.out.println("Check course-lab conflict passed");
-		}
+			
+		if (valid == true)
+			if (debugToggle) System.out.println("Check course-lab conflict passed");
+		
 		return valid;
 	}
 	
@@ -158,10 +151,6 @@ public class Constr
 	*/
 	private List<String> getTimeSlot(int index)
 	{
-	
-		
-		
-		
 		int firstLab = Driver.courses.size();
 		
 		if (index < firstLab)
@@ -281,15 +270,13 @@ public class Constr
 		return sortedIndices;
 	}
 	
-/**
-	* Method checks to see if two classes have any time overlap using the index of an a slot in currentAssign
+    /**
+	* Method checks to see if two classes have any time overlap using the index of a slot in currentAssign
 	* @param assignIndex1, assignIndex2 are the indexes of the classes in currentAssign
 	* @return true if there is no conflict, false if there is a time conflict
 	*/
 	public boolean checkCourseTimeConflict(int assignIndex1, int assignIndex2)
 	{	
-		
-	
 		debug("______________________________________");
 		debug("In checkCourseTimeConflict: ");
 		debug("Index1 = " + assignIndex1 + " which is " + currentAssign[assignIndex1]);
