@@ -50,8 +50,8 @@ import java.time.format.DateTimeFormatter;
 public class Constr
 {
 	// Set once, upon instantiation:
-	private Course [] sectionList;
-	private Slot [] slotList;
+	public Course [] sectionList;
+	public Slot [] slotList;
 	private int pr_size;
 	private int all_slots_size;
 	
@@ -108,17 +108,17 @@ public class Constr
 		slotHas = new int[all_slots_size];
 		
 		if (valid == true)
-			evening();
+			//evening();
+		
+		if (valid == true)
+			incompatible();
 		
 		if (valid == true)
 			max();
 		
 		if (valid == true)
 			unwanted();
-			
-		if (valid == true)
-			incompatible();
-					
+						
 		if (valid == true)
 			check500();
 			
@@ -132,14 +132,19 @@ public class Constr
 	// If so checks if it's in evening slot
 	public void evening()
 	{
-		for (int i = 0; i < Driver.courses.size(); i++)
-		{
-			if (sectionList[i].getEvening() == true && slotList[i].getEvening() == false){
-				valid = false;
-				if (debugToggle) System.out.println("Failing evening ...");
-				break;
+		for (int i = 0; i < sectionList.length; i++) {
+			if (currentAssign[i] == -99)
+				continue;
+			
+			if (sectionList[i].getEvening() == true) {
+				
+				int offset = (i < Driver.courses.size()) ? 0 : Driver.course_slots.size();
+				if (slotList[currentAssign[i]+offset].getEvening() == false) {
+					valid = false;
+					if (debugToggle) System.out.println("Failing evening ...");
+				}			
 			}
-		}			
+		}		
 	}
 
 	//First goes through all courses and adds to count of slot when that slot is used
@@ -199,30 +204,30 @@ public class Constr
 	//Converts ArrayList to Set and compares the lengths to see if there were duplicates in the ArrayList
 	public void check500()
 	{
-		int num_courses = Driver.courses.size();
-		int num_500 = 0;
-				
-		int[] indices = new int[num_courses];
-		Arrays.fill(indices, -99);
+		int num_courses = Driver.courses.size();		
+		ArrayList<Integer> indices = new ArrayList<Integer>();
 		
 		for (int i = 0; i < num_courses; i++) {
-			if (sectionList[i].getName().get(1).charAt(0) == '5') {
-				indices[i] = currentAssign[i];
-				num_500++;
-			}
+			if (sectionList[i].getName().get(1).charAt(0) == '5')
+				indices.add(currentAssign[i]);
 		}
+		
+		int num_500 = indices.size();
+		int unassigned = 0;
 		
 		Set<Integer> indexSet = new HashSet<Integer>();
-		for (int i = 0; i < indices.length; i++) {
+		for (int i = 0; i < indices.size(); i++) {
 			
-			if (indices[i] == -99)
+			if (indices.get(i) == -99) {
+				unassigned++;
 				continue;
-			
-			if (!indexSet.contains(indices[i]))
-				indexSet.add(indices[i]);
+			}
+			if (!indexSet.contains(indices.get(i)))
+				indexSet.add(indices.get(i));
 		}
 		
-		if (!indexSet.isEmpty() && indexSet.size() != num_500) {
+		if (!indexSet.isEmpty() && indexSet.size()+unassigned != num_500) {
+			System.out.println(num_500 + " " + unassigned);
 			valid = false;
 			if (debugToggle) System.out.println("Failing check500 ...");
 		}
@@ -253,9 +258,10 @@ public class Constr
 		
 		// Generate an array containing the sorted indices:
 		int[] sortedIndices = new int[sectionList.length];
-		for (int i=0; i < sortedCourses.size(); i++)
+		for (int i=0; i < sortedCourses.size(); i++){
+			//System.out.println(sortedCourses.get(i).getName());
 			sortedIndices[i] = sortedCourses.get(i).getIndex();
-		
+		}
 		return sortedIndices;
 	}
 	

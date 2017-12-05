@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Course
 {
-	private final int EVE_VAL = 100;
+	private final int EVE_VAL = 500;
 	private List<String> name;
 	private boolean evening = false;
 	private ArrayList<ArrayList<List<String>>> unwanted = new ArrayList<ArrayList<List<String>>>();

@@ -58,6 +58,8 @@ public class OrTree<T>{
 			int[] new_candidate = this.data.clone();
 			new_candidate[section_idx] = i;
 			
+			//System.out.println(Arrays.toString(new_candidate));
+			
 			// If successor is viable, add it to the current node's children:
 			if (Driver.constr.evaluate(new_candidate) == true) { 
 				this.addChild(new_candidate);
@@ -78,6 +80,10 @@ public class OrTree<T>{
 			// Determine index of element of pr that will be expanded by altern...
 			// We expand the most tightly bound section.
 			int expand_idx = mostTightlyBound.get(mtbIndex);	
+			
+			boolean is_course = (expand_idx < Driver.courses.size()) ? true : false;
+			Object x = (is_course) ? Driver.courses.get(expand_idx) : Driver.labs.get(expand_idx - Driver.courses.size());
+			//System.out.println(expand_idx + " " + x);
 			
 			// Avoid over-writing values designed by partial assignments:
 			if (this.data[expand_idx] != -99){
@@ -104,6 +110,7 @@ public class OrTree<T>{
 			} 
 			// Restart if a dead-end is hit:
 			else {
+				System.out.println(Arrays.toString(this.data));
 				//return this.buildCandidate(mostTightlyBound, mtbIndex);
 				return null;
 			}
