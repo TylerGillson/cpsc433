@@ -33,7 +33,7 @@ public class Selection
 		int sum = 0;
 		int tempValue;
 		for (int i = 0; i< generationSize; i++) {
-			tempValue = Driver.eval.getValue(generation.get(i));
+			tempValue = Driver.eval.getValue(generation.get(i), false);
 			evalArray[i] = tempValue;
 			sum += tempValue;
 		}

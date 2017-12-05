@@ -12,7 +12,7 @@ public class Driver {
     // Search constraints:
     public static int pop_init = 5;
 	public static int pop_max  = 10;
-	public static int gen_max  = 30;
+	public static int gen_max  = 20;
 	
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
@@ -124,13 +124,13 @@ public class Driver {
 	 * @param sol - The completed pr instance to be converted.
 	 */
 	public static void printSchedule(int[] sol){
-		String output = "Eval-value: " + String.valueOf(eval.getValue(sol)) + "\n";
+		String output = "Eval-value: " + String.valueOf(eval.getValue(sol, true)) + "\n\n";
 		String line;
 		String day;
 		String time;
 		
 		// Iterate through sol's entries and re-construct section, day, and time info:
-		for (int i=0; i<sol.length; i++){
+		for (int i=0; i < sol.length; i++){
 
 			int slot_idx = sol[i];
 			String section = "";
@@ -213,7 +213,7 @@ public class Driver {
         	}
         	
         	if (print_prs)
-        		System.out.println("CANDIDATE " + i + "\tEval score: " + eval.getValue(candidate));
+        		System.out.println("CANDIDATE " + i + "\tEval score: " + eval.getValue(candidate, false));
         	
         	generation.add(candidate);
     	}
@@ -237,8 +237,8 @@ public class Driver {
 		List<int[]> lastGen = generation.getGeneration();
 		Collections.sort(lastGen, new Comparator<int[]>() {
 	        public int compare(int[] sol1, int[] sol2){
-	        	int e1 = eval.getValue(sol1);
-	        	int e2 = eval.getValue(sol2);
+	        	int e1 = eval.getValue(sol1, false);
+	        	int e2 = eval.getValue(sol2, false);
 	        	
 	        	if (e1 == e2)
 	            	return 0;

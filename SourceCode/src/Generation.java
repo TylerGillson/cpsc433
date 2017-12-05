@@ -48,8 +48,8 @@ public class Generation{
 		selector.select(selector.getLastIndexChoice());
 		int[] b = selector.getSelection();
 		
-		if (Arrays.equals(a, b))
-			throw new java.lang.Error("Breeding identical parents!");
+		//if (Arrays.equals(a, b))
+		//	throw new java.lang.Error("Breeding identical parents!");
 		
 		// Breed them using an or-tree and the alternate search control:
 		int pr_size = Driver.courses.size() + Driver.labs.size();
@@ -59,7 +59,7 @@ public class Generation{
 		child = tree.breedCandidates(a, b);
 		
 		if (Driver.print_prs)
-			System.out.println("Child #" + gen_num + "\tEval score: " + Driver.eval.getValue(child));
+			System.out.println("Child #" + gen_num + "\tEval score: " + Driver.eval.getValue(child, false));
 		
 		generation.add(child);
 		
@@ -68,8 +68,8 @@ public class Generation{
 			// If it has been, reduce the population by taking out the worst individual:
 			Collections.sort(generation, new Comparator<int[]>() {
 		        public int compare(int[] sol1, int[] sol2){
-		        	int e1 = Driver.eval.getValue(sol1);
-		        	int e2 = Driver.eval.getValue(sol2);
+		        	int e1 = Driver.eval.getValue(sol1, false);
+		        	int e2 = Driver.eval.getValue(sol2, false);
 		        	
 		        	if (e1 == e2)
 		            	return 0;
@@ -98,24 +98,24 @@ public class Generation{
 	public String getAvg() {
 		float avg = 0;
 		for (int i = 0; i < generation.size(); i++)
-			avg += Driver.eval.getValue(generation.get(i));
+			avg += Driver.eval.getValue(generation.get(i), false);
 		avg = avg / generation.size();
 		return String.valueOf(avg);
 	}
 	
 	public String getMin() {
-		int min = Driver.eval.getValue(generation.get(0));
+		int min = Driver.eval.getValue(generation.get(0), false);
 		for (int i = 1; i < generation.size(); i++)
-			if (min > Driver.eval.getValue(generation.get(i)))
-				min =  Driver.eval.getValue(generation.get(i));
+			if (min > Driver.eval.getValue(generation.get(i), false))
+				min =  Driver.eval.getValue(generation.get(i), false);
 		return String.valueOf(min);
 	}
 	
 	public String getMax() {
-		int max = Driver.eval.getValue(generation.get(0));
+		int max = Driver.eval.getValue(generation.get(0), false);
 		for (int i = 1; i < generation.size(); i++)
-			if (max < Driver.eval.getValue(generation.get(i)))
-				max =  Driver.eval.getValue(generation.get(i));
+			if (max < Driver.eval.getValue(generation.get(i), false))
+				max =  Driver.eval.getValue(generation.get(i), false);
 		return String.valueOf(max);
 	}
 	

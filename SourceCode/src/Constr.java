@@ -401,162 +401,28 @@ public class Constr
 		return true;
 	}
 	
-	/**
-	* Method checks to see if two classes have any time overlap using the index of an a slot in currentAssign
-	* @param assignIndex1, assignIndex2 are the indexes of the classes in currentAssign
-	* @return true if there is no conflict, false if there is a time conflict
-	*/
-	public boolean checkCourseTimeConflict(int assignIndex1, int assignIndex2)
-	{	
-		debug("______________________________________");
-		debug("In checkCourseTimeConflict: ");
-		debug("Index1 = " + assignIndex1 + " which is " + currentAssign[assignIndex1]);
-		debug("Index2 = " + assignIndex2 + " which is " + currentAssign[assignIndex2]);
-		if(assignIndex1 == assignIndex2) throw new IllegalArgumentException("Indexes cannot be equal!");
+	public void checkCourseLabConflicts() {
+		int num_courses = Driver.courses.size();
 		
-		if((currentAssign[assignIndex1] == -99) ||(currentAssign[assignIndex2] == -99))
-			return true;
-	
-		if (currentAssign == null) throw new NullPointerException();
-		
-		List<String> time1 = getTimeSlot(assignIndex1);
-		List<String> time2 = getTimeSlot(assignIndex2);
-		
-		debug("Time1 is: " + time1);
-		debug("Time2 is: " + time2);
-		
-		//Check to see if they are on the same day
-		if(time1.get(0).compareTo(time2.get(0)) != 0){
-			return true;
-		} 
-		
-		float classDuration;
-		if (time1.get(0).compareTo("MO") == 0){
-			classDuration = 100; // 1 hour classes
-		}
-		else
-			classDuration = 115f; // 1 hour 15 classes
-		
-		//We now need to compute the end start time as an integer for each class
-		float time1start;
-		char digit1 = time1.get(1).charAt(0);
-		char digit2 = time1.get(1).charAt(1);
-		
-		if (digit2 == ':')
-			time1start = (digit1 - 48)* 100;
-		else
-			time1start = (digit1 -48)*1000 + (digit2 -48)*100;
-		
-		//Do the same for the other time
-		float time2start;
-		digit1 = time2.get(1).charAt(0);
-		digit2 = time2.get(1).charAt(1);
-		
-		if (digit2 == ':')
-			time2start = (digit1 - 48)* 100;
-		else
-			time2start = (digit1 -48)*1000 + (digit2 -48)*100;
-		
-		//Use this to find the end times
-		float time1end = time1start + classDuration;
-		float time2end = time2start + classDuration;
-		
-		//Check for conflicts
-		if (time1start == time2start)
-			return false;
-		
-		//Check to see if they end before the other starts
-		if(time1end <= time2start)
-			return true;
-		
-		if(time2end <= time1start)
-			return true;
-		
-		//Check to see if one starts in the middle of the other
-		if((time1start < time2start) && (time2start < time1end))
-			return false;
-		
-		if((time2start < time1start)&& (time1start < time2end))
-			return false;
-		
-		//Check to see if one ends in the middle of the other
-		if((time1start < time2end) && (time2end < time1end))
-			return false;
-		
-		if((time2start < time1end) && (time1end < time2end))
-			return false;
+		for (int i = 0; i < num_courses; i++) {
+			ArrayList<List<String>> labs = sectionList[i].getLabList();
 			
-		return true;
-	}
-	
-	private void debug(String val){
-		if(debugToggle) System.out.println(val);
-	}
-	
-	public void checkCourseLabConflicts(){
-		
-		boolean safe = true;
-		ArrayList<List<String>> mainList = (ArrayList<List<String>>) Driver.courses.clone();
-		
-		
-		for(int i =0; i < Driver.labs.size(); i++){
-			mainList.add(Driver.labs.get(i));
-		}
-		
-		ArrayList<List<String>> labList;
-		debug("The contents of sectionList is: ");
-		for(int i = 0; i <sectionList.length; i++){
-			debug(i + " = " + sectionList[i].getName());
+			if (currentAssign[i] == -99)
+				continue;
 			
-		}
-		for (int i = 0; i < sectionList.length - Driver.labs.size(); i++){
-			debug("Checking course: " + sectionList[i].getName());
-			
+			for (int j = 0; j < labs.size(); j++) {
+				int labIndex = Driver.labs.indexOf(labs.get(j));
+				int labSlotIndex = currentAssign[labIndex + num_courses];
 				
-				labList  = sectionList[i].getLabList();
-				debug("With labs: ");
-				if(labList == null) debug("Lab list is null.");
-				for(int k = 0; k < labList.size(); k++){
-					if(labList.get(k) == null) debug("Lab = null");
-					debug("Lab " + k + ": " + labList.get(k));
-				}
-				for (int j = 0; j < labList.size(); j++){
-					debug("    Checking lab: " + labList.get(j));
-					
-					safe = checkCourseTimeConflict(mainList.indexOf(sectionList[i].getName()),mainList.indexOf(labList.get(j)));
-					if(!safe){
-						valid = false;
-						debug("Failed due to : " + sectionList[i].getName() + ", " + labList.get(j) );
-						
-						return;
-					}						
-				}
-				safe = checkLabLabconflict(labList, mainList);
-				if(!safe){
+				if (labSlotIndex == -99)
+					continue;
+				
+				if (!LTCheck(currentAssign[i], labSlotIndex)) {
 					valid = false;
-					debug("Failed due to lab v lab conflict");
-					return;
+					break;
 				}
-		}			
-		
-		return;
+			}	
+		}
 	}
 	
-	private boolean checkLabLabconflict(ArrayList<List<String>> labList, ArrayList<List<String>> mainList){
-		if (labList.size() < 2)
-			return true;
-		
-		if (labList.size() == 2)
-			return checkCourseTimeConflict(mainList.indexOf(labList.get(0)), mainList.indexOf(labList.get(1)));
-
-		//We know that there is at least 3 labs, or more
-		//We check that none of these conflict with the first lab in the list
-		boolean safe = true;
-		for (int i = 1; i < labList.size(); i++){
-			safe = checkCourseTimeConflict(mainList.indexOf(labList.get(0)), mainList.indexOf(labList.get(i)));
-			if(!safe) return false;
-		}
-		labList.remove(0); //Remove the first element to reduce size
-		return checkLabLabconflict(labList, mainList);
-	}
 }

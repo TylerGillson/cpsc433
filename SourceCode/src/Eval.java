@@ -73,7 +73,7 @@ public class Eval {
 		}
 	}
 	
-	public int getValue(int[] assign) {
+	public int getValue(int[] assign, boolean show_data) {
 		int[] cAssign = Arrays.copyOfRange(assign, 0, Driver.courses.size());
 		int[] lAssign = Arrays.copyOfRange(assign, Driver.courses.size(), assign.length);
 
@@ -81,8 +81,10 @@ public class Eval {
 		int prefValue    = W_pref      * E_pref(cAssign,lAssign);
 		int pairValue    = W_pair      * E_pair(cAssign,lAssign);
 		int secdiffValue = W_secdiff   * E_secdiff(cAssign,lAssign);
+		
+		if (show_data) System.out.println("Min: "+minValue+" Pref: "+prefValue+" Pair: "+pairValue+" SecDiff: "+secdiffValue);
+		
 		return minValue+prefValue+pairValue+secdiffValue;
-
 	}
 	
 	//eval minfilled
@@ -135,32 +137,32 @@ public class Eval {
 			List<String> time = new ArrayList<String>();
 			
 			//if this is a lab get from labAssign
-			if(classname.contains("TUT") || classname.contains("LAB")) {
-				int labAssignIndex=Driver.labs.indexOf(classname);
-				if (labAssignIndex < 0)
+			if (classname.contains("TUT") || classname.contains("LAB")) {
+				int labAssignIndex = Driver.labs.indexOf(classname);
+				if (labAssignIndex < 0) {
+					//System.out.println(item.toString());
 					continue;
+				}
 				int slotIndex = labAssign[labAssignIndex];
-				List<String> slotInfo=Driver.lab_slots.get(slotIndex);
+				List<String> slotInfo = Driver.lab_slots.get(slotIndex);
 				day.add(slotInfo.get(0));
 				time.add(slotInfo.get(1));
 			}
 			//if this is a course get from courseAssign
 			else {
-				int courseAssignIndex=Driver.courses.indexOf(classname);
-				if (courseAssignIndex < 0)
+				int courseAssignIndex = Driver.courses.indexOf(classname);
+				if (courseAssignIndex < 0) {
+					//System.out.println(item.toString());
 					continue;
+				}
 				int slotIndex = courseAssign[courseAssignIndex];
-				List<String> slotInfo=Driver.course_slots.get(slotIndex);
+				List<String> slotInfo = Driver.course_slots.get(slotIndex);
 				day.add(slotInfo.get(0));
 				time.add(slotInfo.get(1));
 			}
-			//build to see if this is in pref
-			List<List<String>> key = new ArrayList<List<String>>(3);
-			key.add(day);
-			key.add(time);
-			key.add(classname);
-			//if the matching daytime-class is not in pref add penalty
-			if (pref.containsKey(key) == false)
+			
+			// Check if the preference is met by the assignment:
+			if (!(item.get(0).equals(day) && item.get(1).equals(time)) )
 				result += pref_value;
 		}
 		
