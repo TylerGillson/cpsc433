@@ -125,51 +125,41 @@ public class Eval {
 	
 	private int E_pref(int[] courseAssign, int[] labAssign) {
 		int result = 0;
-		for (int i = 0; i < courseAssign.length; i++) {
-			List<List<String>> key = new ArrayList<List<String>>();
-			//get the daytime base on slot index
-			int SlotIndex = courseAssign[i];
+		
+		for (ArrayList<List<String>> item : Driver.preferences) {
+			//get the classname and its pref value
+			List<String> classname = item.get(2);
+			int pref_value = Integer.parseInt(item.get(3).get(0));
 			
-			if (SlotIndex == -99)
-				continue;
+			List<String> day = new ArrayList<String>();
+			List<String> time = new ArrayList<String>();
 			
-			List<String> day =new ArrayList<String>(1);
-			day.add(Driver.course_slots.get(SlotIndex).get(0));
-			List<String> time = new ArrayList<String>(1);
-			time.add(Driver.course_slots.get(SlotIndex).get(1));
-			List<String> classid = (List<String>) Driver.courses.get(i);
-
+			//if this is a lab get from labAssign
+			if(classname.contains("TUT") || classname.contains("LAB")) {
+				int labAssignIndex=Driver.labs.indexOf(classname);
+				int slotIndex = labAssign[labAssignIndex];
+				List<String> slotInfo=Driver.lab_slots.get(slotIndex);
+				day.add(slotInfo.get(0));
+				time.add(slotInfo.get(1));
+			}
+			//if this is a course get from courseAssign
+			else {
+				int courseAssignIndex=Driver.courses.indexOf(classname);
+				int slotIndex = courseAssign[courseAssignIndex];
+				List<String> slotInfo=Driver.course_slots.get(slotIndex);
+				day.add(slotInfo.get(0));
+				time.add(slotInfo.get(1));
+			}
+			//build to see if this is in pref
+			List<List<String>> key = new ArrayList<List<String>>(3);
 			key.add(day);
 			key.add(time);
-			key.add(classid);
-			
-			//find if key exist, if it does result increase by its pref value
-			if (pref.containsKey(key)) 
-				result += pref.get(key);
+			key.add(classname);
+			//if the matching daytime-class is not in pref add penalty
+			if (pref.containsKey(key) == false)
+				result += pref_value;
 		}
 		
-		for (int i=0; i < labAssign.length; i++) {
-			List<List<String>> key = new ArrayList<List<String>>();
-			//get the daytime base on slot index
-			int SlotIndex = labAssign[i];
-			
-			if (SlotIndex == -99)
-				continue;
-			
-			List<String> day = new ArrayList<String>(1);
-			day.add(Driver.lab_slots.get(SlotIndex).get(0));
-			List<String> time = new ArrayList<String>(1);
-			time.add(Driver.lab_slots.get(SlotIndex).get(1));
-			List<String> classid = (List<String>) Driver.labs.get(i);
-			
-			key.add(day);
-			key.add(time);
-			key.add(classid);
-
-			//find if key exist, if it does result increase by its pref value
-			if (pref.containsKey(key))
-				result += pref.get(key);
-		}
 		return result;
 	}
 	
