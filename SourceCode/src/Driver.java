@@ -31,8 +31,9 @@ public class Driver {
 	public static Eval eval;
 	
 	// Output Toggles:
-	public static boolean print_avgs = true;
-	public static boolean print_prs = false;
+	public static boolean print_avgs = false;
+	public static boolean print_prs = true;
+	public static long startTime = System.currentTimeMillis();
 	
 	/**
 	 * Parse an input file containing scheduling information.
@@ -45,6 +46,8 @@ public class Driver {
     	
 		// Deal with command line args:
 		try {
+			System.out.println("Running ...");
+	
 			configFile = args[0];
 			filename = args[1];
 
@@ -86,8 +89,8 @@ public class Driver {
     	initGeneration0();
     	
     	if (print_avgs){
-    		System.out.print("Initial \t\tavg: ");
-        	generation.printAvg();	
+    		System.out.print("Initial");
+        	generation.printData(true);	
     	}
     	
     	// Run GA for specified # of generations:
@@ -95,10 +98,10 @@ public class Driver {
     		generation.evolve(i+1);
     		
     		if (print_avgs) {
-    			System.out.print("Generation #" + (i+1) + "\t\tavg: " );
-        		generation.printAvg();	
+    			System.out.print("Generation #" + (i+1));
+        		generation.printData(false);
     		}
-    		
+ 
     		generation.cull();
     	}
     	
@@ -107,6 +110,9 @@ public class Driver {
     	    	
     	// Print final generation:
     	generation.print();
+    	
+    	// Print run-time:
+    	System.out.println("Run Time: "+(System.currentTimeMillis() - startTime)+"ms\n");
     	
     	// Print final solution + output schedule:
     	System.out.println("Final Solution:" + "\n" + Arrays.toString(solution) + "\n");

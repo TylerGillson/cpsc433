@@ -88,12 +88,35 @@ public class Generation{
 		return this.generation;
 	}
 	
-	public void printAvg() {
+	public void printData(boolean initialFlag) {
+		String output = "\t\tAvg: " + getAvg() + "\t\tMin: " + getMin() + "\t\tMax: " + getMax() + "\n";
+		if (initialFlag)
+			output = "\t" + output;
+		System.out.print(output);
+	}
+	
+	public String getAvg() {
 		float avg = 0;
 		for (int i = 0; i < generation.size(); i++)
 			avg += Driver.eval.getValue(generation.get(i));
 		avg = avg / generation.size();
-		System.out.println(avg);
+		return String.valueOf(avg);
+	}
+	
+	public String getMin() {
+		int min = Driver.eval.getValue(generation.get(0));
+		for (int i = 1; i < generation.size(); i++)
+			if (min > Driver.eval.getValue(generation.get(i)))
+				min =  Driver.eval.getValue(generation.get(i));
+		return String.valueOf(min);
+	}
+	
+	public String getMax() {
+		int max = Driver.eval.getValue(generation.get(0));
+		for (int i = 1; i < generation.size(); i++)
+			if (max < Driver.eval.getValue(generation.get(i)))
+				max =  Driver.eval.getValue(generation.get(i));
+		return String.valueOf(max);
 	}
 	
 	public void print(){
