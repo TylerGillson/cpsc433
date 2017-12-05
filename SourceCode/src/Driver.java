@@ -31,8 +31,8 @@ public class Driver {
 	public static Eval eval;
 	
 	// Output Toggles:
-	public static boolean print_avgs = false;
-	public static boolean print_prs = true;
+	public static boolean print_data = true;
+	public static boolean print_prs = false;
 	public static long startTime = System.currentTimeMillis();
 	
 	/**
@@ -88,7 +88,7 @@ public class Driver {
     	// Initialize the first generation of candidate solutions:
     	initGeneration0();
     	
-    	if (print_avgs){
+    	if (print_data){
     		System.out.print("Initial");
         	generation.printData(true);	
     	}
@@ -97,7 +97,7 @@ public class Driver {
     	for (int i=0; i<gen_max; i++){
     		generation.evolve(i+1);
     		
-    		if (print_avgs) {
+    		if (print_data) {
     			System.out.print("Generation #" + (i+1));
         		generation.printData(false);
     		}
