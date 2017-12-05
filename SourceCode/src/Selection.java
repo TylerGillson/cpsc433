@@ -83,7 +83,7 @@ public class Selection
 		float randFloat = min + rand.nextFloat() * (max - min);
 		
 		// Perform roulette selection:
-		for (int i = evalArray.length-1; i >= 0; i--) {
+		for (int i = 0; i < evalArray.length; i++) {
 			
 			if (i == ignoreFactIndex)
 				continue;

@@ -119,8 +119,8 @@ public class OrTree<T>{
 		boolean pick_par1;
 		boolean pick_par2;
 		
-		System.out.println("PARENT 1: " + Arrays.toString(par1));
-		System.out.println("PARENT 2: " + Arrays.toString(par2));
+		//System.out.println("PARENT 1: " + Arrays.toString(par1));
+		//System.out.println("PARENT 2: " + Arrays.toString(par2));
 		
 		// Iterate over each index of the parent candidates and execute breeding logic:
 		for (int i=0; i<len; i++){
@@ -131,7 +131,7 @@ public class OrTree<T>{
 			// If parents agree, preserve mutual genetics:
 			if (par1[i] == par2[i]){
 				child[i] = par1[i];
-				System.out.println("PRESERVE: " + Arrays.toString(child));
+				//System.out.println("PRESERVE: " + Arrays.toString(child));
 			}
 			else {
 				// Assess the viability of selecting each parent's assignment:
@@ -143,12 +143,12 @@ public class OrTree<T>{
 				// If only par1 is viable, choose par1's assignment:
 				if (pick_par1 && !pick_par2){
 					child[i] = par1[i];
-					System.out.println("PAR1:     " + Arrays.toString(child));	
+					//System.out.println("PAR1:     " + Arrays.toString(child));	
 				}
 				// If only par2 is viable, choose par2's assignment:
 				else if (!pick_par1 && pick_par2){
 					child[i] = par2[i];
-					System.out.println("PAR2:     " + Arrays.toString(child));
+					//System.out.println("PAR2:     " + Arrays.toString(child));
 				}	
 				// Otherwise, perform altern and randomly select from among viable options:
 				else {
@@ -163,22 +163,23 @@ public class OrTree<T>{
 					}
 					
 					// Restart if altern failed to produce a viable option:
-					if (options.size() == 0)
-						System.out.println("SKIP:     " + Arrays.toString(child));
+					//if (options.size() == 0)
+						//System.out.println("SKIP:     " + Arrays.toString(child));
 					
 					// Otherwise, make the assignment and continue iterating:
-					else {
+					if (options.size() > 0) {
 						Random rn = new Random();
 						int select = rn.nextInt(options.size());
 						child = options.get(select);
-						System.out.println("ALTERN:   " + Arrays.toString(child));
+						//System.out.println("ALTERN:   " + Arrays.toString(child));
 					}
 				}
 			}
-		} // end for
+		}
 		
 		// Return the new, hybridized pr-instance:
-		System.out.println("CHILD:    " + Arrays.toString(child) + "\n");
+		//System.out.println("CHILD:    " + Arrays.toString(child));
+		//System.out.println("CHILD:    " + Driver.eval.getValue(child));
 		return child;
 	}
 	

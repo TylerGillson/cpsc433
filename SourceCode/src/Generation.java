@@ -90,6 +90,14 @@ public class Generation{
 		return this.generation;
 	}
 	
+	public void printAvg() {
+		float avg = 0;
+		for (int i = 0; i < generation.size(); i++)
+			avg += Driver.eval.getValue(generation.get(i));
+		avg = avg / generation.size();
+		System.out.println(avg);
+	}
+	
 	public void print(){
 		System.out.println("Final Generation:");
 		for (int[] sol : this.generation)

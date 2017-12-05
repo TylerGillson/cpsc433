@@ -80,10 +80,14 @@ public class Driver {
     	
     	// Initialize the first generation of candidate solutions:
     	initGeneration0();
+    	System.out.print("Initial eval avg: ");
+    	generation.printAvg();
     	
     	// Run GA for specified # of generations:
     	for (int i=0; i<gen_max; i++){
     		generation.evolve();
+    		System.out.print("gen " + i + " avg: " );
+    		generation.printAvg();
     		generation.cull();
     	}
     	// Sort the final generation according to our fitness function and select the optimal solution:
@@ -186,7 +190,8 @@ public class Driver {
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
         	candidate = t.buildCandidate(mostTightlyBound);
         	
-        	System.out.println("CANDIDATE " + i + ": " + Arrays.toString(candidate));
+        	//System.out.println("CANDIDATE " + i + ": " + Arrays.toString(candidate));
+        	//System.out.println("CANDIDATE " + i + ": " + eval.getValue(candidate));
         	generation.add(candidate);
     	}
     	System.out.println();
