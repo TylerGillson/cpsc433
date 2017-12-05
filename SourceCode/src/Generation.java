@@ -95,7 +95,21 @@ public class Generation{
 		for (int i = 0; i < generation.size(); i++)
 			avg += Driver.eval.getValue(generation.get(i));
 		avg = avg / generation.size();
-		System.out.println(avg);
+		System.out.print(avg);
+	}
+	public void printMin() {
+		int Min = Driver.eval.getValue(generation.get(0));
+		for (int i = 1; i < generation.size(); i++)
+			if (Min > Driver.eval.getValue(generation.get(i)))
+				Min =  Driver.eval.getValue(generation.get(i));
+		System.out.print(Min);
+	}
+	public void printMax() {
+		int Max = Driver.eval.getValue(generation.get(0));
+		for (int i = 1; i < generation.size(); i++)
+			if (Max < Driver.eval.getValue(generation.get(i)))
+				Max =  Driver.eval.getValue(generation.get(i));
+		System.out.print(Max);
 	}
 	
 	public void print(){

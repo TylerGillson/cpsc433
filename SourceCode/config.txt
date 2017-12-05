@@ -1,7 +1,7 @@
-minfilledWeight=20
-prefWeight=10
-pairWeight=20
-secdiffWeight=50
+minfilledWeight=1
+prefWeight=1
+pairWeight=1
+secdiffWeight=1
 
 courseminPenalty=1
 labminPenalty=1

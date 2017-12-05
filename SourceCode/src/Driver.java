@@ -10,10 +10,10 @@ public class Driver {
     public static Generation generation;
 	
     // Search constraints:
-    public static int pop_init = 15;
-	public static int pop_max  = 30;
+    public static int pop_init = 30;
+	public static int pop_max  = 100;
 	public static int gen_max  = 100;
-	
+	public static boolean debug = true;
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
 	public static ArrayList<List<String>> labs;
@@ -29,7 +29,8 @@ public class Driver {
 	// Assign Checking Objects:
 	public static Constr constr;
 	public static Eval eval;
-	
+	public static long startTime = System.currentTimeMillis();
+
 	/**
 	 * Parse an input file containing scheduling information.
 	 * Generate and output an optimized schedule based on the information in the input file.
@@ -38,7 +39,7 @@ public class Driver {
 	public static void main(String[] args) {
 		String configFile;
 		String filename;
-    	
+    	if (debug) System.out.println("Running...");
 		// Deal with command line args:
 		try {
 			configFile = args[0];
@@ -80,14 +81,30 @@ public class Driver {
     	
     	// Initialize the first generation of candidate solutions:
     	initGeneration0();
-    	System.out.print("Initial eval avg: ");
-    	generation.printAvg();
+    	if (debug) {
+    		System.out.println("Run Time: "+(System.currentTimeMillis() - startTime)+"ms");
+    		System.out.print("Initial eval avg: ");
+    		generation.printAvg();
+    		System.out.print("\t Min: " );
+			generation.printMin();
+			System.out.print("\t Max: " );
+			generation.printMax();
+			System.out.print("\n");
+
+    	}
     	
     	// Run GA for specified # of generations:
     	for (int i=0; i<gen_max; i++){
     		generation.evolve();
-    		System.out.print("gen " + i + " avg: " );
-    		generation.printAvg();
+    		if (debug) {
+    			System.out.print("gen " + i + " avg: " );
+    			generation.printAvg();
+    			System.out.print("\t Min: " );
+    			generation.printMin();
+    			System.out.print("\t Max: " );
+    			generation.printMax();
+    			System.out.print("\n");
+    		}
     		generation.cull();
     	}
     	// Sort the final generation according to our fitness function and select the optimal solution:
@@ -97,7 +114,7 @@ public class Driver {
     	generation.print();
     	
     	// Print final solution + output schedule:
-    	System.out.println("Final Solution:" + "\n" + Arrays.toString(solution) + "\n");
+    	if (debug) System.out.println("Final Solution:" + "\n" + Arrays.toString(solution) + "\n");
     	printSchedule(solution);
 	}
     	
