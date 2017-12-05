@@ -5,7 +5,7 @@ public class Course
 	private final int EVE_VAL = 100;
 	private List<String> name;
 	private boolean evening = false;
-	private ArrayList<List<String>> unwanted = new ArrayList<List<String>>();
+	private ArrayList<ArrayList<List<String>>> unwanted = new ArrayList<ArrayList<List<String>>>();
 	private ArrayList<List<String>> incompatible = new ArrayList<List<String>>();
 	private ArrayList<List<String>> labList = new ArrayList<List<String>>();
 	private int index;
@@ -18,7 +18,7 @@ public class Course
 		name = type.equals("course") ? Driver.courses.get(idx) : Driver.labs.get(idx);
 		
 		// Set evening:
-		if (name.get(3).equals("LEC 09"))
+		if (name.get(3).length() > 0 && name.get(3).charAt(0) == '9')
 			evening = true;
 		
 		// Populate not_compatible:
@@ -36,7 +36,7 @@ public class Course
 		for (int i = 0; i < Driver.unwanted.size(); i++)
 		{
 			if (Driver.unwanted.get(i).get(0).equals(name))
-				unwanted.add(Driver.unwanted.get(i).get(1));	
+				unwanted.add(Driver.unwanted.get(i));	
 		}
 		
 		// Build lab list:
@@ -69,7 +69,7 @@ public class Course
 		return evening;
 	}
 	
-	public ArrayList<List<String>> getUnwanted()
+	public ArrayList<ArrayList<List<String>>> getUnwanted()
 	{
 		return unwanted;
 	}

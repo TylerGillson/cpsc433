@@ -60,7 +60,7 @@ public class Constr
 	private int [] currentAssign;
 	private int [] slotHas;
 	
-	private boolean debugToggle = false;
+	private boolean debugToggle = true;
 	
 	public Constr ()
 	{
@@ -110,60 +110,33 @@ public class Constr
 		if (valid == true)
 			evening();
 		
-		if (valid == true){
-			if (debugToggle) System.out.println("Evening passed.");
+		if (valid == true)
 			max();
-		}
 		
-		if (valid == true){
-			if (debugToggle) System.out.println("Max passed.");
+		if (valid == true)
 			unwanted();
-		}
-			
-		if (valid == true){
-			if (debugToggle) System.out.println("Unwanted passed.");
-			incompatible();
-		}
-					
-		if (valid == true){
-			if (debugToggle) System.out.println("Incompatible passed.");
-			check500();
-		}
-			
-		if (valid == true){
-			if (debugToggle) System.out.println("Check 500-level passed.");
-			checkCourseLabConflicts();
-		}
 			
 		if (valid == true)
-			if (debugToggle) System.out.println("Check course-lab conflict passed");
-		
+			incompatible();
+					
+		if (valid == true)
+			check500();
+			
+		if (valid == true)
+			checkCourseLabConflicts();
+			
 		return valid;
-	}
-	
-	/**
-	* Method returns the time slot based on desired assignment index
-	* @param int index, the index of course assign 
-	* @return List<String> the time slot
-	*/
-	private List<String> getTimeSlot(int index)
-	{
-		int firstLab = Driver.courses.size();
-		
-		if (index < firstLab)
-			return Driver.course_slots.get(currentAssign[index]);
-		else
-			return Driver.lab_slots.get(currentAssign[index]);
 	}
 	
 	// Checks each course to see if it is an evening course
 	// If so checks if it's in evening slot
 	public void evening()
 	{
-		for (int i = 0; i < currentAssign.length; i++)
+		for (int i = 0; i < Driver.courses.size(); i++)
 		{
 			if (sectionList[i].getEvening() == true && slotList[i].getEvening() == false){
 				valid = false;
+				if (debugToggle) System.out.println("Failing evening ...");
 				break;
 			}
 		}			
@@ -185,34 +158,36 @@ public class Constr
 			}
 				
 		}
-		if (debugToggle) System.out.println(Arrays.toString(slotList));
 		
 		for (int i = 0; i < slotList.length; i++)
 		{
 			if (slotList[i].getMax() < slotHas[i]){
-				if (debugToggle) System.out.println(Arrays.toString(slotHas));
-				if (debugToggle) System.out.println("FAILING MAX, i=" + i);
-				
 				valid = false;
+				if (debugToggle) System.out.println("Failing max ...");
 				break;
 			}
 		}
-		if (debugToggle) System.out.println(Arrays.toString(slotHas));
 	}	
 	
 	//For each course gets the list of unwanted slots and checks through all of them 
 	//to see if current slot is unwanted
-	public void unwanted()
-	{
-		for (int i = 0; i < currentAssign.length; i++)
-		{
-			if (!valid)
-				break;
+	public void unwanted() {
+		for (int i = 0; i < currentAssign.length; i++) {
 			
-			for (int j = 0; j < sectionList[i].getUnwanted().size(); j++)
-			{
-				if (sectionList[i].getUnwanted().get(j).equals(slotList[i].getName())){
+			if (currentAssign[i] == -99)
+				continue;
+				
+			boolean is_course = (i < Driver.courses.size() ? true : false);
+			
+			for (int j = 0; j < sectionList[i].getUnwanted().size(); j++) {
+				String unwanted_day = sectionList[i].getUnwanted().get(j).get(1).get(0);
+				String unwanted_time = sectionList[i].getUnwanted().get(j).get(2).get(0);
+				String day = (is_course) ? Driver.course_slots.get(currentAssign[i]).get(0) : Driver.lab_slots.get(currentAssign[i]).get(0);
+				String time = (is_course) ? Driver.course_slots.get(currentAssign[i]).get(1) : Driver.lab_slots.get(currentAssign[i]).get(1);
+				
+				if (unwanted_day.equals(day) && unwanted_time.equals(time)){
 					valid = false;
+					if (debugToggle) System.out.println("Failing unwanted ...");
 					break;
 				}
 			}
@@ -224,15 +199,33 @@ public class Constr
 	//Converts ArrayList to Set and compares the lengths to see if there were duplicates in the ArrayList
 	public void check500()
 	{
-		ArrayList<Integer> indices = new ArrayList<Integer>();
-		for (int i = 0; i < currentAssign.length; i++) {
-			if (sectionList[i].getName().get(1).charAt(0) == '5')
-				indices.add(i);
+		int num_courses = Driver.courses.size();
+		int num_500 = 0;
+				
+		int[] indices = new int[num_courses];
+		Arrays.fill(indices, -99);
+		
+		for (int i = 0; i < num_courses; i++) {
+			if (sectionList[i].getName().get(1).charAt(0) == '5') {
+				indices[i] = currentAssign[i];
+				num_500++;
+			}
 		}
 		
-		Set<Integer> indexSet = new HashSet<Integer>(indices);
-		if (indices.size() != indexSet.size())
+		Set<Integer> indexSet = new HashSet<Integer>();
+		for (int i = 0; i < indices.length; i++) {
+			
+			if (indices[i] == -99)
+				continue;
+			
+			if (!indexSet.contains(indices[i]))
+				indexSet.add(indices[i]);
+		}
+		
+		if (!indexSet.isEmpty() && indexSet.size() != num_500) {
 			valid = false;
+			if (debugToggle) System.out.println("Failing check500 ...");
+		}
 	}
 	
 	//Returns an array of indices corresponding to the most tightly bound courses
@@ -299,8 +292,6 @@ public class Constr
 			if (rightAssign == -99 )
 				continue;	
 			
-			
-			
 			//if they are assigned,get their type
 			String leftType = "LEC";
 			if (left.contains("TUT") || left.contains("LAB")) 
@@ -334,8 +325,10 @@ public class Constr
 		List<String> ts1Info = Driver.course_slots.get(lec1TimeSlot); 
 		List<String> ts2Info = Driver.course_slots.get(lec2TimeSlot); 
 		//if same day same time return false
-		if (ts1Info.get(0).equals(ts2Info.get(0)) && ts1Info.get(1).equals(ts2Info.get(1)))
-			return false;		
+		if (ts1Info.get(0).equals(ts2Info.get(0)) && ts1Info.get(1).equals(ts2Info.get(1))) {
+			if (debugToggle) System.out.println("Failing incompatible ...");
+			return false;
+		}
 		return true;
 	}
 	
@@ -343,8 +336,10 @@ public class Constr
 		List<String> ts1Info = Driver.lab_slots.get(tut1TimeSlot); 
 		List<String> ts2Info = Driver.lab_slots.get(tut2TimeSlot); 
 		//if same day same time return false
-		if (ts1Info.get(0).equals(ts2Info.get(0)) && ts1Info.get(1).equals(ts2Info.get(1)))
-			return false;		
+		if (ts1Info.get(0).equals(ts2Info.get(0)) && ts1Info.get(1).equals(ts2Info.get(1))) {
+			if (debugToggle) System.out.println("Failing incompatible ...");
+			return false;
+		}
 		return true;
 	}
 	
@@ -364,8 +359,10 @@ public class Constr
 		
 		//both on monday compare time
 		if (lecDay.equals("MO") && tutDay.equals("MO")) {
-			if (lecTime.equals(tutTime)) 
-				return false;	
+			if (lecTime.equals(tutTime)) {
+				if (debugToggle) System.out.println("Failing incompatible/checkCourseLabConflicts ...");
+				return false;
+			}
 		}
 
 		//both on tuesday compare overlaps
@@ -376,11 +373,16 @@ public class Constr
 			LocalTime tutStartTime = LocalTime.parse(tutTime, DTF);
 			LocalTime tutEndTime = tutStartTime.plusMinutes(60);
 			//if lec start in duration of tut
-			if (lecStartTime.isAfter(tutStartTime) && lecStartTime.isBefore(tutEndTime))
+			if (lecStartTime.isAfter(tutStartTime) && lecStartTime.isBefore(tutEndTime)) {
+				if (debugToggle) System.out.println("Failing incompatible/checkCourseLabConflicts ...");
 				return false;
+			}
+		
 			//if tut start in duration of lec
-			else if (tutStartTime.isAfter(lecStartTime) && tutStartTime.isBefore(lecEndTime))
+			else if (tutStartTime.isAfter(lecStartTime) && tutStartTime.isBefore(lecEndTime)) {
+				if (debugToggle) System.out.println("Failing incompatible/checkCourseLabConflicts ...");
 				return false;
+			}
 		}
 		//if lab is FR and lec is on monday
 		else if (lecDay.equals("MO") && tutDay.equals("FR")) {
@@ -390,13 +392,16 @@ public class Constr
 			LocalTime tutStartTime = LocalTime.parse(tutTime,DTF);
 			LocalTime tutEndTime = tutStartTime.plusMinutes(120);
 			//if lec start in duration of tut
-			if (lecStartTime.isAfter(tutStartTime) && lecStartTime.isBefore(tutEndTime))
+			if (lecStartTime.isAfter(tutStartTime) && lecStartTime.isBefore(tutEndTime)) {
+				if (debugToggle) System.out.println("Failing incompatible/checkCourseLabConflicts ...");
 				return false;
+			}
 			//if tut start in duration of lec
-			else if(tutStartTime.isAfter(lecStartTime) && tutStartTime.isBefore(lecEndTime))
+			else if(tutStartTime.isAfter(lecStartTime) && tutStartTime.isBefore(lecEndTime)) {
+				if (debugToggle) System.out.println("Failing incompatible/checkCourseLabConflicts ...");
 				return false;
+			}
 		}
-		
 		//on diff days
 		return true;
 	}

@@ -165,7 +165,7 @@ public class Parser{
 				buildList2(this.part_assign,ls);
 				break;
 			default:
-				System.out.println("Cannot assign " + ls[0]);	
+				System.out.println("No input data for: " + ls[0].substring(0, ls[0].length()-1));	
 		}	
 	}	
 }

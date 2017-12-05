@@ -212,9 +212,11 @@ public class Driver {
         			break;
         	}
         	
-        	if (print_prs)
-        		System.out.println("CANDIDATE " + i + "\tEval score: " + eval.getValue(candidate, false));
-        	
+        	if (print_prs) {
+        		if (i == 0)
+        			System.out.println();
+        		System.out.println("CANDIDATE " + (i+1) + "\tEval score: " + eval.getValue(candidate, false));
+        	}
         	generation.add(candidate);
     	}
     	System.out.println();
