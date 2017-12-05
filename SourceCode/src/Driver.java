@@ -10,9 +10,9 @@ public class Driver {
     public static Generation generation;
 	
     // Search constraints:
-    public static int pop_init = 50;
-	public static int pop_max  = 60;
-	public static int gen_max  = 200;
+    public static int pop_init = 5;
+	public static int pop_max  = 10;
+	public static int gen_max  = 30;
 	
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
@@ -31,8 +31,8 @@ public class Driver {
 	public static Eval eval;
 	
 	// Output Toggles:
-	public static boolean print_data = true;
-	public static boolean print_prs = false;
+	public static boolean print_data = false;
+	public static boolean print_prs = true;
 	public static long startTime = System.currentTimeMillis();
 	
 	/**
@@ -206,7 +206,11 @@ public class Driver {
         	
         	// Perform an or-tree-based search to build a solution candidate:
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
-        	candidate = t.buildCandidate(mostTightlyBound);
+        	while (true) {
+        		candidate = t.buildCandidate(mostTightlyBound, 0);
+        		if (candidate != null)
+        			break;
+        	}
         	
         	if (print_prs)
         		System.out.println("CANDIDATE " + i + "\tEval score: " + eval.getValue(candidate));

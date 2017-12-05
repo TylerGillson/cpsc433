@@ -59,8 +59,9 @@ public class OrTree<T>{
 			new_candidate[section_idx] = i;
 			
 			// If successor is viable, add it to the current node's children:
-			if (Driver.constr.evaluate(new_candidate) == true) 
+			if (Driver.constr.evaluate(new_candidate) == true) { 
 				this.addChild(new_candidate);
+			}
 		}
 	}
 	
@@ -68,7 +69,7 @@ public class OrTree<T>{
 	 * Perform an or-tree-based search to generate a candidate solution.
 	 * @return sol - An integer array which is a pr-solved instance.
 	 */
-	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound){
+	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound, int mtbIndex){
 		
 		// Return a solution:
 		if (pr_finished(this.data))
@@ -76,11 +77,12 @@ public class OrTree<T>{
 		else {
 			// Determine index of element of pr that will be expanded by altern...
 			// We expand the most tightly bound section.
-			int expand_idx = mostTightlyBound.remove(0);	
+			int expand_idx = mostTightlyBound.get(mtbIndex);	
 			
 			// Avoid over-writing values designed by partial assignments:
 			if (this.data[expand_idx] != -99){
-				expand_idx = mostTightlyBound.remove(0);
+				mtbIndex++;
+				return this.buildCandidate(mostTightlyBound, mtbIndex);
 			}
 			
 			// Generate successor nodes for said section:
@@ -93,14 +95,18 @@ public class OrTree<T>{
 				OrTree<T> child = this.children.get(randIndex);
 				
 				// Recursively expand successor nodes until completion:
-				if (!pr_finished(child.data))
-					return child.buildCandidate(mostTightlyBound);
+				if (!pr_finished(child.data)) {
+					mtbIndex++;
+					return child.buildCandidate(mostTightlyBound, mtbIndex);
+				}
 				else
 					return child.data;
 			} 
-			// Skip over partial assignment indices:
-			else
-				return this.buildCandidate(mostTightlyBound);
+			// Restart if a dead-end is hit:
+			else {
+				//return this.buildCandidate(mostTightlyBound, mtbIndex);
+				return null;
+			}
 		}
 	}
 	

@@ -122,7 +122,7 @@ public class Constr
 			
 		if (valid == true){
 			if (debugToggle) System.out.println("Unwanted passed.");
-			//incompatible();
+			incompatible();
 		}
 					
 		if (valid == true){
@@ -370,16 +370,16 @@ public class Constr
 
 		//both on tuesday compare overlaps
 		else if (lecDay.equals("TU") && tutDay.equals("TU")) {
-			LocalTime lecStartTime=  LocalTime.parse(lecTime, DTF);
+			LocalTime lecStartTime = LocalTime.parse(lecTime, DTF);
 			LocalTime lecEndTime = lecStartTime.plusMinutes(90);
 			
-			LocalTime tutStartTime = LocalTime.parse(tutTime,DTF);
+			LocalTime tutStartTime = LocalTime.parse(tutTime, DTF);
 			LocalTime tutEndTime = tutStartTime.plusMinutes(60);
 			//if lec start in duration of tut
 			if (lecStartTime.isAfter(tutStartTime) && lecStartTime.isBefore(tutEndTime))
 				return false;
 			//if tut start in duration of lec
-			else if(tutStartTime.isAfter(lecStartTime) && tutStartTime.isBefore(lecEndTime))
+			else if (tutStartTime.isAfter(lecStartTime) && tutStartTime.isBefore(lecEndTime))
 				return false;
 		}
 		//if lab is FR and lec is on monday
