@@ -178,8 +178,6 @@ public class OrTree<T>{
 		}
 		
 		// Return the new, hybridized pr-instance:
-		//System.out.println("CHILD:    " + Arrays.toString(child));
-		//System.out.println("CHILD:    " + Driver.eval.getValue(child));
 		return child;
 	}
 	

@@ -1,5 +1,6 @@
 import java.lang.Math;
 import java.util.Random;
+import java.util.Arrays;
 import java.util.List;
 
 public class Selection
@@ -20,59 +21,56 @@ public class Selection
 	{
 		this.rand = rand;
 		int generationSize = generation.size();
-		this.generation = generation;// = facts.toArray(new int[facts.size()][facts.get(0).length]);
+		this.generation = generation;
 		evalArray = new float[generationSize];
 		indexArray = new float[generationSize];
 
-		//Set up the array contents
-		for (int i = 0; i<generationSize; i++)
+		// Set up the index array:
+		for (int i = 0; i < generationSize; i++)
 			indexArray[i] = i;
 		
+		// Set up the eval array and calculate the generation's total eval-value:
 		int sum = 0;
 		int tempValue;
-		for (int i = 0; i< generationSize; i++)
-		{
+		for (int i = 0; i< generationSize; i++) {
 			tempValue = Driver.eval.getValue(generation.get(i));
 			evalArray[i] = tempValue;
 			sum += tempValue;
 		}
 		
-		//Next we need to normalize each of the eval weights of the facts
-		
 		// Avoid division by 0 edge case:
-		if (sum == 0)
-			sum += 1;
+		if (sum == 0) sum += 1;
 		
+		// Normalize each of the eval values:
 		for (int i = 0; i < generationSize; i++)
 			evalArray[i] = evalArray[i] / sum;
 
+		// Sort the normalized factEvals:
 		QuickSortWithIndex sorter = new QuickSortWithIndex(evalArray);
-		//We now need to sort the now normalized factEvals
 		float[][] sorted = sorter.sort();
-		evalArray = sorted[0];
-		indexArray=  sorted[1];
+		evalArray  = sorted[0];
+		indexArray = sorted[1];
 	}
 
-	public int getLastIndexChoice()
-	{
+	public int getLastIndexChoice() {
 		return lastChoice;
 	}
 	
-	public int[] getSelection(){
+	public int[] getSelection() {
 		return selection;
 	}
 	
 	/**
-	* Method performs f_select based on the population that the object was instantiated with
+	* Method performs roulette wheel selection based on the population that the object was instantiated with.
 	* @param int ignoreFactIndex, the fact that is to not be used.
-	* @return int[] some random fact based on the eval value of the roulette selection
+	* @return int[] a semi-random fact
 	*/
 	public void select(int ignoreFactIndex)
 	{
 		// Generate a random float within the range of existing eval values:
 		float min = 99;
 		float max = -99;
-		for (int i=0; i<evalArray.length; i++){
+		for (int i = 0; i < evalArray.length; i++){
 			if (i == lastChoice)
 				continue;
 			if (evalArray[i] < min)
@@ -82,60 +80,15 @@ public class Selection
 		}
 		float randFloat = min + rand.nextFloat() * (max - min);
 		
-		// Perform roulette selection:
+		// Perform roulette wheel selection:
 		for (int i = 0; i < evalArray.length; i++) {
-			
 			if (i == ignoreFactIndex)
 				continue;
 			if (evalArray[i] >= randFloat) {	
-				//System.out.println("lastChoice = " + (int) indexArray[i] + " " + evalArray[i]);
 				lastChoice = i;
 				selection = generation.get(i);
 				break;
 			}
 		}
-	}
-
-	public static int[][] sortFromEvals(int[][] facts)
-	{
-
-		//First we find the total eval value of each of the facts
-		int sum = 0;
-		if (facts.length == 0) throw new IllegalStateException();
-		float[] factEvals = new float[facts.length];
-		float[] courseIndexArray = new float[facts[0].length];
-
-		for (int i = 0; i<facts[0].length; i++)
-		{
-			courseIndexArray[i] = i;
-		}
-		//To prevent multiple array lookups we use tempValue to store the eval value
-		int tempValue;
-		for (int i = 0; i< facts.length; i++)
-		{
-			tempValue = Driver.eval.getValue(facts[i]);
-			factEvals[i] = tempValue;
-			sum += tempValue;
-		}
-		//Next we need to normalize each of the eval weights of the facts
-		for (int i = 0; i< facts.length; i++)
-		{
-			factEvals[i] = factEvals[i] /sum;
-		}
-
-		QuickSortWithIndex sorter = new QuickSortWithIndex(factEvals);
-		//We now need to sort the now normalized factEvals
-		float[][] temp = sorter.sort();
-		factEvals = temp[0];
-		courseIndexArray=  temp[1];
-
-
-		int[][] sortedFacts = new int[courseIndexArray.length][facts[0].length];
-		for (int i = 0; i < courseIndexArray.length; i++)
-		{
-			sortedFacts[i] = facts[Math.round(courseIndexArray[i])];
-
-		}
-		return sortedFacts;
 	}
 }

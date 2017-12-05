@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -22,32 +24,21 @@ public class Generation{
 		boolean add = true;
 		
 		for (int[] member : this.generation) {
-			
 			for (int[] uMem : unique) {
 				add = false;
 				if (!Arrays.equals(member, uMem))
 					add = true;
 			}
-			
 			if (add)
 				unique.add(member);
 		}
-		
 		this.generation.clear();
 		this.generation = unique;
 	}
 	
-	public void evolve(){
+	public void evolve(int gen_num){
 		
-		if (debug) System.out.println("I am evolving!");
-
-		// check to see that the generation is not Empty
-		if (generation.isEmpty())
-			throw new IllegalStateException();
-
-		//We can evolve our population
-
-		//First we choose two facts with F_Select:
+		// Choose two facts via roulette wheel selection:
 		Random rand = new Random();
 		Selection selector = new Selection(generation, rand);
 		
@@ -57,32 +48,39 @@ public class Generation{
 		selector.select(selector.getLastIndexChoice());
 		int[] b = selector.getSelection();
 		
-		//We now have the two facts that we can use with the or-tree, and use the alt-search Control
+		if (Arrays.equals(a, b))
+			throw new java.lang.Error("Breeding identical parents!");
+		
+		// Breed them using an or-tree and the alternate search control:
 		int pr_size = Driver.courses.size() + Driver.labs.size();
 		OrTree<int[]> tree = new OrTree<int[]>(pr_size);
 		
 		int[] child = new int[pr_size];
 		child = tree.breedCandidates(a, b);
-				
+		
+		if (Driver.print_prs)
+			System.out.println("Child #" + gen_num + "\tEval score: " + Driver.eval.getValue(child));
+		
 		generation.add(child);
-		if (generation.size() <= pop_max){
-			if (debug) {
-				System.out.println("The child created is : ");
-				for (int i = 0; i < child.length -1; i++){
-					System.out.print(child[i] + ", ");
-				}
-				System.out.print(child[child.length-1] + "\n");
-				System.out.println("_______________________");
-
-			}
-			return; //We are done increasing this generation
-		}
-		else{
-			//We need to reduce the population by taking out the worst individual.
-			if(debug) System.out.println("Reducing size!");
-
-			int[][] sortedFacts = Selection.sortFromEvals((int[][])generation.toArray(new int[generation.size()][generation.get(0).length]));
-			generation.remove(sortedFacts[sortedFacts.length -1]);
+		
+		// Check that the population maximum has not been exceeded:
+		if (generation.size() > pop_max) {
+			// If it has been, reduce the population by taking out the worst individual:
+			Collections.sort(generation, new Comparator<int[]>() {
+		        public int compare(int[] sol1, int[] sol2){
+		        	int e1 = Driver.eval.getValue(sol1);
+		        	int e2 = Driver.eval.getValue(sol2);
+		        	
+		        	if (e1 == e2)
+		            	return 0;
+		            else if (e1 > e2)
+		            	return 1;
+		            else
+		            	return -1;
+		        }
+		    });
+			
+			generation.remove(generation.size()-1);
 		}		
 	}
 	
@@ -99,7 +97,7 @@ public class Generation{
 	}
 	
 	public void print(){
-		System.out.println("Final Generation:");
+		System.out.println("\nFinal Generation:");
 		for (int[] sol : this.generation)
 			System.out.println(Arrays.toString(sol));
 		System.out.print("\n");

@@ -10,9 +10,9 @@ public class Driver {
     public static Generation generation;
 	
     // Search constraints:
-    public static int pop_init = 15;
-	public static int pop_max  = 30;
-	public static int gen_max  = 100;
+    public static int pop_init = 50;
+	public static int pop_max  = 60;
+	public static int gen_max  = 200;
 	
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
@@ -29,6 +29,10 @@ public class Driver {
 	// Assign Checking Objects:
 	public static Constr constr;
 	public static Eval eval;
+	
+	// Output Toggles:
+	public static boolean print_avgs = true;
+	public static boolean print_prs = false;
 	
 	/**
 	 * Parse an input file containing scheduling information.
@@ -80,16 +84,24 @@ public class Driver {
     	
     	// Initialize the first generation of candidate solutions:
     	initGeneration0();
-    	System.out.print("Initial eval avg: ");
-    	generation.printAvg();
+    	
+    	if (print_avgs){
+    		System.out.print("Initial \t\tavg: ");
+        	generation.printAvg();	
+    	}
     	
     	// Run GA for specified # of generations:
     	for (int i=0; i<gen_max; i++){
-    		generation.evolve();
-    		System.out.print("gen " + i + " avg: " );
-    		generation.printAvg();
+    		generation.evolve(i+1);
+    		
+    		if (print_avgs) {
+    			System.out.print("Generation #" + (i+1) + "\t\tavg: " );
+        		generation.printAvg();	
+    		}
+    		
     		generation.cull();
     	}
+    	
     	// Sort the final generation according to our fitness function and select the optimal solution:
     	int[] solution = sortLastGen();
     	    	
@@ -190,8 +202,9 @@ public class Driver {
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
         	candidate = t.buildCandidate(mostTightlyBound);
         	
-        	//System.out.println("CANDIDATE " + i + ": " + Arrays.toString(candidate));
-        	//System.out.println("CANDIDATE " + i + ": " + eval.getValue(candidate));
+        	if (print_prs)
+        		System.out.println("CANDIDATE " + i + "\tEval score: " + eval.getValue(candidate));
+        	
         	generation.add(candidate);
     	}
     	System.out.println();
