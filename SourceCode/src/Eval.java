@@ -137,6 +137,8 @@ public class Eval {
 			//if this is a lab get from labAssign
 			if(classname.contains("TUT") || classname.contains("LAB")) {
 				int labAssignIndex=Driver.labs.indexOf(classname);
+				if (labAssignIndex < 0)
+					continue;
 				int slotIndex = labAssign[labAssignIndex];
 				List<String> slotInfo=Driver.lab_slots.get(slotIndex);
 				day.add(slotInfo.get(0));
@@ -145,6 +147,8 @@ public class Eval {
 			//if this is a course get from courseAssign
 			else {
 				int courseAssignIndex=Driver.courses.indexOf(classname);
+				if (courseAssignIndex < 0)
+					continue;
 				int slotIndex = courseAssign[courseAssignIndex];
 				List<String> slotInfo=Driver.course_slots.get(slotIndex);
 				day.add(slotInfo.get(0));
