@@ -110,7 +110,7 @@ public class OrTree<T>{
 			} 
 			// Restart if a dead-end is hit:
 			else {
-				System.out.println(Arrays.toString(this.data));
+				//System.out.println(Arrays.toString(this.data));
 				//return this.buildCandidate(mostTightlyBound, mtbIndex);
 				return null;
 			}

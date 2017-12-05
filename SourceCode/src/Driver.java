@@ -31,8 +31,8 @@ public class Driver {
 	public static Eval eval;
 	
 	// Output Toggles:
-	public static boolean print_data = false;
-	public static boolean print_prs = true;
+	public static boolean print_data = true;
+	public static boolean print_prs = false;
 	public static long startTime = System.currentTimeMillis();
 	
 	/**

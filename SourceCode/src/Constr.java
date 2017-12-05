@@ -108,7 +108,7 @@ public class Constr
 		slotHas = new int[all_slots_size];
 		
 		if (valid == true)
-			//evening();
+			evening();
 		
 		if (valid == true)
 			incompatible();
@@ -226,8 +226,7 @@ public class Constr
 				indexSet.add(indices.get(i));
 		}
 		
-		if (!indexSet.isEmpty() && indexSet.size()+unassigned != num_500) {
-			System.out.println(num_500 + " " + unassigned);
+		if (indexSet.size()+unassigned != num_500) {
 			valid = false;
 			if (debugToggle) System.out.println("Failing check500 ...");
 		}
