@@ -11,8 +11,8 @@ public class Driver {
 	
     // Search constraints:
     public static int pop_init = 5;
-	public static int pop_max  = 10;
-	public static int gen_max  = 20;
+	public static int pop_max  = 5;
+	public static int gen_max  = 5;
 	
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
@@ -212,7 +212,7 @@ public class Driver {
         			break;
         	}
         	
-        	if (print_prs) {
+        	if (print_prs | print_data) {
         		if (i == 0)
         			System.out.println();
         		System.out.println("CANDIDATE " + (i+1) + "\tEval score: " + eval.getValue(candidate, false));

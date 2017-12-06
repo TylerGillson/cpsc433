@@ -81,8 +81,8 @@ public class OrTree<T>{
 			// We expand the most tightly bound section.
 			int expand_idx = mostTightlyBound.get(mtbIndex);	
 			
-			boolean is_course = (expand_idx < Driver.courses.size()) ? true : false;
-			Object x = (is_course) ? Driver.courses.get(expand_idx) : Driver.labs.get(expand_idx - Driver.courses.size());
+			//boolean is_course = (expand_idx < Driver.courses.size()) ? true : false;
+			//Object x = (is_course) ? Driver.courses.get(expand_idx) : Driver.labs.get(expand_idx - Driver.courses.size());
 			//System.out.println(expand_idx + " " + x);
 			
 			// Avoid over-writing values designed by partial assignments:

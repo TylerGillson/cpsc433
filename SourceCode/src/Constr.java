@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 	CHECK
 	
 3. assign(ci) has to be unequal to assign(lik) for all k and i. (a course and its labs cannot be in the same slot)
-	???
+	CHECK
 	
 4. not-compatible(a,b) means: assign(a) cannot equal assign(b) (where a,b in Courses + Labs)
 	CHECK --- Current solution highly inefficient.

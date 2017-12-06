@@ -16,6 +16,8 @@ public class Eval {
 	private int W_pair = 1;
 	private int W_secdiff = 1;
 	private HashMap<List<List<String>>,Integer> pref = new HashMap<List<List<String>>,Integer>();
+	private HashMap<List<String>,Integer> course_slots = new HashMap<List<String>,Integer>();
+	private HashMap<List<String>,Integer> lab_slots = new HashMap<List<String>,Integer>();
 
 	public Eval(String configFile) {
 		//load config file
@@ -70,6 +72,22 @@ public class Eval {
 			key.add(Info.get(2));
 			int value = Integer.parseInt(Info.get(3).get(0));
 			pref.put(key, value);
+		}
+		
+		for (List<String> Slot : Driver.course_slots) {
+			List<String> key = new ArrayList<String>(2);
+			key.add(Slot.get(0));
+			key.add(Slot.get(1));
+			int value = 0;
+			course_slots.put(key, value);
+		}
+		
+		for (List<String> Slot : Driver.lab_slots) {
+			List<String> key = new ArrayList<String>(2);
+			key.add(Slot.get(0));
+			key.add(Slot.get(1));
+			int value = 0;
+			lab_slots.put(key, value);
 		}
 	}
 	
@@ -136,8 +154,17 @@ public class Eval {
 			List<String> day = new ArrayList<String>();
 			List<String> time = new ArrayList<String>();
 			
+			List<String> slot_check = new ArrayList<String>();
+			
 			//if this is a lab get from labAssign
 			if (classname.contains("TUT") || classname.contains("LAB")) {
+				slot_check.add(item.get(0).get(0));
+				slot_check.add(item.get(1).get(0));
+				
+				// Skip if the preference time slot does not exist:
+				if (!lab_slots.containsKey(slot_check))
+					continue;
+				
 				int labAssignIndex = Driver.labs.indexOf(classname);
 				if (labAssignIndex < 0) {
 					//System.out.println(item.toString());
@@ -150,6 +177,13 @@ public class Eval {
 			}
 			//if this is a course get from courseAssign
 			else {
+				slot_check.add(item.get(0).get(0));
+				slot_check.add(item.get(1).get(0));
+				
+				// Skip if the preference time slot does not exist:
+				if (!course_slots.containsKey(slot_check))
+					continue;
+				
 				int courseAssignIndex = Driver.courses.indexOf(classname);
 				if (courseAssignIndex < 0) {
 					//System.out.println(item.toString());
@@ -162,8 +196,10 @@ public class Eval {
 			}
 			
 			// Check if the preference is met by the assignment:
-			if (!(item.get(0).equals(day) && item.get(1).equals(time)) )
+			if (!(item.get(0).equals(day) && item.get(1).equals(time)) ){
 				result += pref_value;
+			}
+				
 		}
 		
 		return result;
@@ -187,7 +223,7 @@ public class Eval {
 				if (slotIndex == -99)
 					continue;
 				
-				List<String> x =Driver.lab_slots.get(slotIndex);
+				List<String> x = Driver.lab_slots.get(slotIndex);
 				X1Time.add(x.get(0));
 				X1Time.add(x.get(1));
 
@@ -229,7 +265,7 @@ public class Eval {
 				X2Time.add(x.get(1));
 			}
 			
-			if (X1Time.get(0).equals(X2Time.get(0)) && X1Time.get(1).equals(X2Time.get(1)))
+			if (!X1Time.get(0).equals(X2Time.get(0)) || !X1Time.get(1).equals(X2Time.get(1)))
 				result += this.not_paired;
 		}
 		return result;
