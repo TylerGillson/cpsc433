@@ -94,30 +94,28 @@ public class OrTree<T>{
 			// Generate successor nodes for said section:
 			altern(expand_idx);
 			
-			// Choose a random successor node to expand: 
-			if (this.children.size() > 0) {
+			//if there is children
+			while (this.children.size() > 0) {
+				// Choose a random successor node to expand: 
+				Random rand = new Random();
+				int randIndex = rand.nextInt(this.children.size());
+				OrTree<T> child = this.children.get(randIndex);
 				
-				for (OrTree<T> c : this.children) {
-					// Recursively expand successor nodes until completion:
-					if (c.buildCandidate(mostTightlyBound, mtbIndex) == null)
-						continue;
-					
-					if (!pr_finished(c.data)) {
-						mtbIndex++;
-						return c.buildCandidate(mostTightlyBound, mtbIndex);
-					}
-					else
-						return c.data;
+				// Recursively expand successor nodes until completion:
+				if (child.buildCandidate(mostTightlyBound, mtbIndex) == null) {
+					this.children.remove(randIndex);
+					continue;
 				}
-				return null;
+				if (!pr_finished(child.data)) {
+					mtbIndex++;
+					return child.buildCandidate(mostTightlyBound, mtbIndex);
+				}
+				else
+					return child.data;
 				
 			} 
-			// Restart if a dead-end is hit:
-			else {
-				System.out.println("No solution exists.");
-				System.exit(0);
-				return null;
-			}
+			//a dead-end is hit:
+			return null;
 		}
 	}
 	

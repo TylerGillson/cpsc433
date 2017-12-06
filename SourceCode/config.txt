@@ -1,4 +1,4 @@
-minfilledWeight=0
+minfilledWeight=1
 prefWeight=0
 pairWeight=1
 secdiffWeight=1

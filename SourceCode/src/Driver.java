@@ -228,18 +228,23 @@ public class Driver {
 		
 		// Build the first generation of candidate solutions:
     	for (int i=0; i<pop_init; i++) {	
-        	int[] candidate = new int[pr_size];
+        	int[] candidate = new int[pr_size]; 
         	OrTree<int[]> t = new OrTree<int[]>(oTree.getData());
         	
         	// Perform an or-tree-based search to build a solution candidate:
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
         	candidate = t.buildCandidate(mostTightlyBound, 0);
         	
+           	if (candidate == null) {
+				System.out.println("No solution exists.");
+				System.exit(0);
+            }
         	if (print_prs | print_data) {
         		if (i == 0)
         			System.out.println();
         		System.out.println("CANDIDATE " + (i+1) + "\tEval score: " + eval.getValue(candidate, false));
         	}
+ 
         	generation.add(candidate);
     	}
     	System.out.println();
