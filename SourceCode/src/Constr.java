@@ -141,7 +141,8 @@ public class Constr
 				int offset = (i < Driver.courses.size()) ? 0 : Driver.course_slots.size();
 				if (slotList[currentAssign[i]+offset].getEvening() == false) {
 					valid = false;
-					if (debugToggle) System.out.println("Failing evening ...");
+					
+					//if (debugToggle) System.out.println("Failing evening ...");
 				}			
 			}
 		}		
@@ -169,6 +170,7 @@ public class Constr
 			if (slotList[i].getMax() < slotHas[i]){
 				valid = false;
 				if (debugToggle) System.out.println("Failing max ...");
+				//throw new java.lang.Error("Failing Max!");
 				break;
 			}
 		}

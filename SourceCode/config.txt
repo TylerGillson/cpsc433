@@ -1,9 +1,9 @@
-minfilledWeight=1
-prefWeight=1
+minfilledWeight=0
+prefWeight=0
 pairWeight=1
 secdiffWeight=1
 
 courseminPenalty=1
 labminPenalty=1
-notpairedPenalty=1
-sectionPenalty=1
+notpairedPenalty=11
+sectionPenalty=5

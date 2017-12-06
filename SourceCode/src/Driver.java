@@ -5,14 +5,40 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+/*
+ * parallelpen eval = 5
+ * minfilledWeight=0
+prefWeight=0
+pairWeight=1
+secdiffWeight=1
+
+courseminPenalty=1
+labminPenalty=1
+notpairedPenalty=11
+sectionPenalty=5
+ */
+
+/*
+ * prefexamp eval = 30
+ * minfilledWeight=0
+prefWeight=1
+pairWeight=0
+secdiffWeight=0
+
+courseminPenalty=100
+labminPenalty=100
+notpairedPenalty=11
+sectionPenalty=100
+ */
+
 public class Driver {
     public static Parser p;
     public static Generation generation;
 	
     // Search constraints:
     public static int pop_init = 200;
-	public static int pop_max  = 250;
-	public static int cull_num = 100;
+	public static int pop_max  = 200;
+	public static int cull_num = 1;
 	public static int gen_max  = 1000;
 	
 	// Global data structures to be filled by the parser:
@@ -32,8 +58,8 @@ public class Driver {
 	public static Eval eval;
 	
 	// Output Toggles:
-	public static boolean print_data = true;
-	public static boolean print_prs = false;
+	public static boolean print_data = false;
+	public static boolean print_prs = true;
 	public static long startTime = System.currentTimeMillis();
 	
 	/**
@@ -207,11 +233,7 @@ public class Driver {
         	
         	// Perform an or-tree-based search to build a solution candidate:
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
-        	while (true) {
-        		candidate = t.buildCandidate(mostTightlyBound, 0);
-        		if (candidate != null)
-        			break;
-        	}
+        	candidate = t.buildCandidate(mostTightlyBound, 0);
         	
         	if (print_prs | print_data) {
         		if (i == 0)
@@ -400,8 +422,11 @@ public class Driver {
 					if (slot.get(0).equals(assign.get(1).get(0)) && slot.get(1).equals(assign.get(2).get(0)))
 						slot_idx = lab_slots.indexOf(slot);
 				}
-				if (slot_idx == -99)
-					throw new java.lang.Error("The partial assignment for this lab indicated an invalid slot!");
+				if (slot_idx == -99) {
+					System.out.println("The partial assignment for this lab indicated an invalid slot!");
+					System.out.println("No solution exists.");
+					System.exit(0);
+				}
 			}
 			// The partial assignment refers to a course/lab not in the input.
 			else

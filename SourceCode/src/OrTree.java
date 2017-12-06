@@ -96,22 +96,26 @@ public class OrTree<T>{
 			
 			// Choose a random successor node to expand: 
 			if (this.children.size() > 0) {
-				Random rand = new Random();
-				int randIndex = rand.nextInt(this.children.size());
-				OrTree<T> child = this.children.get(randIndex);
 				
-				// Recursively expand successor nodes until completion:
-				if (!pr_finished(child.data)) {
-					mtbIndex++;
-					return child.buildCandidate(mostTightlyBound, mtbIndex);
+				for (OrTree<T> c : this.children) {
+					// Recursively expand successor nodes until completion:
+					if (c.buildCandidate(mostTightlyBound, mtbIndex) == null)
+						continue;
+					
+					if (!pr_finished(c.data)) {
+						mtbIndex++;
+						return c.buildCandidate(mostTightlyBound, mtbIndex);
+					}
+					else
+						return c.data;
 				}
-				else
-					return child.data;
+				return null;
+				
 			} 
 			// Restart if a dead-end is hit:
 			else {
-				//System.out.println(Arrays.toString(this.data));
-				//return this.buildCandidate(mostTightlyBound, mtbIndex);
+				System.out.println("No solution exists.");
+				System.exit(0);
 				return null;
 			}
 		}
@@ -144,6 +148,49 @@ public class OrTree<T>{
 			// If parents agree, preserve mutual genetics:
 			if (par1[i] == par2[i]){
 				child[i] = par1[i];
+				if (Driver.constr.evaluate(child))
+					continue;
+				
+				// Assess the viability of selecting each parent's assignment:
+				child[i] = par1[i];
+				pick_par1 = Driver.constr.evaluate(child);
+				child[i] = par2[i];
+				pick_par2 = Driver.constr.evaluate(child);
+				
+				// If only par1 is viable, choose par1's assignment:
+				if (pick_par1 && !pick_par2){
+					child[i] = par1[i];
+					//System.out.println("PAR1:     " + Arrays.toString(child));	
+				}
+				// If only par2 is viable, choose par2's assignment:
+				else if (!pick_par1 && pick_par2){
+					child[i] = par2[i];
+					//System.out.println("PAR2:     " + Arrays.toString(child));
+				}	
+				// Otherwise, perform altern and randomly select from among viable options:
+				else {
+					this.data = child;
+					this.children.clear();
+					altern(i);
+					
+					ArrayList<int[]> options = new ArrayList<int[]>();
+					for (OrTree<T> c : this.children){
+						//if (Driver.constr.evaluate(c.data) == true)
+						options.add(c.data);
+					}
+					
+					// Restart if altern failed to produce a viable option:
+					//if (options.size() == 0)
+						//System.out.println("SKIP:     " + Arrays.toString(child));
+					
+					// Otherwise, make the assignment and continue iterating:
+					if (options.size() > 0) {
+						Random rn = new Random();
+						int select = rn.nextInt(options.size());
+						child = options.get(select);
+						//System.out.println("ALTERN:   " + Arrays.toString(child));
+					}
+				}
 				//System.out.println("PRESERVE: " + Arrays.toString(child));
 			}
 			else {
@@ -171,13 +218,9 @@ public class OrTree<T>{
 					
 					ArrayList<int[]> options = new ArrayList<int[]>();
 					for (OrTree<T> c : this.children){
-						if (Driver.constr.evaluate(c.data) == true)
-							options.add(c.data);
+						//if (Driver.constr.evaluate(c.data) == true)
+						options.add(c.data);
 					}
-					
-					// Restart if altern failed to produce a viable option:
-					//if (options.size() == 0)
-						//System.out.println("SKIP:     " + Arrays.toString(child));
 					
 					// Otherwise, make the assignment and continue iterating:
 					if (options.size() > 0) {
