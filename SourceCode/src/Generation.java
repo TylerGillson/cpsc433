@@ -73,14 +73,15 @@ public class Generation{
 		        	
 		        	if (e1 == e2)
 		            	return 0;
-		            else if (e1 > e2)
+		            else if (e1 < e2)
 		            	return 1;
 		            else
 		            	return -1;
 		        }
 		    });
 			
-			generation.remove(generation.size()-1);
+			for (int i = 0; i < Driver.cull_num; i++)
+				generation.remove(i);
 		}		
 	}
 	

@@ -60,7 +60,7 @@ public class Constr
 	private int [] currentAssign;
 	private int [] slotHas;
 	
-	private boolean debugToggle = true;
+	private boolean debugToggle = false;
 	
 	public Constr ()
 	{

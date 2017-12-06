@@ -10,9 +10,10 @@ public class Driver {
     public static Generation generation;
 	
     // Search constraints:
-    public static int pop_init = 5;
-	public static int pop_max  = 5;
-	public static int gen_max  = 5;
+    public static int pop_init = 200;
+	public static int pop_max  = 250;
+	public static int cull_num = 100;
+	public static int gen_max  = 1000;
 	
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
