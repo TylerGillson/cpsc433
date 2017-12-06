@@ -56,7 +56,7 @@ public class OrTree<T>{
 		// Create successor nodes:
 		for (int i=0; i<slot_indices; i++){
 			int[] new_candidate = this.data.clone();
-			new_candidate[section_idx] = i;
+ 			new_candidate[section_idx] = i;
 			
 			//System.out.println(Arrays.toString(new_candidate));
 			
@@ -71,7 +71,7 @@ public class OrTree<T>{
 	 * Perform an or-tree-based search to generate a candidate solution.
 	 * @return sol - An integer array which is a pr-solved instance.
 	 */
-	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound, int mtbIndex){
+	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound, int mtbIndex, List<OrTree<T>> leafHeap){
 		
 		// Return a solution:
 		if (pr_finished(this.data))
@@ -88,33 +88,40 @@ public class OrTree<T>{
 			// Avoid over-writing values designed by partial assignments:
 			if (this.data[expand_idx] != -99){
 				mtbIndex++;
-				return this.buildCandidate(mostTightlyBound, mtbIndex);
+				return this.buildCandidate(mostTightlyBound, mtbIndex,leafHeap);
 			}
 			
 			// Generate successor nodes for said section:
 			altern(expand_idx);
-			
+			mtbIndex++;
+			//add the children to heap
+			for (OrTree<T> c: this.children) {
+				if (leafHeap.contains(c) == false)
+					leafHeap.add(c);
+			}
 			//if there is children
-			while (this.children.size() > 0) {
+			if (this.children.size() > 0) {
 				// Choose a random successor node to expand: 
 				Random rand = new Random();
 				int randIndex = rand.nextInt(this.children.size());
 				OrTree<T> child = this.children.get(randIndex);
 				
 				// Recursively expand successor nodes until completion:
-				if (child.buildCandidate(mostTightlyBound, mtbIndex) == null) {
-					this.children.remove(randIndex);
-					continue;
+				int [] solution = child.buildCandidate(mostTightlyBound, mtbIndex,leafHeap);
+				if ( solution == null) {
+					this.children.remove(child);
+					//random pick from leaf heap and expand
+					randIndex = rand.nextInt(leafHeap.size());
+					OrTree<T> fromheap = leafHeap.get(randIndex);
+					solution = fromheap.buildCandidate(mostTightlyBound, 0,leafHeap);
 				}
-				if (!pr_finished(child.data)) {
-					mtbIndex++;
-					return child.buildCandidate(mostTightlyBound, mtbIndex);
-				}
-				else
-					return child.data;
-				
+				return solution;				
 			} 
-			//a dead-end is hit:
+			else {
+				//remove from heap
+				leafHeap.remove(this);
+			}
+			//adead-end is hit:
 			return null;
 		}
 	}

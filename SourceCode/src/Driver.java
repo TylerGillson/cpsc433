@@ -37,7 +37,7 @@ public class Driver {
 	
     // Search constraints:
     public static int pop_init = 200;
-	public static int pop_max  = 200;
+	public static int pop_max  = 250;
 	public static int cull_num = 1;
 	public static int gen_max  = 1000;
 	
@@ -52,6 +52,7 @@ public class Driver {
 	public static ArrayList<ArrayList<List<String>>> pair;
 	public static ArrayList<ArrayList<List<String>>> part_assign;
 	public static int[] pr;
+	public static List<OrTree<int[]>> leafHeap;
 	
 	// Assign Checking Objects:
 	public static Constr constr;
@@ -230,10 +231,10 @@ public class Driver {
     	for (int i=0; i<pop_init; i++) {	
         	int[] candidate = new int[pr_size]; 
         	OrTree<int[]> t = new OrTree<int[]>(oTree.getData());
-        	
+        	leafHeap = new ArrayList<>();
         	// Perform an or-tree-based search to build a solution candidate:
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
-        	candidate = t.buildCandidate(mostTightlyBound, 0);
+        	candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap);
         	
            	if (candidate == null) {
 				System.out.println("No solution exists.");
