@@ -80,7 +80,7 @@ public class Generation{
 			
 			// Cull the generation:
 			for (int i = 0; i < Driver.cull_num; i++)
-				generation.remove(i);
+				generation.remove(0);
 		}		
 	}
 	
