@@ -36,10 +36,10 @@ public class Driver {
     public static Generation generation;
 	
     // Search constraints:
-    public static int pop_init = 200;
-	public static int pop_max  = 250;
+    public static int pop_init = 20;
+	public static int pop_max  = 30;
 	public static int cull_num = 1;
-	public static int gen_max  = 1000;
+	public static int gen_max  = 80;
 	
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
@@ -53,14 +53,15 @@ public class Driver {
 	public static ArrayList<ArrayList<List<String>>> part_assign;
 	public static int[] pr;
 	public static List<OrTree<int[]>> leafHeap;
+	public static List<OrTree<int[]>> oldHeap;
 	
 	// Assign Checking Objects:
 	public static Constr constr;
 	public static Eval eval;
 	
 	// Output Toggles:
-	public static boolean print_data = false;
-	public static boolean print_prs = true;
+	public static boolean print_data = true;
+	public static boolean print_prs = false;
 	public static long startTime = System.currentTimeMillis();
 	
 	/**
@@ -232,9 +233,11 @@ public class Driver {
         	int[] candidate = new int[pr_size]; 
         	OrTree<int[]> t = new OrTree<int[]>(oTree.getData());
         	leafHeap = new ArrayList<>();
+        	oldHeap = new ArrayList<>();
         	// Perform an or-tree-based search to build a solution candidate:
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
-        	candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap);
+        	candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap, oldHeap);
+        	//candidate = t.buildCandidate2(mostTightlyBound);
         	
            	if (candidate == null) {
 				System.out.println("No solution exists.");
