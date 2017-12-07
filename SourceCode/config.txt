@@ -7,3 +7,11 @@ courseminPenalty=1
 labminPenalty=1
 notpairedPenalty=1
 sectionPenalty=1
+
+pop_init=50
+pop_max=60
+cull_num=20
+gen_max=100
+
+print_data=true
+print_prs=false
