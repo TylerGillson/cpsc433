@@ -68,7 +68,7 @@ public class OrTree<T>{
 	 */
 	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound, int mtbIndex, List<OrTree<T>> leafHeap, Random rand){
 		
-		//System.out.println("LEAF HEAP SIZE: " + leafHeap.size());
+		System.out.println("LEAF HEAP SIZE: " + leafHeap.size());
 		
 		// Return a solution when one is found:
 		if (pr_finished(this.data))
@@ -105,19 +105,7 @@ public class OrTree<T>{
 				
 				// Recursively expand successor nodes until completion:
 				int[] solution = child.buildCandidate(mostTightlyBound, mtbIndex, leafHeap, rand);
-				
-				if (solution == null) {
-					this.children.remove(child);
-					leafHeap.remove(child);
-					
-					if (leafHeap.isEmpty())
-						return null;
-					
-					solution = pickNewNode(mostTightlyBound, leafHeap, rand);
-					return solution;
-				}
-				else
-					return solution;
+				return solution;
 			} 
 			// If all children were dead-ends, consult the leapHeap:
 			else if (!leafHeap.isEmpty()) {
