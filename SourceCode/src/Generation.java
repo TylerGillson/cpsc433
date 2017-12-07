@@ -9,6 +9,7 @@ public class Generation{
 	
 	private List<int[]> generation = new ArrayList<int[]>();
 	private int pop_max = 0;
+	private List<OrTree<int[]>> leafHeap;
 	
 	public Generation(){
 		pop_max = Driver.pop_max;
@@ -34,8 +35,9 @@ public class Generation{
 		int pr_size = Driver.courses.size() + Driver.labs.size();
 		OrTree<int[]> tree = new OrTree<int[]>(pr_size);
 		
-		int[] child = new int[pr_size];
-		child = tree.breedCandidates(a, b);
+		int[] child = Driver.pr.clone();
+		leafHeap = new ArrayList<>();
+		child = tree.breedCandidates(child, 0, a, b, leafHeap);
 		
 		if (Driver.print_prs)
 			System.out.println("Child #" + gen_num + "\tEval score: " + Driver.eval.getValue(child, false));

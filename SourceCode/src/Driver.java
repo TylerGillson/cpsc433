@@ -10,7 +10,7 @@ public class Driver {
     public static Generation generation;
 	
     // Search constraints:
-    public static int pop_init = 5;
+    public static int pop_init = 10;
 	public static int pop_max  = 10;
 	public static int cull_num = 1;
 	public static int gen_max  = 10;
@@ -27,7 +27,6 @@ public class Driver {
 	public static ArrayList<ArrayList<List<String>>> part_assign;
 	public static int[] pr;
 	public static List<OrTree<int[]>> leafHeap;
-	public static List<OrTree<int[]>> oldHeap;
 	
 	// Assign Checking Objects:
 	public static Constr constr;
@@ -97,7 +96,7 @@ public class Driver {
     	}
     	
     	// Run GA for specified # of generations:
-    	for (int i=0; i<gen_max; i++) {
+    	for (int i = 0; i < gen_max; i++) {
     		generation.evolve(i+1);
     		
     		if (print_data) {
@@ -108,7 +107,7 @@ public class Driver {
     	
     	// Sort the final generation according to our fitness function and select the optimal solution:
     	int[] solution = sortLastGen();
-    	    	
+    	
     	// Print final generation:
     	generation.print();
     	
