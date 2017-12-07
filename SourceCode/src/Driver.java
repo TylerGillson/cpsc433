@@ -57,8 +57,6 @@ public class Driver {
 			p = new Parser(filename);
 	    	p.build();
 	    	
-	    	generation = new Generation();
-	    	
 	    	// Initialize data structures:
 	    	courses = p.getCourses();
 	    	labs = p.getLabs();
@@ -70,8 +68,10 @@ public class Driver {
 	    	pair = p.getPair();
 	    	part_assign = p.getPartAssign();
 	    	
-	    	// Initialize eval:
+	    	// Initialize eval & generation:
 	    	eval = new Eval(configFile);
+	    	generation = new Generation();
+	    	
 		}
 		catch(Exception e) {
 			System.out.println("Invalid argument: try \t java Driver [configFile] [inputFile]");
