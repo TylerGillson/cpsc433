@@ -215,7 +215,11 @@ public class Driver {
         	// Perform an or-tree-based search to build a solution candidate:
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
         	Random rand = new Random();
-        	candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap, rand);
+        	try { candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap, rand); }
+        	catch (StackOverflowError e) {
+        		System.out.println("Please re-execute with more stack memory allocated. Use: -Xss[a larger number]m.");
+        		System.exit(0);
+        	}
         	
            	if (candidate == null) {
 				System.out.println("No solution exists.");
