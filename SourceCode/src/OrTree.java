@@ -104,35 +104,21 @@ public class OrTree<T>{
 				OrTree<T> child = this.children.get(randIndex);
 				
 				// Recursively expand successor nodes until completion:
-				int[] solution = child.buildCandidate(mostTightlyBound, mtbIndex, leafHeap, rand);
-				return solution;
+				return child.buildCandidate(mostTightlyBound, mtbIndex, leafHeap, rand);
 			} 
 			// If all children were dead-ends, consult the leapHeap:
 			else if (!leafHeap.isEmpty()) {
 				
-				int[] solution = pickNewNode(mostTightlyBound, leafHeap, rand);
-				return solution;
+				// Randomly select a node from leafHeap to expand: 
+				int randIndex = rand.nextInt(leafHeap.size());
+				OrTree<T> fromHeap = leafHeap.get(randIndex);
+				
+				return fromHeap.buildCandidate(mostTightlyBound, 0, leafHeap, rand);
 			}
 			// If the leafHeap is empty and there are no children, there is no solution.
 			else
 				return null;
 		}
-	}
-	
-	/**
-	 * When the OrTree based search hits a dead-end, this method chooses a new node to expand.
-	 * @param mostTightlyBound
-	 * @param leafHeap
-	 * @return solution
-	 */
-	public int[] pickNewNode(ArrayList<Integer> mostTightlyBound, List<OrTree<T>> leafHeap, Random rand) {
-		
-		// Randomly select a node from leafHeap to expand: 
-		int randIndex = rand.nextInt(leafHeap.size());
-		OrTree<T> fromHeap = leafHeap.get(randIndex);
-		
-		int[] solution = fromHeap.buildCandidate(mostTightlyBound, 0, leafHeap, rand);
-		return solution;
 	}
 	
 	/**
