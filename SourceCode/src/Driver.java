@@ -36,10 +36,10 @@ public class Driver {
     public static Generation generation;
 	
     // Search constraints:
-    public static int pop_init = 200;
-	public static int pop_max  = 200;
+    public static int pop_init = 5;
+	public static int pop_max  = 10;
 	public static int cull_num = 1;
-	public static int gen_max  = 1000;
+	public static int gen_max  = 10;
 	
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
@@ -121,15 +121,13 @@ public class Driver {
     	}
     	
     	// Run GA for specified # of generations:
-    	for (int i=0; i<gen_max; i++){
+    	for (int i=0; i<gen_max; i++) {
     		generation.evolve(i+1);
     		
     		if (print_data) {
     			System.out.print("Generation #" + (i+1));
         		generation.printData(false);
     		}
- 
-    		generation.cull();
     	}
     	
     	// Sort the final generation according to our fitness function and select the optimal solution:
@@ -150,30 +148,31 @@ public class Driver {
 	 * "Output Converter" to print a textual schedule based on a pr instance.
 	 * @param sol - The completed pr instance to be converted.
 	 */
-	public static void printSchedule(int[] sol){
+	public static void printSchedule(int[] sol) {
 		String output = "Eval-value: " + String.valueOf(eval.getValue(sol, true)) + "\n\n";
 		String line;
 		String day;
 		String time;
 		
 		// Iterate through sol's entries and re-construct section, day, and time info:
-		for (int i=0; i < sol.length; i++){
+		for (int i=0; i < sol.length; i++) {
 
 			int slot_idx = sol[i];
 			String section = "";
 			List<String> section_elem;
 			
 			// The i-th sol-entry is a course:
-			if (i < courses.size()){
+			if (i < courses.size()) {
 				section_elem = courses.get(i);
-				for (int j=0; j<section_elem.size(); j++){
+				for (int j=0; j<section_elem.size(); j++)
 					section = section + section_elem.get(j) + " ";
-				}
 				section = section.trim();
-				if(slot_idx == -99) {
+				
+				if (slot_idx == -99) {
 					day = "Unnasigned";
 					time = "";
-				}else{
+				}
+				else {
 					day = course_slots.get(slot_idx).get(0);
 					time = course_slots.get(slot_idx).get(1);
 				}
@@ -182,14 +181,15 @@ public class Driver {
 			// The i-th sol-entry is a lab:
 			else {
 				section_elem = labs.get(i-courses.size());
-				for (int j=0; j<section_elem.size(); j++){
+				for (int j=0; j<section_elem.size(); j++)
 					section = section + section_elem.get(j) + " ";
-				}
 				section = section.trim();
-				if(slot_idx == -99) {
+				
+				if (slot_idx == -99) {
 					day = "Unnasigned";
 					time = "";
-				}else{
+				}
+				else {
 					day = lab_slots.get(slot_idx).get(0);
 					time = lab_slots.get(slot_idx).get(1);
 				}
@@ -208,7 +208,7 @@ public class Driver {
 	 * Using either the latter instance (or an empty one) as a starting point,
 	 * conduct or-tree-based searches to create pop_init candidates.
 	 */
-	public static void initGeneration0(){
+	public static void initGeneration0() {
 		// Determine size of problem data structure:
 		int pr_size = courses.size() + labs.size();
 		
@@ -239,12 +239,12 @@ public class Driver {
 				System.out.println("No solution exists.");
 				System.exit(0);
             }
+           	
         	if (print_prs | print_data) {
         		if (i == 0)
         			System.out.println();
         		System.out.println("CANDIDATE " + (i+1) + "\tEval score: " + eval.getValue(candidate, false));
         	}
- 
         	generation.add(candidate);
     	}
     	System.out.println();
@@ -255,6 +255,7 @@ public class Driver {
 		ArrayList<Integer> mostTightlyBound = new ArrayList<Integer>(); 
 		for (int idx : mTB)
 			mostTightlyBound.add(idx);
+		
 		return mostTightlyBound;
 	}
 	
@@ -263,10 +264,10 @@ public class Driver {
 	 * and return the most optimal solution.
 	 * @return sol - The most optimal solution from the last generation.
 	 */
-	public static int[] sortLastGen(){
+	public static int[] sortLastGen() {
 		List<int[]> lastGen = generation.getGeneration();
 		Collections.sort(lastGen, new Comparator<int[]>() {
-	        public int compare(int[] sol1, int[] sol2){
+	        public int compare(int[] sol1, int[] sol2) {
 	        	int e1 = eval.getValue(sol1, false);
 	        	int e2 = eval.getValue(sol2, false);
 	        	
@@ -282,17 +283,19 @@ public class Driver {
 		return sol;
 	}
 	
-	public static void checkTU18Exists(){
+	public static void checkTU18Exists() {
 		boolean tu18Exists = false;
-		for (int i=0; i < lab_slots.size(); i++){
+		for (int i=0; i < lab_slots.size(); i++) {
 			List<String> ls = lab_slots.get(i);
-			if (ls.get(0).equals("TU") && ls.get(1).equals("18:00")){
+			if (ls.get(0).equals("TU") && ls.get(1).equals("18:00")) {
 				tu18Exists = true;
 				return;
 			}
 		}
-		if (!tu18Exists)
-			throw new java.lang.Error("CPSC 313/413 was included in Courses, but the correct Lab Slot does not exist!");
+		if (!tu18Exists) {
+			System.out.println("CPSC 313/413 was included in Courses, but the correct Lab Slot does not exist!");
+			System.exit(0);
+		}
 	}		
 	
 	/**
@@ -306,7 +309,8 @@ public class Driver {
 	 * 4. Generate a list of all CPSC 313/413 labs & course sections.
 	 * 5. Add unwanted(a,s) to unwanted for all a in above list, for: "MON, 18:00", "TU 17:00", and "TU 18:30".
 	 */
-	public static void manage313413(String course){
+	public static void manage313413(String course) {
+		
 		// Begin generating list of all CPSC 313/413-related sections:
 		ArrayList<List<String>> sections = new ArrayList<List<String>>();
 		
@@ -316,7 +320,7 @@ public class Driver {
 				sections.add(c);});
 		
 		// If there are CPSC-related courses:
-		if (!sections.isEmpty()){
+		if (!sections.isEmpty()) {
 			
 			// Do this only once:
 			if (course.equals("313"))
@@ -338,10 +342,11 @@ public class Driver {
 			part_assign.add(lab_part_assign);
 			
 			// Add CPSC 813/913 to labs:
-			if (course.equals("313")){
+			if (course.equals("313")) {
 				List<String> cpsc813 = Arrays.asList("CPSC", "813", "", ""); 
 				labs.add(cpsc813);
-			} else if (course.equals("413")){
+			}
+			else if (course.equals("413")) {
 				List<String> cpsc913 = Arrays.asList("CPSC", "913", "", ""); 
 				labs.add(cpsc913);
 			}
@@ -361,7 +366,7 @@ public class Driver {
 	 * @param day
 	 * @param time
 	 */
-	public static void addUnwanted(List<String> section, String day, String time){
+	public static void addUnwanted(List<String> section, String day, String time) {
 		ArrayList<List<String>> new_unwanted = new ArrayList<List<String>>();
 		new_unwanted.add(section);
 		new_unwanted.add(Arrays.asList(day));
@@ -373,7 +378,7 @@ public class Driver {
 	 * If the input file contains the following invalid course slot: Tue 11:00 - 12:30,
 	 * It is deleted from course_slots.
 	 */
-	public static void checkForTU11(){
+	public static void checkForTU11() {
 		int delete = -99;
 		Iterator<List<String>> courseSlots = course_slots.iterator(); 
 		while (courseSlots.hasNext()) {
@@ -390,8 +395,9 @@ public class Driver {
 	 * @param pr_size
 	 * @return pr - Problem instance for or-tree-based search.
 	 */
-    public static void build_pr(int pr_size){
-		// Iterate over each partial assignment that was in the input file:
+    public static void build_pr(int pr_size) {
+		
+    	// Iterate over each partial assignment that was in the input file:
 		Iterator<ArrayList<List<String>>> partAssigns = part_assign.iterator(); 
 		while (partAssigns.hasNext()) {
 			
@@ -413,8 +419,11 @@ public class Driver {
 					if (slot.get(0).equals(assign.get(1).get(0)) && slot.get(1).equals(assign.get(2).get(0)))
 						slot_idx = course_slots.indexOf(slot);
 				}
-				if (slot_idx == -99)
-					throw new java.lang.Error("The partial assignment for this course indicated an invalid slot!");
+				if (slot_idx == -99) {
+					System.out.println("The partial assignment for this course indicated an invalid slot!");
+					System.out.println("No solution exists.");
+					System.exit(0);
+				}
 			}
 			// The partial assignment refers to a lab.
 			else if (labs.indexOf(assign.get(0)) != -1) {
@@ -422,7 +431,7 @@ public class Driver {
 				
 				// Iterate through the lab slots to find the index of the correct time slot:
 				Iterator<List<String>> slots = lab_slots.iterator();
-				while (slots.hasNext()){
+				while (slots.hasNext()) {
 					List<String> slot = slots.next();
 					if (slot.get(0).equals(assign.get(1).get(0)) && slot.get(1).equals(assign.get(2).get(0)))
 						slot_idx = lab_slots.indexOf(slot);
@@ -434,8 +443,10 @@ public class Driver {
 				}
 			}
 			// The partial assignment refers to a course/lab not in the input.
-			else
-				throw new java.lang.Error("This course/lab was not in the input!");
+			else {
+				System.out.println("This course/lab was not in the input!");
+				System.exit(0);
+			}
 				
 			// Update pr to ensure that the course/lab is assigned the specified time slot:
 			pr[pr_idx] = slot_idx;

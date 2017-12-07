@@ -69,7 +69,7 @@ public class Constr
 		makeCoursesAndSlots();
 	}
 	
-	public void makeCoursesAndSlots(){
+	public void makeCoursesAndSlots() {
 		Course [] all_sections = new Course[pr_size]; 
 		Slot [] all_slots = new Slot[all_slots_size];
 		
@@ -141,8 +141,8 @@ public class Constr
 				int offset = (i < Driver.courses.size()) ? 0 : Driver.course_slots.size();
 				if (slotList[currentAssign[i]+offset].getEvening() == false) {
 					valid = false;
-					
-					//if (debugToggle) System.out.println("Failing evening ...");
+					if (debugToggle) System.out.println("Failing evening ...");
+					break;
 				}			
 			}
 		}		
@@ -167,10 +167,9 @@ public class Constr
 		
 		for (int i = 0; i < slotList.length; i++)
 		{
-			if (slotList[i].getMax() < slotHas[i]){
+			if (slotList[i].getMax() < slotHas[i]) {
 				valid = false;
 				if (debugToggle) System.out.println("Failing max ...");
-				//throw new java.lang.Error("Failing Max!");
 				break;
 			}
 		}
@@ -192,7 +191,7 @@ public class Constr
 				String day = (is_course) ? Driver.course_slots.get(currentAssign[i]).get(0) : Driver.lab_slots.get(currentAssign[i]).get(0);
 				String time = (is_course) ? Driver.course_slots.get(currentAssign[i]).get(1) : Driver.lab_slots.get(currentAssign[i]).get(1);
 				
-				if (unwanted_day.equals(day) && unwanted_time.equals(time)){
+				if (unwanted_day.equals(day) && unwanted_time.equals(time)) {
 					valid = false;
 					if (debugToggle) System.out.println("Failing unwanted ...");
 					break;
@@ -259,10 +258,9 @@ public class Constr
 		
 		// Generate an array containing the sorted indices:
 		int[] sortedIndices = new int[sectionList.length];
-		for (int i=0; i < sortedCourses.size(); i++){
-			//System.out.println(sortedCourses.get(i).getName());
+		for (int i=0; i < sortedCourses.size(); i++)
 			sortedIndices[i] = sortedCourses.get(i).getIndex();
-		}
+		
 		return sortedIndices;
 	}
 	

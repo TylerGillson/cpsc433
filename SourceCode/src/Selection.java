@@ -1,6 +1,4 @@
-import java.lang.Math;
 import java.util.Random;
-import java.util.Arrays;
 import java.util.List;
 
 public class Selection

@@ -13,7 +13,7 @@ public class Slot
 		setEvening(); 
 	}
 	
-	public void setEvening(){
+	public void setEvening() {
 		String time = name.get(1);
 		int hr = Integer.valueOf(time.substring(0, time.indexOf(':')));
 		evening = (hr >= 18) ? true : false;
@@ -34,7 +34,7 @@ public class Slot
 		return max;
 	}
 	
-	public String toString(){
+	public String toString() {
 		return "Name: " + name + " Evening: " + String.valueOf(evening) + " max: " + String.valueOf(max);
 	}
 }

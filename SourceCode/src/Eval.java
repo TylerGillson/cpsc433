@@ -196,7 +196,7 @@ public class Eval {
 			}
 			
 			// Check if the preference is met by the assignment:
-			if (!(item.get(0).equals(day) && item.get(1).equals(time)) ){
+			if (!(item.get(0).equals(day) && item.get(1).equals(time))) {
 				result += pref_value;
 			}
 				

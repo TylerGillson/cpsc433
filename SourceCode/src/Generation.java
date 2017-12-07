@@ -9,7 +9,6 @@ public class Generation{
 	
 	private List<int[]> generation = new ArrayList<int[]>();
 	private int pop_max = 0;
-	private boolean debug = false;
 	
 	public Generation(){
 		pop_max = Driver.pop_max;
@@ -17,23 +16,6 @@ public class Generation{
 	
 	public void add(int[] candidate){
 		this.generation.add(candidate);
-	}
-	
-	public void cull(){
-		List<int[]> unique = new ArrayList<int[]>();
-		boolean add = true;
-		
-		for (int[] member : this.generation) {
-			for (int[] uMem : unique) {
-				add = false;
-				if (!Arrays.equals(member, uMem))
-					add = true;
-			}
-			if (add)
-				unique.add(member);
-		}
-		this.generation.clear();
-		this.generation = unique;
 	}
 	
 	public void evolve(int gen_num){
@@ -47,9 +29,6 @@ public class Generation{
 		
 		selector.select(selector.getLastIndexChoice());
 		int[] b = selector.getSelection();
-		
-		//if (Arrays.equals(a, b))
-		//	throw new java.lang.Error("Breeding identical parents!");
 		
 		// Breed them using an or-tree and the alternate search control:
 		int pr_size = Driver.courses.size() + Driver.labs.size();
@@ -85,7 +64,7 @@ public class Generation{
 		}		
 	}
 	
-	public List<int[]> getGeneration(){
+	public List<int[]> getGeneration() {
 		return this.generation;
 	}
 	
