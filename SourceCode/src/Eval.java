@@ -53,6 +53,24 @@ public class Eval {
 				else if (setting[0].equals("sectionPenalty")) {
 					this.pen_section = Integer.parseInt(setting[1]); 
 				}
+				else if (setting[0].equals("pop_init")) {
+					Driver.pop_init = Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("pop_max")) {
+					Driver.pop_max = Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("cull_num")) {
+					Driver.cull_num = Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("gen_max")) {
+					Driver.gen_max = Integer.parseInt(setting[1]); 
+				}
+				else if (setting[0].equals("print_data")) {
+					Driver.print_data = Boolean.parseBoolean(setting[1]); 
+				}
+				else if (setting[0].equals("print_prs")) {
+					Driver.print_prs = Boolean.parseBoolean(setting[1]); 
+				}
 				else;			
 			}   
 
