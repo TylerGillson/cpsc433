@@ -44,6 +44,7 @@ public class Generation{
 		
 		// Check that the population maximum has not been exceeded:
 		if (generation.size() > pop_max) {
+			
 			// If it has been, reduce the population by taking out the worst individual:
 			Collections.sort(generation, new Comparator<int[]>() {
 		        public int compare(int[] sol1, int[] sol2){
@@ -59,6 +60,7 @@ public class Generation{
 		        }
 		    });
 			
+			// Cull the generation:
 			for (int i = 0; i < Driver.cull_num; i++)
 				generation.remove(i);
 		}		

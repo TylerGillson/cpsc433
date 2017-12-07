@@ -12,6 +12,8 @@ public class OrTree<T>{
 	public OrTree<T> parent;
 	public List<OrTree<T>> children;
 	
+	public List<OrTree<T>> options;
+	
 	// Constructor for beginning with a partial solution:
 	public OrTree(int[] pr){
 		this.data = pr.clone();
@@ -43,10 +45,6 @@ public class OrTree<T>{
 	 */
 	public void altern(int section_idx){
 		
-		// Avoid over-writing partial assignments:
-		if (Driver.pr[section_idx] != -99)
-			return;
-		
 		// Determine is the section is a course or a lab:
 		boolean isCourse = (section_idx < Driver.courses.size()) ? true : false;
 		
@@ -56,9 +54,7 @@ public class OrTree<T>{
 		// Create successor nodes:
 		for (int i=0; i<slot_indices; i++){
 			int[] new_candidate = this.data.clone();
-			new_candidate[section_idx] = i;
-			
-			//System.out.println(Arrays.toString(new_candidate));
+ 			new_candidate[section_idx] = i;
 			
 			// If successor is viable, add it to the current node's children:
 			if (Driver.constr.evaluate(new_candidate) == true) { 
@@ -71,51 +67,104 @@ public class OrTree<T>{
 	 * Perform an or-tree-based search to generate a candidate solution.
 	 * @return sol - An integer array which is a pr-solved instance.
 	 */
-	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound, int mtbIndex){
+	public int[] buildCandidate2(ArrayList<Integer> mostTightlyBound) {
 		
-		// Return a solution:
+		for (int i = 0; i < mostTightlyBound.size(); i++) {
+			int expand_idx = mostTightlyBound.get(i);
+			
+			if (this.data[expand_idx] != -99)
+				continue;
+			
+			altern(expand_idx);
+			
+			if (this.children.size() == 0) {
+				this.data = Driver.pr;
+				return buildCandidate2(mostTightlyBound);
+			}
+			
+			Random rand = new Random();
+			int randIdx = rand.nextInt(this.children.size());
+			
+			this.data = this.children.get(randIdx).data;
+			this.children.clear();
+		}
+		
+		return this.data;
+	}
+	
+	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound, int mtbIndex, List<OrTree<T>> leafHeap){
+		
+		// Return a solution when one is found:
 		if (pr_finished(this.data))
 			return this.data;
 		else {
-			// Determine index of element of pr that will be expanded by altern...
+			// Determine index of element of pr that will be expanded by altern.
 			// We expand the most tightly bound section.
 			int expand_idx = mostTightlyBound.get(mtbIndex);	
-			
-			//boolean is_course = (expand_idx < Driver.courses.size()) ? true : false;
-			//Object x = (is_course) ? Driver.courses.get(expand_idx) : Driver.labs.get(expand_idx - Driver.courses.size());
-			//System.out.println(expand_idx + " " + x);
 			
 			// Avoid over-writing values designed by partial assignments:
 			if (this.data[expand_idx] != -99){
 				mtbIndex++;
-				return this.buildCandidate(mostTightlyBound, mtbIndex);
+				return this.buildCandidate(mostTightlyBound, mtbIndex, leafHeap);
 			}
 			
 			// Generate successor nodes for said section:
 			altern(expand_idx);
 			
-			//if there is children
-			while (this.children.size() > 0) {
+			//System.out.println(leafHeap.size() + " " + this.children.size());
+			
+			// Remove the current node from leafHeap, as it has been expanded:
+			leafHeap.remove(this);
+			mtbIndex++;
+			
+			// Add the successor nodes to leafHeap:
+			for (OrTree<T> c: this.children) {
+				if (leafHeap.contains(c) == false)
+					leafHeap.add(c);
+			}
+			
+			Random rand = new Random();
+			int randIndex = 0;
+			int[] solution = new int[this.data.length];
+			
+			// If there are children, continue searching:
+			if (this.children.size() > 0) {
+				
 				// Choose a random successor node to expand: 
-				Random rand = new Random();
-				int randIndex = rand.nextInt(this.children.size());
+				randIndex = rand.nextInt(this.children.size());
 				OrTree<T> child = this.children.get(randIndex);
 				
 				// Recursively expand successor nodes until completion:
-				if (child.buildCandidate(mostTightlyBound, mtbIndex) == null) {
-					this.children.remove(randIndex);
-					continue;
-				}
-				if (!pr_finished(child.data)) {
-					mtbIndex++;
-					return child.buildCandidate(mostTightlyBound, mtbIndex);
+				solution = child.buildCandidate(mostTightlyBound, mtbIndex, leafHeap);
+				
+				if (solution == null) {
+					this.children.remove(child);
+					leafHeap.remove(child);
+					
+					if (leafHeap.isEmpty())
+						return null;
+					
+					// Randomly select from leafHeap and expand:
+					randIndex = rand.nextInt(leafHeap.size());
+					OrTree<T> fromheap = leafHeap.get(randIndex);
+					solution = fromheap.buildCandidate(mostTightlyBound, 0, leafHeap);
+					return solution;
 				}
 				else
-					return child.data;
-				
+					return solution;
 			} 
-			//a dead-end is hit:
-			return null;
+			// If all children were dead-ends, consult the leapHeap:
+			else if (!leafHeap.isEmpty()) {
+				
+				// Randomly select from leafHeap and expand:
+				randIndex = rand.nextInt(leafHeap.size());		
+				OrTree<T> fromheap = leafHeap.get(randIndex);
+				solution = fromheap.buildCandidate(mostTightlyBound, 0, leafHeap);
+				return solution;
+			}
+			// If the leafHeap is empty and there are no children, there is no solution.
+			else
+				return null;
 		}
 	}
 	
@@ -180,10 +229,13 @@ public class OrTree<T>{
 			this.children.clear();
 			altern(i);
 			
-			// Make the assignment and continue iterating:
-			Random rn = new Random();
-			int select = rn.nextInt(this.children.size());
-			child = this.children.get(select).data;
+			if (this.children.size() > 0) {
+				// Make the assignment and continue iterating:
+				Random rn = new Random();
+				int select = rn.nextInt(this.children.size());
+				child = this.children.get(select).data;
+				return child;
+			}
 			return child;
 		}
 	}

@@ -5,32 +5,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-/*
- * parallelpen eval = 5
- * minfilledWeight=0
-prefWeight=0
-pairWeight=1
-secdiffWeight=1
-
-courseminPenalty=1
-labminPenalty=1
-notpairedPenalty=11
-sectionPenalty=5
- */
-
-/*
- * prefexamp eval = 30
- * minfilledWeight=0
-prefWeight=1
-pairWeight=0
-secdiffWeight=0
-
-courseminPenalty=100
-labminPenalty=100
-notpairedPenalty=11
-sectionPenalty=100
- */
-
 public class Driver {
     public static Parser p;
     public static Generation generation;
@@ -52,14 +26,16 @@ public class Driver {
 	public static ArrayList<ArrayList<List<String>>> pair;
 	public static ArrayList<ArrayList<List<String>>> part_assign;
 	public static int[] pr;
+	public static List<OrTree<int[]>> leafHeap;
+	public static List<OrTree<int[]>> oldHeap;
 	
 	// Assign Checking Objects:
 	public static Constr constr;
 	public static Eval eval;
 	
 	// Output Toggles:
-	public static boolean print_data = false;
-	public static boolean print_prs = true;
+	public static boolean print_data = true;
+	public static boolean print_prs = false;
 	public static long startTime = System.currentTimeMillis();
 	
 	/**
@@ -137,7 +113,7 @@ public class Driver {
     	generation.print();
     	
     	// Print run-time:
-    	System.out.println("Run Time: "+(System.currentTimeMillis() - startTime)+"ms\n");
+    	System.out.println("Run Time: " + (System.currentTimeMillis() - startTime) + "ms\n");
     	
     	// Print final solution + output schedule:
     	System.out.println("Final Solution:" + "\n" + Arrays.toString(solution) + "\n");
@@ -209,6 +185,7 @@ public class Driver {
 	 * conduct or-tree-based searches to create pop_init candidates.
 	 */
 	public static void initGeneration0() {
+		
 		// Determine size of problem data structure:
 		int pr_size = courses.size() + labs.size();
 		
@@ -218,7 +195,7 @@ public class Driver {
 		
 		// Initialize an OrTree instance based on partial assignments (or not):
 		OrTree<int[]> oTree;
-		if (!part_assign.isEmpty()){
+		if (!part_assign.isEmpty()) {
 			// build_pr initializes the global variable, pr, according to partial assignments.
 			build_pr(pr_size);
 			oTree = new OrTree<int[]>(pr);
@@ -227,30 +204,31 @@ public class Driver {
 			oTree = new OrTree<int[]>(pr_size);
 		
 		// Build the first generation of candidate solutions:
-    	for (int i=0; i<pop_init; i++) {	
-        	int[] candidate = new int[pr_size]; 
+    	for (int i=0; i < pop_init; i++) {	
+        	
+    		int[] candidate = new int[pr_size]; 
         	OrTree<int[]> t = new OrTree<int[]>(oTree.getData());
+        	leafHeap = new ArrayList<>();
         	
         	// Perform an or-tree-based search to build a solution candidate:
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
-        	candidate = t.buildCandidate(mostTightlyBound, 0);
+        	candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap);
         	
            	if (candidate == null) {
 				System.out.println("No solution exists.");
 				System.exit(0);
             }
            	
-        	if (print_prs | print_data) {
-        		if (i == 0)
-        			System.out.println();
-        		System.out.println("CANDIDATE " + (i+1) + "\tEval score: " + eval.getValue(candidate, false));
-        	}
+        	if (i == 0)
+        		System.out.println();
+        	System.out.println("CANDIDATE " + (i+1) + "\tEval score: " + eval.getValue(candidate, false));
+        	
         	generation.add(candidate);
     	}
     	System.out.println();
 	}
 	
-	public static ArrayList<Integer> getMTBCopy(){
+	public static ArrayList<Integer> getMTBCopy() {
 		int[] mTB = constr.getMostTightlyBoundIndices().clone();
 		ArrayList<Integer> mostTightlyBound = new ArrayList<Integer>(); 
 		for (int idx : mTB)
