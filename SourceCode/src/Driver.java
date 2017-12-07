@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 public class Driver {
     public static Parser p;
@@ -211,7 +212,8 @@ public class Driver {
         	
         	// Perform an or-tree-based search to build a solution candidate:
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
-        	candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap);
+        	Random rand = new Random();
+        	candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap, rand);
         	
            	if (candidate == null) {
 				System.out.println("No solution exists.");

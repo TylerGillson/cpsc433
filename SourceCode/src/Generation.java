@@ -37,7 +37,7 @@ public class Generation{
 		
 		int[] child = Driver.pr.clone();
 		leafHeap = new ArrayList<>();
-		child = tree.breedCandidates(child, 0, a, b, leafHeap);
+		child = tree.breedCandidates(child, 0, a, b, leafHeap, rand);
 		
 		if (Driver.print_prs)
 			System.out.println("Child #" + gen_num + "\tEval score: " + Driver.eval.getValue(child, false));

@@ -66,7 +66,9 @@ public class OrTree<T>{
 	 * @param leafHeap			- A list of valid leaves to expand.
 	 * @return					- A completed candidate, or null if one does not exist.
 	 */
-	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound, int mtbIndex, List<OrTree<T>> leafHeap){
+	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound, int mtbIndex, List<OrTree<T>> leafHeap, Random rand){
+		
+		System.out.println("LEAF HEAP SIZE: " + leafHeap.size());
 		
 		// Return a solution when one is found:
 		if (pr_finished(this.data))
@@ -77,8 +79,8 @@ public class OrTree<T>{
 			
 			// Avoid over-writing values designed by partial assignments:
 			if (this.data[expand_idx] != -99){
-				mtbIndex++;
-				return this.buildCandidate(mostTightlyBound, mtbIndex, leafHeap);
+				mtbIndex++;	
+				return this.buildCandidate(mostTightlyBound, mtbIndex, leafHeap, rand);
 			}
 			
 			// Generate successor nodes for current section:
@@ -98,12 +100,11 @@ public class OrTree<T>{
 			if (this.children.size() > 0) {
 				
 				// Choose a random successor node to expand: 
-				Random rand = new Random();
 				int randIndex = rand.nextInt(this.children.size());
 				OrTree<T> child = this.children.get(randIndex);
 				
 				// Recursively expand successor nodes until completion:
-				int[] solution = child.buildCandidate(mostTightlyBound, mtbIndex, leafHeap);
+				int[] solution = child.buildCandidate(mostTightlyBound, mtbIndex, leafHeap, rand);
 				
 				if (solution == null) {
 					this.children.remove(child);
@@ -112,7 +113,7 @@ public class OrTree<T>{
 					if (leafHeap.isEmpty())
 						return null;
 					
-					solution = pickNewNode(mostTightlyBound, leafHeap);
+					solution = pickNewNode(mostTightlyBound, leafHeap, rand);
 					return solution;
 				}
 				else
@@ -121,7 +122,7 @@ public class OrTree<T>{
 			// If all children were dead-ends, consult the leapHeap:
 			else if (!leafHeap.isEmpty()) {
 				
-				int[] solution = pickNewNode(mostTightlyBound, leafHeap);
+				int[] solution = pickNewNode(mostTightlyBound, leafHeap, rand);
 				return solution;
 			}
 			// If the leafHeap is empty and there are no children, there is no solution.
@@ -136,13 +137,13 @@ public class OrTree<T>{
 	 * @param leafHeap
 	 * @return solution
 	 */
-	public int[] pickNewNode(ArrayList<Integer> mostTightlyBound, List<OrTree<T>> leafHeap) {
+	public int[] pickNewNode(ArrayList<Integer> mostTightlyBound, List<OrTree<T>> leafHeap, Random rand) {
 		
-		// Randomly select a node from leafHeap to expand:
-		Random rand = new Random(); 
+		// Randomly select a node from leafHeap to expand: 
 		int randIndex = rand.nextInt(leafHeap.size());
-		OrTree<T> fromheap = leafHeap.get(randIndex);
-		int[] solution = fromheap.buildCandidate(mostTightlyBound, 0, leafHeap);
+		OrTree<T> fromHeap = leafHeap.get(randIndex);
+		
+		int[] solution = fromHeap.buildCandidate(mostTightlyBound, 0, leafHeap, rand);
 		return solution;
 	}
 	
@@ -152,7 +153,7 @@ public class OrTree<T>{
 	 * @param par2 - Parent 2.
 	 * @return sol - An integer array which is a new, hybrid pr-solved instance.
 	 */
-	public int[] breedCandidates(int[] child, int idx, int[] par1, int[] par2, List<OrTree<T>> leafHeap){
+	public int[] breedCandidates(int[] child, int idx, int[] par1, int[] par2, List<OrTree<T>> leafHeap, Random rand){
 		
 		// Return the child once it is complete:
 		if (idx == child.length)
@@ -161,7 +162,7 @@ public class OrTree<T>{
 		// Skip indices that are governed by partial assignments:
 		if (child[idx] != -99) {
 			idx++;
-			return breedCandidates(child, idx, par1, par2, leafHeap);
+			return breedCandidates(child, idx, par1, par2, leafHeap, rand);
 		}
 			
 		// If parents agree, attempt to preserve mutual genetics:
@@ -171,14 +172,14 @@ public class OrTree<T>{
 			// Check validity of preservation:
 			if (Driver.constr.evaluate(child)) {
 				idx++;
-				return breedCandidates(child, idx, par1, par2, leafHeap);
+				return breedCandidates(child, idx, par1, par2, leafHeap, rand);
 			}
 		}
 			
 		// Otherwise, execute breeding logic:
-		child = breed(child, idx, par1, par2, leafHeap);
+		child = breed(child, idx, par1, par2, leafHeap, rand);
 		idx++;
-		return breedCandidates(child, idx, par1, par2, leafHeap);
+		return breedCandidates(child, idx, par1, par2, leafHeap, rand);
 	}
 	
 	/**
@@ -190,7 +191,7 @@ public class OrTree<T>{
 	 * @param i
 	 * @return child
 	 */
-	public int[] breed(int[] child, int idx, int[] par1, int[] par2, List<OrTree<T>> leafHeap) {
+	public int[] breed(int[] child, int idx, int[] par1, int[] par2, List<OrTree<T>> leafHeap, Random rand) {
 		
 		// Assess the viability of selecting each parent's assignment:
 		child[idx] = par1[idx];
@@ -203,13 +204,13 @@ public class OrTree<T>{
 		if (pick_par1 && !pick_par2) {
 			child[idx] = par1[idx];
 			idx++;
-			return breedCandidates(child, idx, par1, par2, leafHeap);
+			return breedCandidates(child, idx, par1, par2, leafHeap, rand);
 		}
 		// If only par2 is viable, choose par2's assignment:
 		else if (!pick_par1 && pick_par2) {
 			child[idx] = par2[idx];
 			idx++;
-			return breedCandidates(child, idx, par1, par2, leafHeap);
+			return breedCandidates(child, idx, par1, par2, leafHeap, rand);
 		}
 		// Otherwise, perform altern and randomly select from among viable options:
 		else {
@@ -221,15 +222,13 @@ public class OrTree<T>{
 				leafHeap.add(c);
 			
 			// If there are children, continue searching:
-			Random rand = new Random();
-			
 			if (this.children.size() > 0) {
 				
 				// Choose a random successor node to expand: 
 				int randIndex = rand.nextInt(this.children.size());
 				OrTree<T> c = this.children.get(randIndex);
 				
-				child = c.breedCandidates(child, idx, par1, par2, leafHeap);
+				child = c.breedCandidates(child, idx, par1, par2, leafHeap, rand);
 				
 				if (Driver.constr.evaluate(child) == false) {
 					this.children.remove(c);
@@ -237,18 +236,17 @@ public class OrTree<T>{
 					
 					randIndex = rand.nextInt(leafHeap.size());
 					OrTree<T> fromHeap = leafHeap.get(randIndex);
-					return breedCandidates(fromHeap.data, 0, par1, par2, leafHeap);
+					return breedCandidates(fromHeap.data, 0, par1, par2, leafHeap, rand);
 				}
 				else
-					return breedCandidates(child, idx, par1, par2, leafHeap);
+					return breedCandidates(child, idx, par1, par2, leafHeap, rand);
 			} 
 			// If all children were dead-ends, consult the leapHeap:
 			else { //(!leafHeap.isEmpty()) {
 				
-				rand = new Random(); 
 				int randIndex = rand.nextInt(leafHeap.size());
 				OrTree<T> fromHeap = leafHeap.get(randIndex);
-				return breedCandidates(fromHeap.data, 0, par1, par2, leafHeap);
+				return breedCandidates(fromHeap.data, 0, par1, par2, leafHeap, rand);
 			}
 		}
 	}
