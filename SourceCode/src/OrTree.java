@@ -70,6 +70,12 @@ public class OrTree<T>{
 		
 		System.out.println("LEAF HEAP SIZE: " + leafHeap.size());
 		
+		if (leafHeap.size() > 25000) {
+			leafHeap.clear();
+			OrTree<T> t = new OrTree<T>(Driver.pr);
+			t.buildCandidate(mostTightlyBound, 0, leafHeap, rand);
+		}
+		
 		// Return a solution when one is found:
 		if (pr_finished(this.data))
 			return this.data;
@@ -83,7 +89,7 @@ public class OrTree<T>{
 				return this.buildCandidate(mostTightlyBound, mtbIndex, leafHeap, rand);
 			}
 			
-			// Generate successor nodes for current section:
+			// Generate successor nodes for current course/lab:
 			altern(expand_idx);
 			
 			// Remove the current node from leafHeap, as it has been expanded:

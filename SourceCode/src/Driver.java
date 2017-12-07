@@ -105,7 +105,9 @@ public class Driver {
         		generation.printData(false);
     		}
     		
-    		generation.addNew();
+    		// Introduce new genetics every five generations:
+    		if (i % 5 == 0)
+    			generation.addNew();
     	}
     	
     	// Sort the final generation according to our fitness function and select the optimal solution:
@@ -215,11 +217,7 @@ public class Driver {
         	// Perform an or-tree-based search to build a solution candidate:
         	ArrayList<Integer> mostTightlyBound = getMTBCopy();
         	Random rand = new Random();
-        	try { candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap, rand); }
-        	catch (StackOverflowError e) {
-        		System.out.println("Please re-execute with more stack memory allocated. Use: -Xss[a larger number]m.");
-        		System.exit(0);
-        	}
+        	candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap, rand);
         	
            	if (candidate == null) {
 				System.out.println("No solution exists.");
