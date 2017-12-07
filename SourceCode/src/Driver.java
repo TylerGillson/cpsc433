@@ -10,11 +10,11 @@ public class Driver {
     public static Parser p;
     public static Generation generation;
 	
-    // Search constraints:
-    public static int pop_init = 10;
-	public static int pop_max  = 10;
-	public static int cull_num = 1;
-	public static int gen_max  = 10;
+    // Search Constraints:
+    public static int pop_init = 50;
+	public static int pop_max  = 60;
+	public static int cull_num = 20;
+	public static int gen_max  = 200;
 	
 	// Global data structures to be filled by the parser:
 	public static ArrayList<List<String>> courses;
@@ -33,7 +33,7 @@ public class Driver {
 	public static Constr constr;
 	public static Eval eval;
 	
-	// Output Toggles:
+	// Output Parameters:
 	public static boolean print_data = true;
 	public static boolean print_prs = false;
 	public static long startTime = System.currentTimeMillis();

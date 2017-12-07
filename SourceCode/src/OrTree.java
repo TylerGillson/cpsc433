@@ -68,7 +68,7 @@ public class OrTree<T>{
 	 */
 	public int[] buildCandidate(ArrayList<Integer> mostTightlyBound, int mtbIndex, List<OrTree<T>> leafHeap, Random rand){
 		
-		System.out.println("LEAF HEAP SIZE: " + leafHeap.size());
+		//System.out.println("LEAF HEAP SIZE: " + leafHeap.size());
 		
 		// Return a solution when one is found:
 		if (pr_finished(this.data))
