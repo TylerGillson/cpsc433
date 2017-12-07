@@ -19,6 +19,18 @@ public class Generation{
 		this.generation.add(candidate);
 	}
 	
+	public void addNew(){
+		int[] candidate = new int[Driver.pr.length];
+		OrTree<int[]> t = new OrTree<int[]>(Driver.pr);
+    	leafHeap = new ArrayList<>();
+    	
+    	// Perform an or-tree-based search to build a solution candidate:
+    	ArrayList<Integer> mostTightlyBound = Driver.getMTBCopy();
+    	Random rand = new Random();
+    	candidate = t.buildCandidate(mostTightlyBound, 0, leafHeap, rand);
+    	this.generation.add(candidate);
+	}
+	
 	public void evolve(int gen_num){
 		
 		// Choose two facts via roulette wheel selection:
